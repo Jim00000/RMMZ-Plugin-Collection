@@ -13,3 +13,4 @@
 
 ## Plugin List
 - Quick Save/Load
+- God Ray Effect (WIP)
