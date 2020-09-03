@@ -1,4 +1,4 @@
-# RMMZ-Plugin-Collection
+# Jim00000's Plugin Collection
 
 <div>
     <p align="center">
