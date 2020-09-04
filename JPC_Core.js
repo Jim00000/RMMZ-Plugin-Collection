@@ -14,6 +14,14 @@
 // Public Functions
 //=============================================================================
 
+function JPC_RegisterKeyBind(vkey, keyName) {
+    Input.keyMapper[vkey] = keyName;
+}
+
+function JPC_GetPluginParams(pluginName) {
+    return PluginManager.parameters(pluginName);
+}
+
 function JPC_ParseNote(note, xmlquery) {
     const JPCNote = RetrieveJPCSectionFromNote(note);
     return JPCNote ? CommitXMLQuery(JPCNote, xmlquery) : null;
