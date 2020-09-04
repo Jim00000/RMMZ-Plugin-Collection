@@ -50,7 +50,7 @@ function JPC_ParseNoteToFloat(note, xmlquery) {
     }
 
     function RetrieveJPCSectionFromNote(note) {
-        const pattern = /(<jpc>[\w\s<>\/\?]+<\/jpc>)/;
+        const pattern = /(<jpc>[\w\s<>\/\?\.-]+<\/jpc>)/;
         const match = pattern.exec(note);
         return match ? match[0] : null;
     }
