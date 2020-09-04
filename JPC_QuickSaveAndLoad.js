@@ -26,6 +26,7 @@
     const PLUGIN_NAME = "jpc_quicksaveandload";
     const QUICK_SAVE_KEY_STRING = "QuickSave";
     const QUICK_LOAD_KEY_STRING = "QuickLoad";
+    const QUICK_SAVE_FILENAME = "quicksave";
     const VK_F6 = 0x75;
     const VK_F7 = 0x76;
 
@@ -41,50 +42,60 @@
         return PluginManager.parameters(PLUGIN_NAME);
     }
 
-    function QuickSave(savefileId) {
-        if (savefileId >= 0 && savefileId < DataManager.maxSavefiles()) {
-            $gameSystem.setSavefileId(savefileId);
-            $gameSystem.onBeforeSave();
-            DataManager.saveGame(savefileId)
-                .then(() => { SoundManager.playSave(); })
-                .catch(() => { SoundManager.playBuzzer(); });
-        } else {
-            console.error("Cannot save file: id = %d", savefileId);
-            SoundManager.playBuzzer();
-        }
+    function MakeQuickSaveName() {
+        return QUICK_SAVE_FILENAME;
     }
 
-    function QuickLoad(savefileId) {
-        if (savefileId >= 0 && savefileId < DataManager.maxSavefiles()) {
-            DataManager.loadGame(savefileId)
-                .then(() => {
-                    SoundManager.playLoad();
-                    if (FADE_OUT_EFFECT) {
-                        $gameScreen._fadeOutDuration = 50;
-                        setTimeout(function () {
-                            $gameScreen._fadeInDuration = 50;
-                            SceneManager.goto(Scene_Map);
-                        }, 500);
-                    } else {
+    function LoadGameFromQuickSave() {
+        const quickSaveName = MakeQuickSaveName();
+        return StorageManager.loadObject(quickSaveName).then(contents => {
+            DataManager.createGameObjects();
+            DataManager.extractSaveContents(contents);
+            DataManager.correctDataErrors();
+            return 0;
+        });
+    }
+
+    function DoQuickSave() {
+        const contents = DataManager.makeSaveContents();
+        const saveName = MakeQuickSaveName();
+        return StorageManager.saveObject(saveName, contents).then(() => {
+            return 0;
+        });
+    }
+
+    function QuickSave() {
+        DoQuickSave()
+            .then(() => { SoundManager.playSave(); })
+            .catch(() => { SoundManager.playBuzzer(); });
+    }
+
+    function QuickLoad() {
+        LoadGameFromQuickSave()
+            .then(() => {
+                SoundManager.playLoad();
+                if (FADE_OUT_EFFECT) {
+                    $gameScreen._fadeOutDuration = 50;
+                    setTimeout(function () {
+                        $gameScreen._fadeInDuration = 50;
                         SceneManager.goto(Scene_Map);
-                    }
-                })
-                .catch(() => { SoundManager.playBuzzer(); });
-        } else {
-            console.error("Cannot load file: id = %d", savefileId);
-            SoundManager.playBuzzer();
-        }
+                    }, 500);
+                } else {
+                    SceneManager.goto(Scene_Map);
+                }
+            })
+            .catch(() => { SoundManager.playBuzzer(); });
     }
 
     function UpdateCallQuickSave() {
         if (IsQuickSaveCalled()) {
-            QuickSave(QUICK_SAVE_SLOT_ID);
+            QuickSave();
         }
     }
 
     function UpdateCallQuickLoad() {
         if (IsQuickLoadCalled()) {
-            QuickLoad(QUICK_SAVE_SLOT_ID);
+            QuickLoad();
         }
     }
 
