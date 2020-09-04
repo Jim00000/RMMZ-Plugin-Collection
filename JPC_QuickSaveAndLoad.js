@@ -9,12 +9,6 @@
  * @help 
  * Use F6 to quicksave, F7 to quickload.
  * 
- * @param HasFadeOutEffect
- * @text Fade out while save file is loading
- * @type boolean
- * @default true
- * @on Enable 
- * @off Disable
  */
 {
     // Fixed variables
@@ -24,9 +18,6 @@
     const QUICK_SAVE_FILENAME = "quicksave";
     const VK_F6 = 0x75;
     const VK_F7 = 0x76;
-
-    // User-defined variables
-    const FADE_OUT_EFFECT = JSON.parse(GetPluginParams()['HasFadeOutEffect']);
 
     function RegisterKeyBind(vkey, keyName) {
         Input.keyMapper[vkey] = keyName;
@@ -66,18 +57,7 @@
 
     function QuickLoad() {
         LoadGameFromQuickSave()
-            .then(() => {
-                SoundManager.playLoad();
-                if (FADE_OUT_EFFECT) {
-                    $gameScreen._fadeOutDuration = 50;
-                    setTimeout(function () {
-                        $gameScreen._fadeInDuration = 50;
-                        SceneManager.goto(Scene_Map);
-                    }, 500);
-                } else {
-                    SceneManager.goto(Scene_Map);
-                }
-            })
+            .then(() => { SoundManager.playLoad(); })
             .catch(() => { SoundManager.playBuzzer(); });
     }
 
