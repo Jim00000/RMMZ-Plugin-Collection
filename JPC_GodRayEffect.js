@@ -88,10 +88,6 @@
         return degree * Math.PI / 180.0;
     }
 
-    function GetDelta() {
-        return DELTA;
-    }
-
     function LoadGLSLShaderFile(filePath) {
         const path = require("path"), fs = require("fs");
         const shaderFile = fs.readFileSync(path.resolve(filePath));
@@ -118,7 +114,7 @@
     }
 
     function UpdateGodRayShader(spritest_map) {
-        spritest_map.godRayFilter.uniforms.utime += GetDelta();
+        spritest_map.godRayFilter.uniforms.utime += spritest_map.godRayFilterDelta;
         if (IS_LIGHT_PARALLEL == false) {
             spritest_map.godRayFilter.uniforms.light[0] = CENTER[0] - $gameMap._displayX * $gameMap.tileWidth();
             spritest_map.godRayFilter.uniforms.light[1] = CENTER[1] - $gameMap._displayY * $gameMap.tileHeight();
@@ -134,6 +130,7 @@
         _Spriteset_Map__initialize.apply(this, arguments);
         this.isGodRayFilterApplied = JPC_ParseNoteToBoolean($dataMap.note, "godrayeffect.enable");
         if (this.isGodRayFilterApplied) {
+            this.godRayFilterDelta = JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.delta") || DELTA;
             this.godRayFilter = CreateGodRayShader(ANGLE, GAIN, LACUNRITY, IS_LIGHT_PARALLEL, CENTER);
             this.filters.push(this.godRayFilter);
             this.godRayFilterUpdateHandler = UpdateGodRayShader;
