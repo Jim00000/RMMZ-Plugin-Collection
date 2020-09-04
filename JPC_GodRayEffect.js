@@ -116,8 +116,8 @@
     function UpdateGodRayShader(spritest_map) {
         spritest_map.godRayFilter.uniforms.utime += spritest_map.godRayFilterDelta;
         if (spritest_map.isGodRayLightParallel == false) {
-            spritest_map.godRayFilter.uniforms.light[0] = CENTER[0] - $gameMap._displayX * $gameMap.tileWidth();
-            spritest_map.godRayFilter.uniforms.light[1] = CENTER[1] - $gameMap._displayY * $gameMap.tileHeight();
+            spritest_map.godRayFilter.uniforms.light[0] = spritest_map.godRayLightSource[0] - $gameMap._displayX * $gameMap.tileWidth();
+            spritest_map.godRayFilter.uniforms.light[1] = spritest_map.godRayLightSource[1] - $gameMap._displayY * $gameMap.tileHeight();
         }
     }
 
@@ -132,12 +132,14 @@
         if (this.isGodRayFilterApplied) {
             this.godRayFilterDelta = JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.delta") || DELTA;
             this.isGodRayLightParallel = JPC_ParseNoteToBoolean($dataMap.note, "godrayeffect.parallel_light") || IS_LIGHT_PARALLEL;
+            this.godRayLightSource = JPC_ParseNoteToNumArray($dataMap.note, "godrayeffect.lightsource") || CENTER;
             this.godRayFilter = CreateGodRayFilter(
-                JPC_ParseNoteToInt($dataMap.note, "godrayeffect.angle") || ANGLE, 
-                JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.gain") || GAIN, 
-                JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.lacunrity") || LACUNRITY, 
-                this.isGodRayLightParallel, 
-                CENTER);
+                JPC_ParseNoteToInt($dataMap.note, "godrayeffect.angle") || ANGLE,
+                JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.gain") || GAIN,
+                JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.lacunrity") || LACUNRITY,
+                this.isGodRayLightParallel,
+                this.godRayLightSource
+            );
             this.filters.push(this.godRayFilter);
             this.godRayFilterUpdateHandler = UpdateGodRayShader;
         }
