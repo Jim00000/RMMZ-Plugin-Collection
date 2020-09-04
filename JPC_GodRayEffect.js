@@ -98,7 +98,7 @@
     // GodRay
     //=============================================================================
 
-    function CreateGodRayShader(_angle, _gain, _uLacunrity, _parallel, _center) {
+    function CreateGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _center) {
         const fragShaderCode = LoadGLSLShaderFile(GOD_RAY_SHADER_PATH).toString();
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             angle: _angle,
@@ -132,7 +132,7 @@
         if (this.isGodRayFilterApplied) {
             this.godRayFilterDelta = JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.delta") || DELTA;
             this.isGodRayLightParallel = JPC_ParseNoteToBoolean($dataMap.note, "godrayeffect.parallel_light") || IS_LIGHT_PARALLEL;
-            this.godRayFilter = CreateGodRayShader(
+            this.godRayFilter = CreateGodRayFilter(
                 JPC_ParseNoteToInt($dataMap.note, "godrayeffect.angle") || ANGLE, 
                 JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.gain") || GAIN, 
                 JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.lacunrity") || LACUNRITY, 
