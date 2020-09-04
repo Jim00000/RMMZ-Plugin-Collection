@@ -90,9 +90,9 @@ Window_JPCNotifier.prototype.isBusy = function () {
     //=============================================================================
     // Renew Scene_Map
     //=============================================================================
-    const _Scene_Map__create = Scene_Map.prototype.createMenuButton;
+    const _Scene_Map__createMenuButton = Scene_Map.prototype.createMenuButton;
     Scene_Map.prototype.createMenuButton = function () {
-        _Scene_Map__create.apply(this, arguments);
+        _Scene_Map__createMenuButton.apply(this, arguments);
         JPCNotifier = new Window_JPCNotifier();
         this.addWindow(JPCNotifier);
     };
