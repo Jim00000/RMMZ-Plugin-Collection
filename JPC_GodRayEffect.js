@@ -20,7 +20,7 @@
  * following metadata with xml format in the note. Giving an example:
  * 
  * <jpc>
- *   <godrayeffect>
+ *   <godrayfilter>
  *     <enable>true</enable>
  *     <delta>0.001</delta>
  *     <angle>15</angle>
@@ -28,7 +28,7 @@
  *     <lacunrity>2.8</lacunrity>
  *     <parallel_light>false</parallel_light>
  *     <lightsource>[-100, -100]</lightsource>
- *   </godrayeffect>
+ *   </godrayfilter>
  * </jpc>
  * 
  * Note that the filter will pick the default value defined in the plugin 
@@ -148,15 +148,15 @@
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function () {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.isGodRayFilterApplied = JPC_ParseNoteToBoolean($dataMap.note, "godrayeffect.enable");
+        this.isGodRayFilterApplied = JPC_ParseNoteToBoolean($dataMap.note, "godrayfilter.enable");
         if (this.isGodRayFilterApplied) {
-            this.godRayFilterDelta = JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.delta") || DELTA;
-            this.isGodRayLightParallel = JPC_ParseNoteToBoolean($dataMap.note, "godrayeffect.parallel_light") || IS_LIGHT_PARALLEL;
-            this.godRayLightSource = JPC_ParseNoteToNumArray($dataMap.note, "godrayeffect.lightsource") || CENTER;
+            this.godRayFilterDelta = JPC_ParseNoteToFloat($dataMap.note, "godrayfilter.delta") || DELTA;
+            this.isGodRayLightParallel = JPC_ParseNoteToBoolean($dataMap.note, "godrayfilter.parallel_light") || IS_LIGHT_PARALLEL;
+            this.godRayLightSource = JPC_ParseNoteToNumArray($dataMap.note, "godrayfilter.lightsource") || CENTER;
             this.godRayFilter = CreateGodRayFilter(
-                JPC_ParseNoteToInt($dataMap.note, "godrayeffect.angle") || ANGLE,
-                JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.gain") || GAIN,
-                JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.lacunrity") || LACUNRITY,
+                JPC_ParseNoteToInt($dataMap.note, "godrayfilter.angle") || ANGLE,
+                JPC_ParseNoteToFloat($dataMap.note, "godrayfilter.gain") || GAIN,
+                JPC_ParseNoteToFloat($dataMap.note, "godrayfilter.lacunrity") || LACUNRITY,
                 this.isGodRayLightParallel,
                 this.godRayLightSource
             );
