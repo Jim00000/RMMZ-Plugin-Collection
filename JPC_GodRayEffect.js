@@ -131,7 +131,9 @@
         this.isGodRayFilterApplied = JPC_ParseNoteToBoolean($dataMap.note, "godrayeffect.enable");
         if (this.isGodRayFilterApplied) {
             this.godRayFilterDelta = JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.delta") || DELTA;
-            this.godRayFilter = CreateGodRayShader(ANGLE, GAIN, LACUNRITY, IS_LIGHT_PARALLEL, CENTER);
+            this.godRayFilter = CreateGodRayShader(
+                JPC_ParseNoteToInt($dataMap.note, "godrayeffect.angle") || ANGLE, 
+                GAIN, LACUNRITY, IS_LIGHT_PARALLEL, CENTER);
             this.filters.push(this.godRayFilter);
             this.godRayFilterUpdateHandler = UpdateGodRayShader;
         }
