@@ -24,6 +24,16 @@ function JPC_ParseNoteToBoolean(note, xmlquery) {
     return JSON.parse(result);
 }
 
+function JPC_ParseNoteToInt(note, xmlquery) {
+    const int = JPC_ParseNote(note, xmlquery);
+    return int === null ? null : parseInt(int);
+}
+
+function JPC_ParseNoteToFloat(note, xmlquery) {
+    const float = JPC_ParseNote(note, xmlquery);
+    return float === null ? null : parseFloat(float);
+}
+
 {
     //=============================================================================
     // Functions
