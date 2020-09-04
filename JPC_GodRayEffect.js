@@ -8,11 +8,31 @@
  * @author Jim00000
  * @help 
  * Dependent Files: JPC_Core.js
- * This is an official filter provided by PiXiJS (Alain Galvan).
- * Visit https://pixijs.io/pixi-filters/tools/demo/ for a live demo of Godray filter.
- * https://pixijs.io/pixi-filters/docs/PIXI.filters.GodrayFilter.html offers details about every parameters.
- * The shader file (godray.fs) comes from https://github.com/pixijs/pixi-filters/tree/master/filters/godray/src 
+ * 
+ * This is an official filter provided by PiXiJS (Alain Galvan). Visit 
+ * https://pixijs.io/pixi-filters/tools/demo/ for a live demo of Godray filter.
+ * https://pixijs.io/pixi-filters/docs/PIXI.filters.GodrayFilter.html offers 
+ * details about every parameters. The shader file (godray.fs) comes from 
+ * https://github.com/pixijs/pixi-filters/tree/master/filters/godray/src 
  * and has a few modifications.
+ * 
+ * In the map attribute's editor, you can set parameters to the map by writing 
+ * following metadata with xml format in the note. Giving an example:
+ * 
+ * <jpc>
+ *   <godrayeffect>
+ *     <enable>true</enable>
+ *     <delta>0.001</delta>
+ *     <angle>15</angle>
+ *     <gain>0.5</gain>
+ *     <lacunrity>2.8</lacunrity>
+ *     <parallel_light>false</parallel_light>
+ *     <lightsource>[-100, -100]</lightsource>
+ *   </godrayeffect>
+ * </jpc>
+ * 
+ * Note that the filter will pick the default value defined in the plugin 
+ * manager if you do not give specific value to the parameter in the xml.
  * 
  * @param delta
  * @text The larger the delta value, more frequently the light disturbs
