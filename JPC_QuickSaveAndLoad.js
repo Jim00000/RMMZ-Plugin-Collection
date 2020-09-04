@@ -20,19 +20,7 @@
     const QUICK_SAVE_FILENAME = "quicksave";
     const VK_F6 = 0x75;
     const VK_F7 = 0x76;
-
-
-    //=============================================================================
-    // Function
-    //=============================================================================
-    function RegisterKeyBind(vkey, keyName) {
-        Input.keyMapper[vkey] = keyName;
-    }
-
-    function GetPluginParams() {
-        return PluginManager.parameters(PLUGIN_NAME);
-    }
-
+    
     //=============================================================================
     // Quick Save & Load
     //=============================================================================
@@ -108,9 +96,9 @@
 
     (() => {
         // Register F6 as quicksave hotkey
-        RegisterKeyBind(VK_F6, QUICK_SAVE_KEY_STRING);
+        JPC_RegisterKeyBind(VK_F6, QUICK_SAVE_KEY_STRING);
         // Register F7 as quickload hotkey
-        RegisterKeyBind(VK_F7, QUICK_LOAD_KEY_STRING);
+        JPC_RegisterKeyBind(VK_F7, QUICK_LOAD_KEY_STRING);
     })();
 }
 
