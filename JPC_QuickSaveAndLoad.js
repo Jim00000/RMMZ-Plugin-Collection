@@ -10,7 +10,8 @@
  * Dependent Files: JPC_Core.js
  * 
  * Use F6 to quicksave, F7 to quickload. The quick save file is named as 
- * "quicksave.rmmzsave".
+ * "quicksave.rmmzsave". You can also quick load the game save in the game title 
+ * scene.
  * 
  */
 {
