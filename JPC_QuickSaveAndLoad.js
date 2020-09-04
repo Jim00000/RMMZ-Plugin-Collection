@@ -9,11 +9,6 @@
  * @help 
  * Use F6 to quicksave, F7 to quickload.
  * 
- * @param QuickSaveSlotId
- * @text The target save slot which quick save/load picks
- * @type number
- * @default 0
- * 
  * @param HasFadeOutEffect
  * @text Fade out while save file is loading
  * @type boolean
@@ -31,7 +26,6 @@
     const VK_F7 = 0x76;
 
     // User-defined variables
-    const QUICK_SAVE_SLOT_ID = parseInt(GetPluginParams()['QuickSaveSlotId']);
     const FADE_OUT_EFFECT = JSON.parse(GetPluginParams()['HasFadeOutEffect']);
 
     function RegisterKeyBind(vkey, keyName) {
