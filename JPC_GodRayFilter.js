@@ -82,7 +82,7 @@
     //=============================================================================
     // Fixed Parameters
     //=============================================================================
-    const PLUGIN_NAME = "jpc_godrayeffect";
+    const PLUGIN_NAME = "jpc_godrayfilter";
     const GOD_RAY_SHADER_PATH = "js/plugins/shaders/godray.fs";
 
     //=============================================================================
