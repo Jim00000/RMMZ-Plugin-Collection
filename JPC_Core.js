@@ -34,6 +34,11 @@ function JPC_ParseNoteToFloat(note, xmlquery) {
     return float === null ? null : parseFloat(float);
 }
 
+function JPC_ParseNoteToNumArray(note, xmlquery) {
+    const numArray = JPC_ParseNote(note, xmlquery);
+    return JSON.parse(numArray);
+}
+
 {
     //=============================================================================
     // Functions
