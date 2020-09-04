@@ -130,7 +130,7 @@
         return filter;
     }
 
-    function UpdateGodRayShader(spritest_map) {
+    function UpdateGodRayFilter(spritest_map) {
         spritest_map.godRayFilter.uniforms.utime += spritest_map.godRayFilterDelta;
         if (spritest_map.isGodRayLightParallel == false) {
             spritest_map.godRayFilter.uniforms.light[0] = spritest_map.godRayLightSource[0] - $gameMap._displayX * $gameMap.tileWidth();
@@ -158,7 +158,7 @@
                 this.godRayLightSource
             );
             this.filters.push(this.godRayFilter);
-            this.godRayFilterUpdateHandler = UpdateGodRayShader;
+            this.godRayFilterUpdateHandler = UpdateGodRayFilter;
         }
     };
 
