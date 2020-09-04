@@ -134,7 +134,8 @@
             this.godRayFilter = CreateGodRayShader(
                 JPC_ParseNoteToInt($dataMap.note, "godrayeffect.angle") || ANGLE, 
                 JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.gain") || GAIN, 
-                LACUNRITY, IS_LIGHT_PARALLEL, CENTER);
+                JPC_ParseNoteToFloat($dataMap.note, "godrayeffect.lacunrity") || LACUNRITY, 
+                IS_LIGHT_PARALLEL, CENTER);
             this.filters.push(this.godRayFilter);
             this.godRayFilterUpdateHandler = UpdateGodRayShader;
         }
