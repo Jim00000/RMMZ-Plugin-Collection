@@ -57,7 +57,10 @@
 
     function QuickLoad() {
         LoadGameFromQuickSave()
-            .then(() => { SoundManager.playLoad(); })
+            .then(() => { 
+                SoundManager.playLoad(); 
+                SceneManager.goto(Scene_Map);
+            })
             .catch(() => { SoundManager.playBuzzer(); });
     }
 
