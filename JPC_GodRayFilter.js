@@ -84,25 +84,22 @@
     //=============================================================================
     const PLUGIN_NAME = "jpc_godrayfilter";
     const GOD_RAY_SHADER_PATH = "js/plugins/shaders/godray.fs";
+    const PLUGINPARAMS = JPC_GetPluginParams(PLUGIN_NAME);
 
     //=============================================================================
     // User-defined Parameters
     //=============================================================================
-    const DELTA = parseFloat(GetPluginParams()['delta']);
-    const ANGLE = parseFloat(GetPluginParams()['angle']);
-    const GAIN = parseFloat(GetPluginParams()['gain']);
-    const LACUNRITY = parseFloat(GetPluginParams()['lacunrity']);
-    const IS_LIGHT_PARALLEL = JSON.parse(GetPluginParams()['parallel']);
-    const CENTER_ARRAY = JSON.parse(GetPluginParams()['lightsrc']);
+    const DELTA = parseFloat(PLUGINPARAMS['delta']);
+    const ANGLE = parseFloat(PLUGINPARAMS['angle']);
+    const GAIN = parseFloat(PLUGINPARAMS['gain']);
+    const LACUNRITY = parseFloat(PLUGINPARAMS['lacunrity']);
+    const IS_LIGHT_PARALLEL = JSON.parse(PLUGINPARAMS['parallel']);
+    const CENTER_ARRAY = JSON.parse(PLUGINPARAMS['lightsrc']);
     const CENTER = [parseFloat(CENTER_ARRAY[0]), parseFloat(CENTER_ARRAY[1])];
 
     //=============================================================================
     // Help functions
     //=============================================================================
-
-    function GetPluginParams() {
-        return PluginManager.parameters(PLUGIN_NAME);
-    }
 
     function DegToRad(degree) {
         return degree * Math.PI / 180.0;
