@@ -44,9 +44,7 @@
     function DoQuickSave() {
         const contents = DataManager.makeSaveContents();
         const saveName = MakeQuickSaveName();
-        return StorageManager.saveObject(saveName, contents).then(() => {
-            return 0;
-        });
+        return StorageManager.saveObject(saveName, contents);
     }
 
     function QuickSave() {
