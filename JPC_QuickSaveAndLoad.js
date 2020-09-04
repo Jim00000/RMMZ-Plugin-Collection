@@ -11,7 +11,9 @@
  * 
  */
 {
-    // Fixed variables
+    //=============================================================================
+    // Fixed Parameters
+    //=============================================================================
     const PLUGIN_NAME = "jpc_quicksaveandload";
     const QUICK_SAVE_KEY_STRING = "QuickSave";
     const QUICK_LOAD_KEY_STRING = "QuickLoad";
@@ -19,6 +21,10 @@
     const VK_F6 = 0x75;
     const VK_F7 = 0x76;
 
+
+    //=============================================================================
+    // Function
+    //=============================================================================
     function RegisterKeyBind(vkey, keyName) {
         Input.keyMapper[vkey] = keyName;
     }
@@ -26,6 +32,10 @@
     function GetPluginParams() {
         return PluginManager.parameters(PLUGIN_NAME);
     }
+
+    //=============================================================================
+    // Quick Save & Load
+    //=============================================================================
 
     function MakeQuickSaveName() {
         return QUICK_SAVE_FILENAME;
@@ -55,8 +65,8 @@
 
     function QuickLoad() {
         LoadGameFromQuickSave()
-            .then(() => { 
-                SoundManager.playLoad(); 
+            .then(() => {
+                SoundManager.playLoad();
                 SceneManager.goto(Scene_Map);
             })
             .catch(() => { SoundManager.playBuzzer(); });
@@ -82,23 +92,25 @@
         return Input.isTriggered(QUICK_LOAD_KEY_STRING);
     }
 
+    //=============================================================================
+    // Renew Spriteset_Map
+    //=============================================================================
+    const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
+    Scene_Map.prototype.updateScene = function () {
+        _Scene_Map__updateScene.apply(this, arguments);
+        if (!SceneManager.isSceneChanging()) {
+            UpdateCallQuickSave();
+        }
+        if (!SceneManager.isSceneChanging()) {
+            UpdateCallQuickLoad();
+        }
+    };
+
     (() => {
         // Register F6 as quicksave hotkey
         RegisterKeyBind(VK_F6, QUICK_SAVE_KEY_STRING);
         // Register F7 as quickload hotkey
         RegisterKeyBind(VK_F7, QUICK_LOAD_KEY_STRING);
-
-        const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
-        Scene_Map.prototype.updateScene = function () {
-            _Scene_Map__updateScene.apply(this, arguments);
-            if (!SceneManager.isSceneChanging()) {
-                UpdateCallQuickSave();
-            }
-            if (!SceneManager.isSceneChanging()) {
-                UpdateCallQuickLoad();
-            }
-        };
-
     })();
 }
 
