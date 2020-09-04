@@ -97,6 +97,18 @@
         }
     };
 
+    //=============================================================================
+    // Renew Scene_Title
+    //=============================================================================
+    const _Scene_Title__update = Scene_Title.prototype.update;
+    Scene_Title.prototype.update = function () {
+        _Scene_Title__update.apply(this, arguments);
+        if (!SceneManager.isSceneChanging()) {
+            UpdateCallQuickLoad();
+        }
+    };
+    
+
     (() => {
         // Register F6 as quicksave hotkey
         JPC_RegisterKeyBind(VK_F6, QUICK_SAVE_KEY_STRING);
