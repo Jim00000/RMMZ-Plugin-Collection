@@ -7,6 +7,7 @@
  * @plugindesc Add god ray effect to the game map.
  * @author Jim00000
  * @help 
+ * Dependent Files: JPC_Core.js
  * This is an official filter provided by PiXiJS (Alain Galvan).
  * Visit https://pixijs.io/pixi-filters/tools/demo/ for a live demo of Godray filter.
  * https://pixijs.io/pixi-filters/docs/PIXI.filters.GodrayFilter.html offers details about every parameters.
@@ -92,8 +93,7 @@
     }
 
     function LoadGLSLShaderFile(filePath) {
-        const path = require("path");
-        const fs = require("fs");
+        const path = require("path"), fs = require("fs");
         const shaderFile = fs.readFileSync(path.resolve(filePath));
         return shaderFile;
     }
@@ -118,10 +118,10 @@
     }
 
     function UpdateGodRayShader(spritest_map) {
-        spritest_map.glslFilter.uniforms.utime += GetDelta();
+        spritest_map.godRayFilter.uniforms.utime += GetDelta();
         if (IS_LIGHT_PARALLEL == false) {
-            spritest_map.glslFilter.uniforms.light[0] = CENTER[0] - $gameMap._displayX * $gameMap.tileWidth();
-            spritest_map.glslFilter.uniforms.light[1] = CENTER[1] - $gameMap._displayY * $gameMap.tileHeight();
+            spritest_map.godRayFilter.uniforms.light[0] = CENTER[0] - $gameMap._displayX * $gameMap.tileWidth();
+            spritest_map.godRayFilter.uniforms.light[1] = CENTER[1] - $gameMap._displayY * $gameMap.tileHeight();
         }
     }
 
@@ -132,15 +132,20 @@
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function () {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.glslFilter = CreateGodRayShader(ANGLE, GAIN, LACUNRITY, IS_LIGHT_PARALLEL, CENTER);
-        this.filters = [this.glslFilter];
-        this.glslFilterUpdateHandler = UpdateGodRayShader;
+        this.isGodRayFilterApplied = JPC_ParseNoteToBoolean($dataMap.note, "godrayeffect.enable");
+        if (this.isGodRayFilterApplied) {
+            this.godRayFilter = CreateGodRayShader(ANGLE, GAIN, LACUNRITY, IS_LIGHT_PARALLEL, CENTER);
+            this.filters.push(this.godRayFilter);
+            this.godRayFilterUpdateHandler = UpdateGodRayShader;
+        }
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function () {
         _Spriteset_Map__update.apply(this, arguments);
-        this.glslFilterUpdateHandler(this);
+        if (this.isGodRayFilterApplied) {
+            this.godRayFilterUpdateHandler(this);
+        }
     };
 }
 
