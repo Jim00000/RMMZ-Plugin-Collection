@@ -16,51 +16,50 @@
  * - XML parsing 
  */
 
-var JPCNotifier = null;
+var JPC = (() => {
+    'use strict';
 
-//=============================================================================
-// Public Functions
-//=============================================================================
+    var Exported = {};
+    Exported.notifier = null;
 
-function JPC_RegisterKeyBind(vkey, keyName) {
-    Input.keyMapper[vkey] = keyName;
-}
+    Exported.buildNotifier = function () {
+        return new Window_JPCNotifier();
+    }
 
-function JPC_GetPluginParams(pluginName) {
-    return PluginManager.parameters(pluginName);
-}
+    Exported.registerKeyBind = function (vkey, keyName) {
+        Input.keyMapper[vkey] = keyName;
+    }
 
-function JPC_ParseNote(note, xmlquery) {
-    const JPCNote = RetrieveJPCSectionFromNote(note);
-    return JPCNote ? CommitXMLQuery(JPCNote, xmlquery) : null;
-}
+    Exported.getPluginParams = function (pluginName) {
+        return PluginManager.parameters(pluginName);
+    }
 
-function JPC_ParseNoteToBoolean(note, xmlquery) {
-    const result = JPC_ParseNote(note, xmlquery) || "false";
-    return JSON.parse(result);
-}
+    Exported.parseNote = function (note, xmlquery) {
+        const JPCNote = retrieveJPCSectionFromNote(note);
+        return JPCNote ? commitXMLQuery(JPCNote, xmlquery) : null;
+    }
 
-function JPC_ParseNoteToInt(note, xmlquery) {
-    const int = JPC_ParseNote(note, xmlquery);
-    return int === null ? null : parseInt(int);
-}
+    Exported.parseNoteToBoolean = function (note, xmlquery) {
+        const result = Exported.parseNote(note, xmlquery) || "false";
+        return JSON.parse(result);
+    }
 
-function JPC_ParseNoteToFloat(note, xmlquery) {
-    const float = JPC_ParseNote(note, xmlquery);
-    return float === null ? null : parseFloat(float);
-}
+    Exported.parseNoteToInt = function (note, xmlquery) {
+        const int = Exported.parseNote(note, xmlquery);
+        return int === null ? null : parseInt(int);
+    }
 
-function JPC_ParseNoteToNumArray(note, xmlquery) {
-    const numArray = JPC_ParseNote(note, xmlquery);
-    return JSON.parse(numArray);
-}
+    Exported.parseNoteToFloat = function (note, xmlquery) {
+        const float = Exported.parseNote(note, xmlquery);
+        return float === null ? null : parseFloat(float);
+    }
 
-{
-    //=============================================================================
-    // Functions
-    //=============================================================================
+    Exported.parseNoteToNumArray = function (note, xmlquery) {
+        const numArray = Exported.parseNote(note, xmlquery);
+        return JSON.parse(numArray);
+    }
 
-    function CommitXMLQuery(data, query) {
+    function commitXMLQuery(data, query) {
         try {
             var xmldoc = require("js/plugins/third_party/xmldoc.js");
             var xml = new xmldoc.XmlDocument(data);
@@ -70,7 +69,7 @@ function JPC_ParseNoteToNumArray(note, xmlquery) {
         }
     }
 
-    function RetrieveJPCSectionFromNote(note) {
+    function retrieveJPCSectionFromNote(note) {
         const pattern = /(<jpc>[\w\s<>\/\?\.\-\[\]\,]+<\/jpc>)/;
         const match = pattern.exec(note);
         return match ? match[0] : null;
@@ -154,13 +153,15 @@ function JPC_ParseNoteToNumArray(note, xmlquery) {
     //=============================================================================
     // Renew Scene_Map
     //=============================================================================
-    const _Scene_Map__createMenuButton = Scene_Map.prototype.createMenuButton;
-    Scene_Map.prototype.createMenuButton = function () {
-        _Scene_Map__createMenuButton.apply(this, arguments);
-        JPCNotifier = new Window_JPCNotifier();
-        this.addWindow(JPCNotifier);
+    const _Scene_Map__createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
+    Scene_Map.prototype.createDisplayObjects = function () {
+        _Scene_Map__createDisplayObjects.apply(this, arguments);
+        JPC.notifier = JPC.buildNotifier();
+        this.addWindow(JPC.notifier);
     };
-}
+
+    return Exported;
+})();
 
 /* MIT License
 

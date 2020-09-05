@@ -78,13 +78,14 @@
  * @max 10000.0
  */
 
-{
+(() => {
+    'use strict';
     //=============================================================================
     // Fixed Parameters
     //=============================================================================
     const PLUGIN_NAME = "jpc_godrayfilter";
     const GOD_RAY_SHADER_PATH = "js/plugins/shaders/godray.fs";
-    const PLUGINPARAMS = JPC_GetPluginParams(PLUGIN_NAME);
+    const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
     //=============================================================================
     // User-defined Parameters
@@ -94,29 +95,25 @@
     const GAIN = parseFloat(PLUGINPARAMS['gain']);
     const LACUNRITY = parseFloat(PLUGINPARAMS['lacunrity']);
     const IS_LIGHT_PARALLEL = JSON.parse(PLUGINPARAMS['parallel']);
-    const CENTER_ARRAY = JSON.parse(PLUGINPARAMS['lightsrc']);
-    const CENTER = [parseFloat(CENTER_ARRAY[0]), parseFloat(CENTER_ARRAY[1])];
+    const LIGHTSRC_ARRAY = JSON.parse(PLUGINPARAMS['lightsrc']);
+    const LIGHTSRC = [parseFloat(LIGHTSRC_ARRAY[0]), parseFloat(LIGHTSRC_ARRAY[1])];
 
     //=============================================================================
     // Help functions
     //=============================================================================
 
-    function DegToRad(degree) {
+    function degToRad(degree) {
         return degree * Math.PI / 180.0;
     }
 
-    function LoadGLSLShaderFile(filePath) {
+    function loadGLSLShaderFile(filePath) {
         const path = require("path"), fs = require("fs");
         const shaderFile = fs.readFileSync(path.resolve(filePath));
         return shaderFile;
     }
 
-    //=============================================================================
-    // GodRay
-    //=============================================================================
-
-    function CreateGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _center) {
-        const fragShaderCode = LoadGLSLShaderFile(GOD_RAY_SHADER_PATH).toString();
+    function createGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _lightsrc) {
+        const fragShaderCode = loadGLSLShaderFile(GOD_RAY_SHADER_PATH).toString();
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             angle: _angle,
             gain: _gain,
@@ -124,13 +121,13 @@
             parallel: _parallel,
             dimensions: [Graphics.boxWidth, Graphics.boxHeight],
             aspect: Graphics.boxHeight / Graphics.boxWidth,
-            light: _parallel ? [Math.cos(DegToRad(_angle)), Math.sin(DegToRad(_angle))] : _center,
+            light: _parallel ? [Math.cos(degToRad(_angle)), Math.sin(degToRad(_angle))] : _lightsrc,
             utime: 0
         });
         return filter;
     }
 
-    function UpdateGodRayFilter(spritest_map) {
+    function updateGodRayFilter(spritest_map) {
         spritest_map.godRayFilter.uniforms.utime += spritest_map.godRayFilterDelta;
         if (spritest_map.isGodRayLightParallel == false) {
             spritest_map.godRayFilter.uniforms.light[0] = spritest_map.godRayLightSource[0] - $gameMap._displayX * $gameMap.tileWidth();
@@ -138,27 +135,23 @@
         }
     }
 
-    //=============================================================================
-    // Renew Spriteset_Map
-    //=============================================================================
-
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function () {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.isGodRayFilterApplied = JPC_ParseNoteToBoolean($dataMap.note, "godrayfilter.enable");
+        this.isGodRayFilterApplied = JPC.parseNoteToBoolean($dataMap.note, "godrayfilter.enable");
         if (this.isGodRayFilterApplied) {
-            this.godRayFilterDelta = JPC_ParseNoteToFloat($dataMap.note, "godrayfilter.delta") || DELTA;
-            this.isGodRayLightParallel = JPC_ParseNoteToBoolean($dataMap.note, "godrayfilter.parallel_light") || IS_LIGHT_PARALLEL;
-            this.godRayLightSource = JPC_ParseNoteToNumArray($dataMap.note, "godrayfilter.lightsource") || CENTER;
-            this.godRayFilter = CreateGodRayFilter(
-                JPC_ParseNoteToInt($dataMap.note, "godrayfilter.angle") || ANGLE,
-                JPC_ParseNoteToFloat($dataMap.note, "godrayfilter.gain") || GAIN,
-                JPC_ParseNoteToFloat($dataMap.note, "godrayfilter.lacunrity") || LACUNRITY,
+            this.godRayFilterDelta = JPC.parseNoteToFloat($dataMap.note, "godrayfilter.delta") || DELTA;
+            this.isGodRayLightParallel = JPC.parseNoteToBoolean($dataMap.note, "godrayfilter.parallel_light") || IS_LIGHT_PARALLEL;
+            this.godRayLightSource = JPC.parseNoteToNumArray($dataMap.note, "godrayfilter.lightsource") || LIGHTSRC;
+            this.godRayFilter = createGodRayFilter(
+                JPC.parseNoteToInt($dataMap.note, "godrayfilter.angle") || ANGLE,
+                JPC.parseNoteToFloat($dataMap.note, "godrayfilter.gain") || GAIN,
+                JPC.parseNoteToFloat($dataMap.note, "godrayfilter.lacunrity") || LACUNRITY,
                 this.isGodRayLightParallel,
                 this.godRayLightSource
             );
             this.filters.push(this.godRayFilter);
-            this.godRayFilterUpdateHandler = UpdateGodRayFilter;
+            this.godRayFilterUpdateHandler = updateGodRayFilter;
         }
     };
 
@@ -169,7 +162,8 @@
             this.godRayFilterUpdateHandler(this);
         }
     };
-}
+
+})();
 
 /* MIT License
 

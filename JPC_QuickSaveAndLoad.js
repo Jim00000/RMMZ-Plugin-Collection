@@ -14,27 +14,27 @@
  * scene.
  * 
  */
-{
-    //=============================================================================
-    // Fixed Parameters
-    //=============================================================================
+(() => {
+    'use strict';
+
     const PLUGIN_NAME = "jpc_quicksaveandload";
     const QUICK_SAVE_KEY_STRING = "QuickSave";
     const QUICK_LOAD_KEY_STRING = "QuickLoad";
     const QUICK_SAVE_FILENAME = "quicksave";
     const VK_F6 = 0x75;
     const VK_F7 = 0x76;
-    
-    //=============================================================================
-    // Quick Save & Load
-    //=============================================================================
 
-    function MakeQuickSaveName() {
+    // Register F6 as quicksave hotkey
+    JPC.registerKeyBind(VK_F6, QUICK_SAVE_KEY_STRING);
+    // Register F7 as quickload hotkey
+    JPC.registerKeyBind(VK_F7, QUICK_LOAD_KEY_STRING);
+
+    function makeQuickSaveName() {
         return QUICK_SAVE_FILENAME;
     }
 
-    function LoadGameFromQuickSave() {
-        const quickSaveName = MakeQuickSaveName();
+    function loadGameFromQuickSave() {
+        const quickSaveName = makeQuickSaveName();
         return StorageManager.loadObject(quickSaveName).then(contents => {
             DataManager.createGameObjects();
             DataManager.extractSaveContents(contents);
@@ -43,20 +43,20 @@
         });
     }
 
-    function DoQuickSave() {
+    function doQuickSave() {
         const contents = DataManager.makeSaveContents();
-        const saveName = MakeQuickSaveName();
+        const saveName = makeQuickSaveName();
         return StorageManager.saveObject(saveName, contents);
     }
 
-    function QuickSave() {
-        DoQuickSave()
+    function quickSave() {
+        doQuickSave()
             .then(() => { SoundManager.playSave(); })
             .catch(() => { SoundManager.playBuzzer(); });
     }
 
-    function QuickLoad() {
-        LoadGameFromQuickSave()
+    function quickLoad() {
+        loadGameFromQuickSave()
             .then(() => {
                 SoundManager.playLoad();
                 SceneManager.goto(Scene_Map);
@@ -64,59 +64,56 @@
             .catch(() => { SoundManager.playBuzzer(); });
     }
 
-    function UpdateCallQuickSave() {
-        if (IsQuickSaveCalled()) {
-            QuickSave();
+    function updateCallQuickSave() {
+        if (isQuickSaveCalled()) {
+            quickSave();
+            if (JPC.notifier !== null) {
+                JPC.notifier.setText("Quick save is done");
+                JPC.notifier.open();
+            }
         }
     }
 
-    function UpdateCallQuickLoad() {
-        if (IsQuickLoadCalled()) {
-            QuickLoad();
+    function updateCallQuickLoad() {
+        if (isQuickLoadCalled()) {
+            quickLoad();
+            setTimeout(() => {
+                if (JPC.notifier !== null) {
+                    JPC.notifier.setText("Quick load is done");
+                    JPC.notifier.open();
+                }
+            }, 1000);
         }
     }
 
-    function IsQuickSaveCalled() {
+    function isQuickSaveCalled() {
         return Input.isTriggered(QUICK_SAVE_KEY_STRING);
     }
 
-    function IsQuickLoadCalled() {
+    function isQuickLoadCalled() {
         return Input.isTriggered(QUICK_LOAD_KEY_STRING);
     }
 
-    //=============================================================================
-    // Renew Spriteset_Map
-    //=============================================================================
     const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
     Scene_Map.prototype.updateScene = function () {
         _Scene_Map__updateScene.apply(this, arguments);
         if (!SceneManager.isSceneChanging()) {
-            UpdateCallQuickSave();
+            updateCallQuickSave();
         }
         if (!SceneManager.isSceneChanging()) {
-            UpdateCallQuickLoad();
+            updateCallQuickLoad();
         }
     };
 
-    //=============================================================================
-    // Renew Scene_Title
-    //=============================================================================
     const _Scene_Title__update = Scene_Title.prototype.update;
     Scene_Title.prototype.update = function () {
         _Scene_Title__update.apply(this, arguments);
         if (!SceneManager.isSceneChanging()) {
-            UpdateCallQuickLoad();
+            updateCallQuickLoad();
         }
     };
-    
 
-    (() => {
-        // Register F6 as quicksave hotkey
-        JPC_RegisterKeyBind(VK_F6, QUICK_SAVE_KEY_STRING);
-        // Register F7 as quickload hotkey
-        JPC_RegisterKeyBind(VK_F7, QUICK_LOAD_KEY_STRING);
-    })();
-}
+})();
 
 /* MIT License
 
