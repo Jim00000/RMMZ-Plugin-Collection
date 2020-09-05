@@ -19,6 +19,18 @@
  * @type string
  * @default quicksave
  * 
+ * @param quick_save_notification_msg
+ * @text Quick save message
+ * @desc The notification message while quicksaving is done.
+ * @type string
+ * @default Quicksaving...
+ *
+ * @param quick_load_notification_msg
+ * @text Quick load message
+ * @desc The notification message while quickloading is done.
+ * @type string
+ * @default Quickloading... 
+ *
  * @param quick_save_key
  * @text quick save key
  * @desc The key to quick save. Input should be a virtual key.
@@ -42,6 +54,8 @@
     const QUICK_SAVE_FILENAME = PLUGINPARAMS['quick_save_name'];
     const QUICK_SAVE_KEY = PLUGINPARAMS['quick_save_key'];
     const QUICK_LOAD_KEY = PLUGINPARAMS['quick_load_key'];
+    const QUICK_SAVE_NOTIFICATION_MESSAGE = PLUGINPARAMS['quick_save_notification_msg'];
+    const QUICK_LOAD_NOTIFICATION_MESSAGE = PLUGINPARAMS['quick_load_notification_msg'];
 
     // Register F6 as quicksave hotkey
     JPC.registerKeyBind(QUICK_SAVE_KEY, QUICK_SAVE_KEY_STRING);
@@ -86,7 +100,7 @@
     function updateCallQuickSave() {
         if (isQuickSaveCalled()) {
             quickSave();
-            JPC.notify("Quick save is done");
+            JPC.notify(QUICK_SAVE_NOTIFICATION_MESSAGE);
         }
     }
 
@@ -94,7 +108,7 @@
         if (isQuickLoadCalled()) {
             quickLoad();
             setTimeout(() => {
-                JPC.notify("Quick load is done");
+                JPC.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
             }, 600);
         }
     }
