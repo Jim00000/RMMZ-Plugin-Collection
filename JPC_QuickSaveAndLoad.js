@@ -9,19 +9,39 @@
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_QuickSaveAndLoad.js
  * @base JPC_Core
  * @help 
- * Use F6 to quicksave, F7 to quickload. The quick save file is named as 
- * "quicksave.rmmzsave". You can also quick load the game save in the game title 
- * scene.
+ * Use F6 to quicksave, F7 to quickload in default. 
+ * The quick save file is named as "quicksave.rmmzsave" in default. 
+ * You can also quick load the save file in the game title scene.
+ * 
+ * @param quick_save_name
+ * @text filename
+ * @desc The filename of quick save
+ * @type string
+ * @default quicksave
+ * 
+ * @param quick_save_key
+ * @text quick save key
+ * @desc The key to quick save. Input should be a virtual key.
+ * @type number
+ * @default 117
+ * 
+ * @param quick_load_key
+ * @text quick load key
+ * @desc The key to quick load. Input should be a virtual key.
+ * @type number
+ * @default 118
  */
 (() => {
     'use strict';
 
     const PLUGIN_NAME = "jpc_quicksaveandload";
+    const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
+
     const QUICK_SAVE_KEY_STRING = "QuickSave";
     const QUICK_LOAD_KEY_STRING = "QuickLoad";
-    const QUICK_SAVE_FILENAME = "quicksave";
-    const QUICK_SAVE_KEY = JPC.vkeys.VK_F6;
-    const QUICK_LOAD_KEY = JPC.vkeys.VK_F7;
+    const QUICK_SAVE_FILENAME = PLUGINPARAMS['quick_save_name'];
+    const QUICK_SAVE_KEY = PLUGINPARAMS['quick_save_key'];
+    const QUICK_LOAD_KEY = PLUGINPARAMS['quick_load_key'];
 
     // Register F6 as quicksave hotkey
     JPC.registerKeyBind(QUICK_SAVE_KEY, QUICK_SAVE_KEY_STRING);
