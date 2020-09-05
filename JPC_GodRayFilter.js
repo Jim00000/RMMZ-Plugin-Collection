@@ -130,8 +130,8 @@
     function updateGodRayFilter(spritest_map) {
         spritest_map.godRayFilter.uniforms.utime += spritest_map.godRayFilterDelta;
         if (spritest_map.isGodRayLightParallel == false) {
-            spritest_map.godRayFilter.uniforms.light[0] = spritest_map.godRayLightSource[0] - $gameMap._displayX * $gameMap.tileWidth();
-            spritest_map.godRayFilter.uniforms.light[1] = spritest_map.godRayLightSource[1] - $gameMap._displayY * $gameMap.tileHeight();
+            spritest_map.godRayFilter.uniforms.light[0] = spritest_map.godRayLightSource[0] - $gameMap.displayX() * $gameMap.tileWidth();
+            spritest_map.godRayFilter.uniforms.light[1] = spritest_map.godRayLightSource[1] - $gameMap.displayY() * $gameMap.tileHeight();
         }
     }
 
