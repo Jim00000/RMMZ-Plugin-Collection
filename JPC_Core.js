@@ -35,28 +35,28 @@ var JPC = (() => {
         VK.VK_XBUTTON1 = 0x05;  // X1 mouse button
         VK.VK_XBUTTON2 = 0x06;  // X2 mouse button
         VK.VK_BACK = 0x08;      // BACKSPACE
-        VK.VK_TAB = 0x09;       
+        VK.VK_TAB = 0x09;
         VK.VK_CLEAR = 0x0C;
         VK.VK_RETURN = 0x0D;    // ENTER
-        VK.VK_SHIFT = 0x10;     
-        VK.VK_CONTROL = 0x11;   
+        VK.VK_SHIFT = 0x10;
+        VK.VK_CONTROL = 0x11;
         VK.VK_MENU = 0x12;      // ALT
-        VK.VK_PAUSE = 0x13;     
+        VK.VK_PAUSE = 0x13;
         VK.VK_CAPITAL = 0x14;   // CAPS LOCK
-        VK.VK_ESCAPE = 0x1B;    
-        VK.VK_SPACE = 0x20;     
+        VK.VK_ESCAPE = 0x1B;
+        VK.VK_SPACE = 0x20;
         VK.VK_PRIOR = 0x21;     // PAGE UP
         VK.VK_NEXT = 0x22;      // PAGE DOWN
-        VK.VK_END = 0x23;       
-        VK.VK_LEFT = 0x25;      
-        VK.VK_UP = 0x26;        
-        VK.VK_RIGHT = 0x27;     
-        VK.VK_DOWN = 0x28;      
-        VK.VK_PRINT = 0x2A;     
+        VK.VK_END = 0x23;
+        VK.VK_LEFT = 0x25;
+        VK.VK_UP = 0x26;
+        VK.VK_RIGHT = 0x27;
+        VK.VK_DOWN = 0x28;
+        VK.VK_PRINT = 0x2A;
         VK.VK_SNAPSHOT = 0x2C;  // PRINT SCREEN
-        VK.VK_INSERT = 0x2D;    
-        VK.VK_DELETE = 0x2E;    
-        VK.VK_HELP = 0x2F;      
+        VK.VK_INSERT = 0x2D;
+        VK.VK_DELETE = 0x2E;
+        VK.VK_HELP = 0x2F;
         VK.VK_0 = 0x30;
         VK.VK_1 = 0x31;
         VK.VK_2 = 0x32;
@@ -95,7 +95,7 @@ var JPC = (() => {
         VK.VK_Z = 0x5A;
         VK.VK_LWIN = 0x5B;      // LEFT WIN
         VK.VK_RWIN = 0x5C;      // RIGHT WIN
-        VK.VK_SLEEP = 0x5F; 
+        VK.VK_SLEEP = 0x5F;
         VK.VK_NUMPAD0 = 0x60;
         VK.VK_NUMPAD1 = 0x61;
         VK.VK_NUMPAD2 = 0x62;
@@ -135,9 +135,22 @@ var JPC = (() => {
         return VK;
     })();
 
-
     Exported.buildNotifier = function () {
         return new Window_JPCNotifier();
+    }
+
+    Exported.notify = function (msg, duration = 3000) {
+        if (Exported.notifier !== null) {
+            if (Exported.notifier.parent !== null && (Exported.notifier.parent instanceof WindowLayer) === true) {
+                Exported.notifier.submitText(msg);
+                Exported.notifier.setDuration(duration);
+                if (Exported.notifier.isBusy()) {
+                    Exported.notifier.resetTimer();
+                } else {
+                    Exported.notifier.open();
+                }
+            }
+        }
     }
 
     Exported.registerKeyBind = function (vkey, keyName) {
@@ -210,15 +223,17 @@ var JPC = (() => {
     Window_JPCNotifier.prototype.initialize = function () {
         Window_Base.prototype.initialize.call(this, new Rectangle(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(1)));
         this.move(-10, -20, 0, Window_Base.prototype.fittingHeight(1));
-        this._text = "";
+        this._texts = [];
+        this._maxTextQueueSize = 5;
+        this._fontsize = 16;
         this.contents.fontFace = $gameSystem.mainFontFace();
-        this.contents.fontSize = 16;
-        this.backOpacity = 0;
+        this.contents.fontSize = this._fontsize;
+        this.backOpacity = 255;
         this.opacity = 0; // Disable background frame
         this._duration = 3000; // in milliseconds
         this.contentsOpacity = 0;
-        this._start_timestamp = new Date().getTime();
         this._isBusy = false;
+        this.resetTimer();
         this.refresh();
     };
 
@@ -227,6 +242,7 @@ var JPC = (() => {
         if (this._isBusy) {
             if (this.isExpired() == false) {
                 this.contentsOpacity += 8;
+                this.refresh();
             } else {
                 this.contentsOpacity -= 8;
                 if (this.contentsOpacity <= 0) {
@@ -241,16 +257,37 @@ var JPC = (() => {
 
     Window_JPCNotifier.prototype.open = function () {
         Window_Base.prototype.open.call(this);
-        this.move(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(1));
+        // We have height range about 5 line in maximum
+        this.move(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(4) - 10);
         this._isBusy = true;
         this.contentsOpacity = 0;
-        this._start_timestamp = new Date().getTime();
+        this.createContents();
+        this.resetTimer();
         this.refresh();
+    }
+
+    Window_JPCNotifier.prototype.drawTextEx = function (text, x, y, width) {
+        this.contents.fontSize = this._fontsize;
+        const textState = this.createTextState(text, x, y, width);
+        this.processAllText(textState);
+        return textState.outputWidth;
+    }
+
+    Window_JPCNotifier.prototype.outputText = function () {
+        var output = "";
+        this._texts.forEach((text) => {
+            output += (text + "\n");
+        });
+        return output;
+    }
+
+    Window_JPCNotifier.prototype.resetTimer = function () {
+        this._start_timestamp = new Date().getTime();
     }
 
     Window_JPCNotifier.prototype.refresh = function () {
         this.contents.clear();
-        this.drawText(this._text, 0, 0, this.innerWidth, "left");
+        this.drawTextEx(this.outputText(), 0, 0, this.innerWidth);
     }
 
     Window_JPCNotifier.prototype.isExpired = function () {
@@ -258,12 +295,19 @@ var JPC = (() => {
         return current_timestamp > (this._start_timestamp + this._duration);
     }
 
-    Window_JPCNotifier.prototype.setText = function (text) {
-        this._text = text;
+    Window_JPCNotifier.prototype.setDuration = function (duration) {
+        this._duration = duration;
+    }
+
+    Window_JPCNotifier.prototype.submitText = function (text) {
+        while (this._texts.length > this._maxTextQueueSize) {
+            this._texts.pop();
+        }
+        this._texts.unshift(text);
     }
 
     Window_JPCNotifier.prototype.clearText = function () {
-        this._text = "";
+        this._texts = [];
     }
 
     Window_JPCNotifier.prototype.isBusy = function () {

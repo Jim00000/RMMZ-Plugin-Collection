@@ -86,10 +86,7 @@
     function updateCallQuickSave() {
         if (isQuickSaveCalled()) {
             quickSave();
-            if (JPC.notifier !== null) {
-                JPC.notifier.setText("Quick save is done");
-                JPC.notifier.open();
-            }
+            JPC.notify("Quick save is done");
         }
     }
 
@@ -97,11 +94,8 @@
         if (isQuickLoadCalled()) {
             quickLoad();
             setTimeout(() => {
-                if (JPC.notifier !== null) {
-                    JPC.notifier.setText("Quick load is done");
-                    JPC.notifier.open();
-                }
-            }, 1000);
+                JPC.notify("Quick load is done");
+            }, 600);
         }
     }
 
