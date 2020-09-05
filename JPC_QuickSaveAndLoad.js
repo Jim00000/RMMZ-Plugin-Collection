@@ -6,13 +6,12 @@
  * @target MZ
  * @plugindesc Quick save/load mechanism.
  * @author Jim00000
+ * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_QuickSaveAndLoad.js
+ * @base JPC_Core
  * @help 
- * Dependent Files: JPC_Core.js
- * 
  * Use F6 to quicksave, F7 to quickload. The quick save file is named as 
  * "quicksave.rmmzsave". You can also quick load the game save in the game title 
  * scene.
- * 
  */
 (() => {
     'use strict';
