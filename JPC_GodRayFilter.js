@@ -111,14 +111,8 @@
         return degree * Math.PI / 180.0;
     }
 
-    function loadGLSLShaderFile(filePath) {
-        const path = require("path"), fs = require("fs");
-        const shaderFile = fs.readFileSync(path.resolve(filePath));
-        return shaderFile;
-    }
-
     function createGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _lightsrc) {
-        const fragShaderCode = loadGLSLShaderFile(GOD_RAY_SHADER_PATH).toString();
+        const fragShaderCode = JPC.loadGLSLShaderFile(GOD_RAY_SHADER_PATH).toString();
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             angle: _angle,
             gain: _gain,

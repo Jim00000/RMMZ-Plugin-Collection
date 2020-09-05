@@ -59,6 +59,12 @@ var JPC = (() => {
         return JSON.parse(numArray);
     }
 
+    Exported.loadGLSLShaderFile = function (filePath) {
+        const path = require("path"), fs = require("fs");
+        const shaderFile = fs.readFileSync(path.resolve(filePath));
+        return shaderFile;
+    }
+
     function commitXMLQuery(data, query) {
         try {
             var xmldoc = require("js/plugins/third_party/xmldoc.js");
