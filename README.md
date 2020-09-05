@@ -1,4 +1,4 @@
-# Jim00000's Plugin Collection
+# Jim00000's Plugin Collection - JPC
 
 <div>
     <p align="center">
@@ -14,3 +14,16 @@
 ## Plugin List
 - Quick Save/Load
 - God Ray Effect
+
+## Installation
+
+Put all of the files under \<path-to-your-RMMZ-project-directory\>\js\plugins folder.
+
+## Credits
+- [sax-js (by isaacs)](https://github.com/isaacs/sax-js)
+- [xmldoc (by nfarina)](https://github.com/nfarina/xmldoc)
+- [godray filter (by Alain Galvan)](https://github.com/pixijs/pixi-filters/tree/master/filters/godray)
+
+## License
+
+This software is under MIT license.
