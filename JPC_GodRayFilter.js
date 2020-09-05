@@ -6,13 +6,18 @@
  * @target MZ
  * @plugindesc Add god ray effect to the game map.
  * @author Jim00000
+ * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_GodRayFilter.js
+ * @base JPC_Core
  * @help 
- * Dependent Files: JPC_Core.js
+ * This is an official filter provided by PiXiJS (Alain Galvan). 
  * 
- * This is an official filter provided by PiXiJS (Alain Galvan). Visit 
- * https://pixijs.io/pixi-filters/tools/demo/ for a live demo of Godray filter.
+ * Visit https://pixijs.io/pixi-filters/tools/demo/ for a live demo of Godray 
+ * filter.
+ * 
  * https://pixijs.io/pixi-filters/docs/PIXI.filters.GodrayFilter.html offers 
- * details about every parameters. The shader file (godray.fs) comes from 
+ * details about every parameters. 
+ * 
+ * The shader file (godray.fs) comes from 
  * https://github.com/pixijs/pixi-filters/tree/master/filters/godray/src 
  * and has a few modifications.
  * 
@@ -35,7 +40,7 @@
  * manager if you do not give specific value to the parameter in the xml.
  * 
  * @param delta
- * @text The larger the delta value, more frequently the light disturbs
+ * @text Delta
  * @type number
  * @default 0.01
  * @decimals 3
@@ -70,7 +75,7 @@
  * @default false
  * 
  * @param lightsrc
- * @text The position of the light source
+ * @text light source
  * @type number[]
  * @decimals 3
  * @default [0.0, -100.0]
