@@ -20,13 +20,13 @@
     const QUICK_SAVE_KEY_STRING = "QuickSave";
     const QUICK_LOAD_KEY_STRING = "QuickLoad";
     const QUICK_SAVE_FILENAME = "quicksave";
-    const VK_F6 = 0x75;
-    const VK_F7 = 0x76;
+    const QUICK_SAVE_KEY = JPC.vkeys.VK_F6;
+    const QUICK_LOAD_KEY = JPC.vkeys.VK_F7;
 
     // Register F6 as quicksave hotkey
-    JPC.registerKeyBind(VK_F6, QUICK_SAVE_KEY_STRING);
+    JPC.registerKeyBind(QUICK_SAVE_KEY, QUICK_SAVE_KEY_STRING);
     // Register F7 as quickload hotkey
-    JPC.registerKeyBind(VK_F7, QUICK_LOAD_KEY_STRING);
+    JPC.registerKeyBind(QUICK_LOAD_KEY, QUICK_LOAD_KEY_STRING);
 
     function makeQuickSaveName() {
         return QUICK_SAVE_FILENAME;
