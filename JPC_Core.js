@@ -6,8 +6,14 @@
  * @target MZ
  * @plugindesc Essential core file for JPC plugin.
  * @author Jim00000
+ * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_Core.js
  * @help 
+ * The plugin contains essential function and objects to support other JPC's 
+ * plugins.
  * 
+ * This script includes and handles : 
+ * - A notifier : tell information or status to the player
+ * - XML parsing 
  */
 
 var JPCNotifier = null;
