@@ -20,7 +20,7 @@ void main()
         float dist = distance(lightsrc[i], gl_FragCoord.xy);
         float dd = radius - dist;
         if(dd > 0.0) {
-            factor += log(1.01 + pow(dd / radius, 2.2));
+            factor += log(1.00 + pow(dd / radius, 1.8));
         }
     }
     finalColor = diffuseColor.xyz * clamp(factor, globalIllumination, 1.0);
