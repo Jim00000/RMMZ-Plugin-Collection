@@ -218,7 +218,7 @@ var JPC = (() => {
         Window_Base.prototype.initialize.call(this, new Rectangle(-10, -20, 0, 0));
         this._working = [];
         this._waiting = [];
-        this._maxWorkingQueueSize = 5;
+        this._maxWorkingQueueSize = 10;
         this._fontsize = 16;
         this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = this._fontsize;
