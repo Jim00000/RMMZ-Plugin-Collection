@@ -6,10 +6,21 @@
  * @target MZ
  * @plugindesc Add light map effect
  * @author Jim00000
- * @url 
+ * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_LightMap.js
  * @base JPC_Core
  * @help 
  * 
+ * @param lightmap_radius
+ * @text The radius of the light map.
+ * @type number
+ * @default 256.0
+ * @min 0
+ * 
+ * @param global_illumination
+ * @text Global illumination for the environment.
+ * @type number
+ * @default 0.0
+ * @min 0
  */
 
 (() => {
@@ -19,11 +30,14 @@
     const LIGHTMAP_SHADER_PATH = "js/plugins/shaders/lightmap.fs";
     const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
-    function createLightMap() {
+    const ILLUMINATION = parseFloat(PLUGINPARAMS['global_illumination']);
+    const LIGHTMAP_RADIUS = parseFloat(PLUGINPARAMS['lightmap_radius']);
+
+    function createLightMap(_illumination, _radius) {
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH).toString();
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
-            minfactor: 0.0,
-            radius: 256.0,
+            globalIllumination: _illumination,
+            radius: _radius,
             lightsrc: [-9999999, -9999999],
         });
         return filter;
@@ -43,7 +57,10 @@
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function () {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.lightmap = createLightMap();
+        this.lightmap = createLightMap(
+            JPC.parseNoteToFloat($dataMap.note, "lightmap.global_illumination") || ILLUMINATION,
+            JPC.parseNoteToFloat($dataMap.note, "lightmap.lightmap_radius") || LIGHTMAP_RADIUS
+        );
         this.filters.push(this.lightmap);
         this.playerSprite = null;
     };
