@@ -142,16 +142,11 @@ var JPC = (() => {
     Exported.notify = function (msg, duration = 3000) {
         if (Exported.notifier !== null) {
             if (Exported.notifier.parent !== null && (Exported.notifier.parent instanceof WindowLayer) === true) {
-                Exported.notifier.submitText(msg);
-                Exported.notifier.setDuration(duration);
-                if (Exported.notifier.isBusy()) {
-                    Exported.notifier.resetTimer();
-                } else {
-                    Exported.notifier.open();
+                Exported.notifier.submit(msg, duration);
+                
                 }
             }
         }
-    }
 
     Exported.registerKeyBind = function (vkey, keyName) {
         Input.keyMapper[vkey] = keyName;
@@ -221,9 +216,9 @@ var JPC = (() => {
     Window_JPCNotifier.prototype.constructor = Window_JPCNotifier;
 
     Window_JPCNotifier.prototype.initialize = function () {
-        Window_Base.prototype.initialize.call(this, new Rectangle(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(1)));
-        this.move(-10, -20, 0, Window_Base.prototype.fittingHeight(1));
-        this._texts = [];
+        Window_Base.prototype.initialize.call(this, new Rectangle(-10, -20, 0, 0));
+        this._working = [];
+        this._waiting = [];
         this._maxTextQueueSize = 5;
         this._fontsize = 16;
         this.contents.fontFace = $gameSystem.mainFontFace();
@@ -247,23 +242,25 @@ var JPC = (() => {
                 this.contentsOpacity -= 8;
                 if (this.contentsOpacity <= 0) {
                     this.contentsOpacity = 0;
-                    this._isBusy = false;
                     this.clearText();
+                    if (this._waiting.length > 0) {
+                        var maxduration = 0;
+                        // Move contents from waiting queue to working queue
+                        while (this._waiting.length > 0 && this._working.length < this._maxTextQueueSize) {
+                            const data = this._waiting.pop();
+                            maxduration = Math.max(data.duration, maxduration);
+                            this._working.unshift(data.text);
+                        }
+                        // restart the notification
+                        this._duration = maxduration;
+                        this.startNotification();
+                    } else {
+                        this._isBusy = false;
                     this.move(-10, -20, 0, Window_Base.prototype.fittingHeight(1));
                 }
             }
         }
     }
-
-    Window_JPCNotifier.prototype.open = function () {
-        Window_Base.prototype.open.call(this);
-        // We have height range about 5 line in maximum
-        this.move(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(4) - 10);
-        this._isBusy = true;
-        this.contentsOpacity = 0;
-        this.createContents();
-        this.resetTimer();
-        this.refresh();
     }
 
     Window_JPCNotifier.prototype.drawTextEx = function (text, x, y, width) {
@@ -275,9 +272,10 @@ var JPC = (() => {
 
     Window_JPCNotifier.prototype.outputText = function () {
         var output = "";
-        this._texts.forEach((text) => {
+        this._working.reverse().forEach((text) => {
             output += (text + "\n");
         });
+        this._working.reverse();
         return output;
     }
 
@@ -295,19 +293,34 @@ var JPC = (() => {
         return current_timestamp > (this._start_timestamp + this._duration);
     }
 
-    Window_JPCNotifier.prototype.setDuration = function (duration) {
-        this._duration = duration;
+    Window_JPCNotifier.prototype.startNotification = function() {
+            // We have height range about 5 line in maximum
+            this.move(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(4) - 10);
+            this._isBusy = true;
+            this.contentsOpacity = 0;
+            this.createContents();
+            this.resetTimer();
+            this.refresh();
     }
 
-    Window_JPCNotifier.prototype.submitText = function (text) {
-        while (this._texts.length > this._maxTextQueueSize) {
-            this._texts.pop();
+    Window_JPCNotifier.prototype.submit = function (text, duration) {
+        if (this._isBusy == false) {
+            this.startNotification();
         }
-        this._texts.unshift(text);
+        if (this._working.length >= this._maxTextQueueSize) {
+            this._waiting.unshift({
+                text: text,
+                duration: duration
+            });
+        } else {
+            Exported.notifier.resetTimer();
+            this._duration = Math.max(this._duration, duration);
+            this._working.unshift(text);
+        }
     }
 
     Window_JPCNotifier.prototype.clearText = function () {
-        this._texts = [];
+        this._working = [];
     }
 
     Window_JPCNotifier.prototype.isBusy = function () {
