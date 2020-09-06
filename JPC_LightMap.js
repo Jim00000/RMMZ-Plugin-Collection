@@ -10,17 +10,28 @@
  * @base JPC_Core
  * @help 
  * 
+ * This script adds a pointlight source to the player sprite. You can add 
+ * following tags in the map's note to set up the parameters :
+ * 
+ * <jpc>
+ *   <lightmap>
+ *     <global_illumination>0.0</global_illumination>
+ *     <lightmap_radius>300.0</lightmap_radius>
+ *   </lightmap>
+ * </jpc>
+ * 
  * @param lightmap_radius
  * @text The radius of the light map.
  * @type number
  * @default 256.0
- * @min 0
+ * @min 0.0
  * 
  * @param global_illumination
  * @text Global illumination for the environment.
  * @type number
  * @default 0.0
- * @min 0
+ * @min 0.0
+ * @max 1.0
  */
 
 (() => {
