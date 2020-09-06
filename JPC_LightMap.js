@@ -23,6 +23,18 @@
  * Also, you can use plugin command to enable or disable the lightmap effect :
  * · set : set to enable or disable the lightmap effect.
  * 
+ * To make a object become glowable, in the event editor, fill following data 
+ * into the note textbox :
+ * 
+ * <jpc>
+ *   <lightmap>
+ *     <lightobj>true</lightobj>
+ *   </lightmap>
+ * </jpc>
+ * 
+ * Note that there are at most 32 light objects allowed in a map due to in 
+ * consideration for the performance.
+ * 
  * @param lightmap_radius
  * @text The radius of the light map.
  * @type number

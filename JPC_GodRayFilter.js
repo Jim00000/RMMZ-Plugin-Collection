@@ -21,7 +21,7 @@
  * https://github.com/pixijs/pixi-filters/tree/master/filters/godray/src 
  * and has a few modifications.
  * 
- * In the map attribute's editor, you can set parameters to the map by writing 
+ * In the map properties editor, you can set parameters to the map by writing 
  * following metadata with xml format in the note. Giving an example:
  * 
  * <jpc>
