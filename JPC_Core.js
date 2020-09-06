@@ -294,7 +294,7 @@ var JPC = (() => {
 
     Window_JPCNotifier.prototype.startNotification = function () {
         // We have height range about 5 line in maximum
-        this.move(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(4) - 10);
+        this.move(-10, -15, Graphics.boxWidth, Graphics.boxHeight);
         this._isBusy = true;
         this.contentsOpacity = 0;
         this.createContents();
