@@ -82,7 +82,7 @@
     function updateLightMap(spritest_map) {
         if (spritest_map.playerSprite === null) {
             spritest_map.playerSprite = SceneManager._scene._spriteset._characterSprites.find(character =>
-                character._characterName === $gamePlayer._characterName
+                character._character instanceof Game_Player
             );
         } else {
             spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
