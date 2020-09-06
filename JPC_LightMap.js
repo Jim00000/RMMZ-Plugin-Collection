@@ -37,7 +37,7 @@
 (() => {
     'use strict';
 
-    const PLUGIN_NAME = "jpc_lightmap";
+    const PLUGIN_NAME = "JPC_LightMap";
     const LIGHTMAP_SHADER_PATH = "js/plugins/shaders/lightmap.fs";
     const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 

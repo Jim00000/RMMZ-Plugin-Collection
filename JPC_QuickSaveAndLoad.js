@@ -46,7 +46,7 @@
 (() => {
     'use strict';
 
-    const PLUGIN_NAME = "jpc_quicksaveandload";
+    const PLUGIN_NAME = "JPC_QuickSaveAndLoad";
     const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
     const QUICK_SAVE_KEY_STRING = "QuickSave";
