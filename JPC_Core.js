@@ -222,11 +222,12 @@ var JPC = (() => {
         this._fontsize = 16;
         this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = this._fontsize;
-        this.backOpacity = 255;
+        this.backOpacity = 0;
         this.opacity = 0; // Disable background frame
         this._duration = 3000; // in milliseconds
         this.contentsOpacity = 0;
         this._isBusy = false;
+        this._isWindow = false;
         this.resetTimer();
         this.refresh();
     };
