@@ -143,10 +143,9 @@ var JPC = (() => {
         if (Exported.notifier !== null) {
             if (Exported.notifier.parent !== null && (Exported.notifier.parent instanceof WindowLayer) === true) {
                 Exported.notifier.submit(msg, duration);
-                
-                }
             }
         }
+    }
 
     Exported.registerKeyBind = function (vkey, keyName) {
         Input.keyMapper[vkey] = keyName;
@@ -256,11 +255,11 @@ var JPC = (() => {
                         this.startNotification();
                     } else {
                         this._isBusy = false;
-                    this.move(-10, -20, 0, Window_Base.prototype.fittingHeight(1));
+                        this.move(-10, -20, 0, 0);
+                    }
                 }
             }
         }
-    }
     }
 
     Window_JPCNotifier.prototype.drawTextEx = function (text, x, y, width) {
@@ -293,14 +292,14 @@ var JPC = (() => {
         return current_timestamp > (this._start_timestamp + this._duration);
     }
 
-    Window_JPCNotifier.prototype.startNotification = function() {
-            // We have height range about 5 line in maximum
-            this.move(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(4) - 10);
-            this._isBusy = true;
-            this.contentsOpacity = 0;
-            this.createContents();
-            this.resetTimer();
-            this.refresh();
+    Window_JPCNotifier.prototype.startNotification = function () {
+        // We have height range about 5 line in maximum
+        this.move(-10, -20, Graphics.boxWidth, Window_Base.prototype.fittingHeight(4) - 10);
+        this._isBusy = true;
+        this.contentsOpacity = 0;
+        this.createContents();
+        this.resetTimer();
+        this.refresh();
     }
 
     Window_JPCNotifier.prototype.submit = function (text, duration) {
