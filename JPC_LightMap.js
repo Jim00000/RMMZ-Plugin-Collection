@@ -20,6 +20,9 @@
  *   </lightmap>
  * </jpc>
  * 
+ * Also, you can use plugin command to enable or disable the lightmap effect :
+ * · set : set to enable or disable the lightmap effect.
+ * 
  * @param lightmap_radius
  * @text The radius of the light map.
  * @type number
@@ -32,6 +35,16 @@
  * @default 0.0
  * @min 0.0
  * @max 1.0
+ * 
+ * @command set
+ * @text set
+ * @desc set to enable/disable lightmap effect.
+ *
+ * @arg enable
+ * @type boolean
+ * @text enable
+ * @desc enable the lightmap effect or not.
+ * @default true
  */
 
 (() => {
@@ -43,6 +56,18 @@
 
     const ILLUMINATION = parseFloat(PLUGINPARAMS['global_illumination']);
     const LIGHTMAP_RADIUS = parseFloat(PLUGINPARAMS['lightmap_radius']);
+
+    JPC.lightmap = (() => {
+        'use strict';
+        var Exported = {};
+        // Tell whether the light map is enabled
+        Exported.enable = false;
+        return Exported;
+    })();
+
+    PluginManager.registerCommand(PLUGIN_NAME, "set", args => {
+        JPC.lightmap.enable = args.enable;
+    });
 
     function createLightMap(_illumination, _radius) {
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH).toString();
@@ -63,6 +88,7 @@
             spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
             spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
         }
+        spritest_map.lightmap.enabled = JPC.lightmap.enable;
     }
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
