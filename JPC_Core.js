@@ -218,7 +218,7 @@ var JPC = (() => {
         Window_Base.prototype.initialize.call(this, new Rectangle(-10, -20, 0, 0));
         this._working = [];
         this._waiting = [];
-        this._maxTextQueueSize = 5;
+        this._maxWorkingQueueSize = 5;
         this._fontsize = 16;
         this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = this._fontsize;
@@ -246,7 +246,7 @@ var JPC = (() => {
                     if (this._waiting.length > 0) {
                         var maxduration = 0;
                         // Move contents from waiting queue to working queue
-                        while (this._waiting.length > 0 && this._working.length < this._maxTextQueueSize) {
+                        while (this._waiting.length > 0 && this._working.length < this._maxWorkingQueueSize) {
                             const data = this._waiting.pop();
                             maxduration = Math.max(data.duration, maxduration);
                             this._working.unshift(data.text);
@@ -307,7 +307,7 @@ var JPC = (() => {
         if (this._isBusy == false) {
             this.startNotification();
         }
-        if (this._working.length >= this._maxTextQueueSize) {
+        if (this._working.length >= this._maxWorkingQueueSize) {
             this._waiting.unshift({
                 text: text,
                 duration: duration
