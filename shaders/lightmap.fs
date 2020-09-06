@@ -1,23 +1,28 @@
+#define MAX_LIGHTS 32
 precision highp float;
 
 varying vec2 vTextureCoord;
+
 uniform sampler2D uSampler;
-uniform vec2 lightsrc;
+uniform vec2 lightsrc[MAX_LIGHTS];
 uniform float radius;
 uniform float globalIllumination;
+uniform int lightSrcSize;
 
 void main() 
 {
     vec4 diffuseColor = texture2D(uSampler, vTextureCoord);
-    float dist = distance(lightsrc, gl_FragCoord.xy);
     vec3 finalColor;
-    float dd = radius - dist;
-    if(dd > 0.0) {
-        finalColor = diffuseColor.xyz * clamp(log(1.01 + pow(dd / radius, 2.2)), globalIllumination, 1.0);
-        // finalColor = diffuseColor.xyz * clamp(dd / radius, globalIllumination, 1.0);
-    } else {
-        finalColor = diffuseColor.xyz * globalIllumination;
+    float factor = 0.0;
+    for(int i = 0; i < MAX_LIGHTS; i++) {
+        // Workaround. Bypass 'loop index cannot be compared with non-constant expression' issue.
+        if (i >= lightSrcSize) { break; }
+        float dist = distance(lightsrc[i], gl_FragCoord.xy);
+        float dd = radius - dist;
+        if(dd > 0.0) {
+            factor += log(1.01 + pow(dd / radius, 2.2));
+        }
     }
-    
+    finalColor = diffuseColor.xyz * clamp(factor, globalIllumination, 1.0);
     gl_FragColor = vec4(finalColor, diffuseColor.a);
 }

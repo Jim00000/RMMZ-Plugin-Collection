@@ -56,12 +56,13 @@
 
     const ILLUMINATION = parseFloat(PLUGINPARAMS['global_illumination']);
     const LIGHTMAP_RADIUS = parseFloat(PLUGINPARAMS['lightmap_radius']);
+    const MAX_LIGHTS = 32; // This value must be consistent with the macro value defined in the the lightmap.fs shader file.
 
     JPC.lightmap = (() => {
         'use strict';
         var Exported = {};
         // Tell whether the light map is enabled
-        Exported.enable = false;
+        Exported.enable = true;
         return Exported;
     })();
 
@@ -74,21 +75,49 @@
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             globalIllumination: _illumination,
             radius: _radius,
-            lightsrc: [-9999999, -9999999],
+            lightSrcSize: 0,
+            lightsrc: new Float32Array(MAX_LIGHTS * 2),
         });
         return filter;
     }
 
     function updateLightMap(spritest_map) {
+        // Find Player's sprite
         if (spritest_map.playerSprite === null) {
             spritest_map.playerSprite = SceneManager._scene._spriteset._characterSprites.find(character =>
                 character._character instanceof Game_Player
             );
-        } else {
-            spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
-            spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
         }
-        spritest_map.lightmap.enabled = JPC.lightmap.enable;
+
+        // Find game events which represents light source
+        if (this.isLightSrcFound === false) {
+            SceneManager._scene._spriteset._characterSprites.forEach(character => {
+                if (character._character !== undefined && character._character instanceof Game_Event &&
+                    character.isEmptyCharacter() === false) {
+                    const eventId = character._character._eventId;
+                    const note = $dataMap.events[eventId].note
+                    // Skip event whose note is empty and verify that this is a light object
+                    if ($dataMap.events[eventId].note.length > 0 &&
+                        JPC.parseNoteToBoolean(note, "lightmap.lightobj") === true) {
+                        // Append to the light object list
+                        this.lightObjPos.push(character.position);
+                    }
+                }
+            });
+            this.isLightSrcFound = true;
+        }
+
+        spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
+        spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
+        if (this.lightObjPos.length > 0) {
+            // Update light source's position
+            for (let i = 0; i < this.lightObjPos.length; i++) {
+                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 0] = this.lightObjPos[i]._x;
+                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 1] = this.lightObjPos[i]._y;
+            }
+        }
+        // Update light source' count
+        spritest_map.lightmap.uniforms.lightSrcSize = this.lightObjPos.length + 1;
     }
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
@@ -101,12 +130,17 @@
         this.filters.push(this.lightmap);
         this.lightmapUpdateHandler = updateLightMap;
         this.playerSprite = null;
+        this.isLightSrcFound = false;
+        this.lightObjPos = []; // light object's position
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function () {
         _Spriteset_Map__update.apply(this, arguments);
-        this.lightmapUpdateHandler(this);
+        this.lightmap.enabled = JPC.lightmap.enable;
+        if (this.lightmap.enabled === true) {
+            this.lightmapUpdateHandler(this);
+        }
     };
 
 })();
