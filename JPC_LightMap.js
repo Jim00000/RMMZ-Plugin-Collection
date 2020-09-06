@@ -62,13 +62,14 @@
             JPC.parseNoteToFloat($dataMap.note, "lightmap.lightmap_radius") || LIGHTMAP_RADIUS
         );
         this.filters.push(this.lightmap);
+        this.lightmapUpdateHandler = updateLightMap;
         this.playerSprite = null;
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function () {
         _Spriteset_Map__update.apply(this, arguments);
-        updateLightMap(this);
+        this.lightmapUpdateHandler(this);
     };
 
 })();
