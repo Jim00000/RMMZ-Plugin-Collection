@@ -82,11 +82,11 @@
         JPC.lightmap.enable = args.enable;
     });
 
-    function createLightMap(_illumination, _radius) {
+    function createLightMap(_illumination) {
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH).toString();
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             globalIllumination: _illumination,
-            lightRadius: _radius,
+            lightRadius: new Float32Array(MAX_LIGHTS),
             lightSrcSize: 0,
             lightsrc: new Float32Array(MAX_LIGHTS * 2),
             ambientColor: new Float32Array(MAX_LIGHTS * 3)
@@ -114,6 +114,7 @@
                         JPC.parseNoteToBoolean(note, "lightmap.lightobj") === true) {
                         // Append to the light object list
                         spritest_map.lightObjPos.push(character.position);
+                        // Append to ambient color list
                         var r = JPC.parseNoteToFloat(note, "lightmap.r");
                         var g = JPC.parseNoteToFloat(note, "lightmap.g");
                         var b = JPC.parseNoteToFloat(note, "lightmap.b");
@@ -122,6 +123,9 @@
                             g: g != null ? g : 1.0,
                             b: b != null ? b : 1.0
                         });
+                        // Append radius for each object
+                        var radius = JPC.parseNoteToFloat(note, "lightmap.radius");
+                        spritest_map.lightRadius.push(radius != null ? radius : LIGHTMAP_RADIUS);
                     }
                 }
             });
@@ -136,6 +140,9 @@
             spritest_map.lightmap.uniforms.ambientColor[0] = 1.0;
             spritest_map.lightmap.uniforms.ambientColor[1] = 1.0;
             spritest_map.lightmap.uniforms.ambientColor[2] = 1.0;
+            // Update player's light radius
+            spritest_map.lightmap.uniforms.lightRadius[0] = JPC.parseNoteToFloat(
+                $dataMap.note, "lightmap.lightmap_radius") || LIGHTMAP_RADIUS;
         } else {
             // Move light source of player out of the screen
             spritest_map.lightmap.uniforms.lightsrc[0] = -99999;
@@ -150,6 +157,14 @@
             );
         }
 
+        // Check whether the size is consistent
+        if (spritest_map.ambientColor.length !== spritest_map.lightRadius.length) {
+            Graphics.printError(
+                PLUGIN_NAME + ".js : " + new Error().lineNumber,
+                "size of ambientColor is not equal to lightRadius"
+            );
+        }
+
         if (spritest_map.lightObjPos.length > 0) {
             // Loop to update every light object
             for (let i = 0; i < spritest_map.lightObjPos.length; i++) {
@@ -160,6 +175,8 @@
                 spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 0] = spritest_map.ambientColor[i].r;
                 spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 1] = spritest_map.ambientColor[i].g;
                 spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 2] = spritest_map.ambientColor[i].b;
+                // Update light radius
+                spritest_map.lightmap.uniforms.lightRadius[1 + i] = spritest_map.lightRadius[i];
             }
         }
 
@@ -172,16 +189,16 @@
     Spriteset_Map.prototype.initialize = function () {
         _Spriteset_Map__initialize.apply(this, arguments);
         this.lightmap = createLightMap(
-            JPC.parseNoteToFloat($dataMap.note, "lightmap.global_illumination") || ILLUMINATION,
-            JPC.parseNoteToFloat($dataMap.note, "lightmap.lightmap_radius") || LIGHTMAP_RADIUS
+            JPC.parseNoteToFloat($dataMap.note, "lightmap.global_illumination") || ILLUMINATION
         );
         this.filters.push(this.lightmap);
         this.lightmapUpdateHandler = updateLightMap;
         this.playerSprite = null;
-        this.isPlayerLightSrc = true;
+        this.isPlayerLightSrc = false;
         this.isLightSrcFound = false; // do not modify this
         this.lightObjPos = []; // light object's position
         this.ambientColor = [];
+        this.lightRadius = [];
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
