@@ -125,7 +125,6 @@
                     }
                 }
             });
-            console.debug(spritest_map.ambientColor);
             spritest_map.isLightSrcFound = true;
         }
 
