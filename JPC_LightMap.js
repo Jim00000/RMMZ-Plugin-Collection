@@ -29,6 +29,10 @@
  * <jpc>
  *   <lightmap>
  *     <lightobj>true</lightobj>
+ *     <r>1.0</r>
+ *     <g>1.0</g>
+ *     <b>1.0</b>
+ *     <radius>150.0</radius>
  *   </lightmap>
  * </jpc>
  * 
