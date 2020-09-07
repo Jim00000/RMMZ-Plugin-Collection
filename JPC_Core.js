@@ -190,7 +190,8 @@ var JPC = (() => {
         try {
             var xmldoc = require("js/plugins/third_party/xmldoc.js");
             var xml = new xmldoc.XmlDocument(data);
-            return xml.valueWithPath(query);
+            var result = xml.valueWithPath(query);
+            return result === undefined ? null : result;
         } catch (error) {
             return null;
         }
