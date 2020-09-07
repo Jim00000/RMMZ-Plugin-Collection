@@ -86,9 +86,10 @@
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH).toString();
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             globalIllumination: _illumination,
-            radius: _radius,
+            lightRadius: _radius,
             lightSrcSize: 0,
             lightsrc: new Float32Array(MAX_LIGHTS * 2),
+            ambientColor: new Float32Array(MAX_LIGHTS * 3)
         });
         return filter;
     }
@@ -102,7 +103,7 @@
         }
 
         // Find game events which represents light source
-        if (this.isLightSrcFound === false) {
+        if (spritest_map.isLightSrcFound === false) {
             SceneManager._scene._spriteset._characterSprites.forEach(character => {
                 if (character._character !== undefined && character._character instanceof Game_Event &&
                     character.isEmptyCharacter() === false) {
@@ -112,24 +113,60 @@
                     if ($dataMap.events[eventId].note.length > 0 &&
                         JPC.parseNoteToBoolean(note, "lightmap.lightobj") === true) {
                         // Append to the light object list
-                        this.lightObjPos.push(character.position);
+                        spritest_map.lightObjPos.push(character.position);
+                        var r = JPC.parseNoteToFloat(note, "lightmap.r");
+                        var g = JPC.parseNoteToFloat(note, "lightmap.g");
+                        var b = JPC.parseNoteToFloat(note, "lightmap.b");
+                        spritest_map.ambientColor.push({
+                            r: r != null ? r : 1.0,
+                            g: g != null ? g : 1.0,
+                            b: b != null ? b : 1.0
+                        });
                     }
                 }
             });
-            this.isLightSrcFound = true;
+            console.debug(spritest_map.ambientColor);
+            spritest_map.isLightSrcFound = true;
         }
 
-        spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
-        spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
-        if (this.lightObjPos.length > 0) {
-            // Update light source's position
-            for (let i = 0; i < this.lightObjPos.length; i++) {
-                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 0] = this.lightObjPos[i]._x;
-                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 1] = this.lightObjPos[i]._y;
+        if (this.isPlayerLightSrc === true) {
+            // Update player's position
+            spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
+            spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
+            // Update player's ambient color
+            spritest_map.lightmap.uniforms.ambientColor[0] = 1.0;
+            spritest_map.lightmap.uniforms.ambientColor[1] = 1.0;
+            spritest_map.lightmap.uniforms.ambientColor[2] = 1.0;
+        } else {
+            // Move far away out of the screen
+            spritest_map.lightmap.uniforms.lightsrc[0] = -99999;
+            spritest_map.lightmap.uniforms.lightsrc[1] = -99999;
+        }
+
+        // Check whether the size is consistent
+        if (spritest_map.lightObjPos.length !== spritest_map.ambientColor.length) {
+            Graphics.printError(
+                PLUGIN_NAME + ".js : " + new Error().lineNumber,
+                "size of lightObjPos is not equal to ambientColor"
+            );
+        }
+
+        if (spritest_map.lightObjPos.length > 0) {
+            // Loop to update every light object
+            for (let i = 0; i < spritest_map.lightObjPos.length; i++) {
+                // Update light source's position
+                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 0] = spritest_map.lightObjPos[i]._x;
+                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 1] = spritest_map.lightObjPos[i]._y;
+                // Update ambient color
+                spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 0] = spritest_map.ambientColor[i].r;
+                spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 1] = spritest_map.ambientColor[i].g;
+                spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 2] = spritest_map.ambientColor[i].b;
             }
         }
+
         // Update light source' count
-        spritest_map.lightmap.uniforms.lightSrcSize = this.lightObjPos.length + 1;
+        // One more count is for player
+        spritest_map.lightmap.uniforms.lightSrcSize = spritest_map.lightObjPos.length + 1;
     }
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
@@ -142,8 +179,10 @@
         this.filters.push(this.lightmap);
         this.lightmapUpdateHandler = updateLightMap;
         this.playerSprite = null;
-        this.isLightSrcFound = false;
+        this.isPlayerLightSrc = true;
+        this.isLightSrcFound = false; // do not modify this
         this.lightObjPos = []; // light object's position
+        this.ambientColor = [];
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
