@@ -15,15 +15,16 @@ void main()
     vec4 diffuseColor = texture2D(uSampler, vTextureCoord);
     vec3 finalColor;
     vec3 mixedLightColor = vec3(globalIllumination);
+    vec2 pixelPos = gl_FragCoord.xy;
 
     for(int i = 0; i < MAX_LIGHTS; i++) {
         // Workaround. Bypass 'loop index cannot be compared with non-constant expression' issue.
         if (i >= lightSrcSize) { break; }
-        float dist = distance(lightsrc[i], gl_FragCoord.xy);
+        float dist = distance(lightsrc[i], pixelPos);
         float dd = lightRadius - dist;
         if(dd > 0.0) {
-            vec2 toLight = abs(lightsrc[i] - gl_FragCoord.xy);
-            float brightness = clamp(dot(normalize(toLight), gl_FragCoord.xy), 0.0, 1.0);
+            vec2 toLight = abs(lightsrc[i] - pixelPos);
+            float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0);
             brightness *= clamp(1.0 - (length(toLight) / lightRadius), 0.0, 1.0);
             mixedLightColor += brightness * ambientColor[i];
         }
