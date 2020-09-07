@@ -137,7 +137,7 @@
             spritest_map.lightmap.uniforms.ambientColor[1] = 1.0;
             spritest_map.lightmap.uniforms.ambientColor[2] = 1.0;
         } else {
-            // Move far away out of the screen
+            // Move light source of player out of the screen
             spritest_map.lightmap.uniforms.lightsrc[0] = -99999;
             spritest_map.lightmap.uniforms.lightsrc[1] = -99999;
         }
