@@ -95,14 +95,14 @@
 
     function updateLightMap(spritest_map) {
         // Find Player's sprite
-        if (spritest_map.playerSprite === null) {
+        if (spritest_map.playerSprite == null) {
             spritest_map.playerSprite = SceneManager._scene._spriteset._characterSprites.find(character =>
                 character._character instanceof Game_Player
             );
         }
 
         // Find game events which represents light source
-        if (spritest_map.isLightSrcFound === false) {
+        if (spritest_map.isLightSrcFound == false) {
             SceneManager._scene._spriteset._characterSprites.forEach(character => {
                 if (character._character !== undefined && character._character instanceof Game_Event &&
                     character.isEmptyCharacter() === false) {
@@ -131,7 +131,7 @@
             spritest_map.isLightSrcFound = true;
         }
 
-        if (JPC.lightmap.isPlayerLightSrc === true) {
+        if (JPC.lightmap.isPlayerLightSrc == true) {
             // Update player's position
             spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
             spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
@@ -213,7 +213,8 @@
     Spriteset_Map.prototype.update = function () {
         _Spriteset_Map__update.apply(this, arguments);
         this.lightmap.enabled = JPC.lightmap.enable;
-        this.lightmapUpdateHandler(this);
+        if(this.lightmap.enabled == true)
+            this.lightmapUpdateHandler(this);
     };
 
 })();
