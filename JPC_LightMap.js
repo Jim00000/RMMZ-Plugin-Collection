@@ -17,6 +17,8 @@
  *   <lightmap>
  *     <global_illumination>0.0</global_illumination>
  *     <lightmap_radius>300.0</lightmap_radius>
+ *     <is_player_light_source>true</is_player_light_source>
+ *     <enable>true</enable>
  *   </lightmap>
  * </jpc>
  * 
@@ -61,6 +63,12 @@
  * @text enable
  * @desc enable the lightmap effect or not.
  * @default true
+ * 
+ * @arg isPlayerLightSrc
+ * @text Is player a light source
+ * @desc Make player become a light source
+ * @type boolean
+ * @default false
  */
 
 (() => {
@@ -77,13 +85,16 @@
     JPC.lightmap = (() => {
         'use strict';
         var Exported = {};
-        // Tell whether the light map is enabled
-        Exported.enable = true;
+        // Tell whether the light map effect is enabled
+        Exported.enable;
+        // Is player a light source
+        Exported.isPlayerLightSrc;
         return Exported;
     })();
 
     PluginManager.registerCommand(PLUGIN_NAME, "set", args => {
         JPC.lightmap.enable = args.enable;
+        JPC.lightmap.isPlayerLightSrc = args.isPlayerLightSrc;
     });
 
     function createLightMap(_illumination) {
@@ -136,7 +147,7 @@
             spritest_map.isLightSrcFound = true;
         }
 
-        if (this.isPlayerLightSrc === true) {
+        if (JPC.lightmap.isPlayerLightSrc === true) {
             // Update player's position
             spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
             spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
@@ -198,11 +209,15 @@
         this.filters.push(this.lightmap);
         this.lightmapUpdateHandler = updateLightMap;
         this.playerSprite = null;
-        this.isPlayerLightSrc = false;
         this.isLightSrcFound = false; // do not modify this
         this.lightObjPos = []; // light object's position
         this.ambientColor = [];
         this.lightRadius = [];
+        
+        const _enable = JPC.parseNoteToBoolean($dataMap.note, "lightmap.enable");
+        JPC.lightmap.enable = _enable !== null ? _enable : false;
+        const _isPlayerLightSrc = JPC.parseNoteToBoolean($dataMap.note, "lightmap.is_player_light_source");
+        JPC.lightmap.isPlayerLightSrc = _isPlayerLightSrc !== null ? _isPlayerLightSrc : false;
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
