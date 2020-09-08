@@ -16,7 +16,7 @@
  * <jpc>
  *   <lightmap>
  *     <global_illumination>0.0</global_illumination>
- *     <lightmap_radius>300.0</lightmap_radius>
+ *     <light_radius>256.0</light_radius>
  *     <is_player_light_source>true</is_player_light_source>
  *     <enable>true</enable>
  *   </lightmap>
@@ -41,34 +41,19 @@
  * Note that there are at most 32 light objects allowed in a map due to in 
  * consideration for the performance.
  * 
- * @param lightmap_radius
- * @text The radius of the light map.
+ * @param default_light_radius
+ * @text Default radius of the light.
  * @type number
  * @default 256.0
  * @min 0.0
  * 
- * @param global_illumination
- * @text Global illumination for the environment.
+ * @param default_global_illumination
+ * @text Default global illumination for the environment/map.
  * @type number
- * @default 0.0
+ * @default 1.0
  * @min 0.0
  * @max 1.0
  * 
- * @command set
- * @text set
- * @desc set to enable/disable lightmap effect.
- *
- * @arg enable
- * @type boolean
- * @text enable
- * @desc enable the lightmap effect or not.
- * @default true
- * 
- * @arg isPlayerLightSrc
- * @text Is player a light source
- * @desc Make player become a light source
- * @type boolean
- * @default false
  */
 
 (() => {
@@ -78,8 +63,8 @@
     const LIGHTMAP_SHADER_PATH = "js/plugins/shaders/lightmap.fs";
     const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
-    const ILLUMINATION = parseFloat(PLUGINPARAMS['global_illumination']);
-    const LIGHTMAP_RADIUS = parseFloat(PLUGINPARAMS['lightmap_radius']);
+    const ILLUMINATION = parseFloat(PLUGINPARAMS['default_global_illumination']);
+    const LIGHT_RADIUS = parseFloat(PLUGINPARAMS['default_light_radius']);
     const MAX_LIGHTS = 32; // This value must be consistent with the macro value defined in the the lightmap.fs shader file.
 
     JPC.lightmap = (() => {
@@ -89,13 +74,12 @@
         Exported.enable;
         // Is player a light source
         Exported.isPlayerLightSrc;
+        // Player's light radius
+        Exported.playerLightRadius;
+        // Global illumination
+        Exported.globalIllumination;
         return Exported;
     })();
-
-    PluginManager.registerCommand(PLUGIN_NAME, "set", args => {
-        JPC.lightmap.enable = args.enable;
-        JPC.lightmap.isPlayerLightSrc = args.isPlayerLightSrc;
-    });
 
     function createLightMap(_illumination) {
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH).toString();
@@ -139,8 +123,8 @@
                             b: b != null ? b : 1.0
                         });
                         // Append radius for each object
-                        var radius = JPC.parseNoteToFloat(note, "lightmap.radius");
-                        spritest_map.lightRadius.push(radius != null ? radius : LIGHTMAP_RADIUS);
+                        var _radius = JPC.parseNoteToFloat(note, "lightmap.radius");
+                        spritest_map.lightRadius.push(_radius !== null ? _radius : LIGHT_RADIUS);
                     }
                 }
             });
@@ -156,8 +140,7 @@
             spritest_map.lightmap.uniforms.ambientColor[1] = 1.0;
             spritest_map.lightmap.uniforms.ambientColor[2] = 1.0;
             // Update player's light radius
-            spritest_map.lightmap.uniforms.lightRadius[0] = JPC.parseNoteToFloat(
-                $dataMap.note, "lightmap.lightmap_radius") || LIGHTMAP_RADIUS;
+            spritest_map.lightmap.uniforms.lightRadius[0] = JPC.lightmap.playerLightRadius;
         } else {
             // Move light source of player out of the screen
             spritest_map.lightmap.uniforms.lightsrc[0] = -99999;
@@ -194,6 +177,9 @@
                 spritest_map.lightmap.uniforms.lightRadius[1 + i] = spritest_map.lightRadius[i];
             }
         }
+        
+        // Update global illumination
+        spritest_map.lightmap.uniforms.globalIllumination = JPC.lightmap.globalIllumination;
 
         // Update light source' count
         // One more count is for player
@@ -203,9 +189,11 @@
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function () {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.lightmap = createLightMap(
-            JPC.parseNoteToFloat($dataMap.note, "lightmap.global_illumination") || ILLUMINATION
-        );
+        const radius = JPC.parseNoteToFloat($dataMap.note, "lightmap.light_radius");
+        this.defaultLightRadius = radius !== null ? radius : LIGHT_RADIUS;
+        const illumination = JPC.parseNoteToFloat($dataMap.note, "lightmap.global_illumination");
+        JPC.lightmap.globalIllumination = illumination !== null ? illumination : ILLUMINATION;
+        this.lightmap = createLightMap(JPC.lightmap.globalIllumination);
         this.filters.push(this.lightmap);
         this.lightmapUpdateHandler = updateLightMap;
         this.playerSprite = null;
@@ -213,20 +201,19 @@
         this.lightObjPos = []; // light object's position
         this.ambientColor = [];
         this.lightRadius = [];
-        
-        const _enable = JPC.parseNoteToBoolean($dataMap.note, "lightmap.enable");
-        JPC.lightmap.enable = _enable !== null ? _enable : false;
-        const _isPlayerLightSrc = JPC.parseNoteToBoolean($dataMap.note, "lightmap.is_player_light_source");
-        JPC.lightmap.isPlayerLightSrc = _isPlayerLightSrc !== null ? _isPlayerLightSrc : false;
+
+        const enable = JPC.parseNoteToBoolean($dataMap.note, "lightmap.enable");
+        JPC.lightmap.enable = enable !== null ? enable : false;
+        const isPlayerLightSrc = JPC.parseNoteToBoolean($dataMap.note, "lightmap.is_player_light_source");
+        JPC.lightmap.isPlayerLightSrc = isPlayerLightSrc !== null ? isPlayerLightSrc : false;
+        JPC.lightmap.playerLightRadius = this.defaultLightRadius;
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function () {
         _Spriteset_Map__update.apply(this, arguments);
         this.lightmap.enabled = JPC.lightmap.enable;
-        if (this.lightmap.enabled === true) {
-            this.lightmapUpdateHandler(this);
-        }
+        this.lightmapUpdateHandler(this);
     };
 
 })();
