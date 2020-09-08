@@ -124,7 +124,7 @@
                         });
                         // Append radius for each object
                         var _radius = JPC.parseNoteToFloat(note, "lightmap.radius");
-                        spritest_map.lightRadius.push(_radius !== null ? _radius : LIGHT_RADIUS);
+                        spritest_map.lightRadius.push(_radius !== null ? _radius : spritest_map.defaultLightRadius);
                     }
                 }
             });
