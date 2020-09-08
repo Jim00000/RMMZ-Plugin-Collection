@@ -161,8 +161,8 @@ var JPC = (() => {
     }
 
     Exported.parseNoteToBoolean = function (note, xmlquery) {
-        const result = Exported.parseNote(note, xmlquery) || "false";
-        return JSON.parse(result);
+        const bool = Exported.parseNote(note, xmlquery);
+        return bool === null ? null : JSON.parse(bool);
     }
 
     Exported.parseNoteToInt = function (note, xmlquery) {
