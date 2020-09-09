@@ -2106,15 +2106,35 @@ var JPC = (() => {
     }
 
     Exported.loadGLSLShaderFile = function (filePath) {
-        const path = require("path"), fs = require("fs");
-        const shaderFile = fs.readFileSync(path.resolve(filePath));
-        return shaderFile;
+        return readFileAsString(filePath);
+    }
+
+    function readFileAsString(filePath) {
+        if (Utils.isNwjs() === true) {
+            const path = require("path"), fs = require("fs");
+            const shaderFile = fs.readFileSync(path.resolve(filePath));
+            return shaderFile.toString();
+        } else {
+            return loadBySyncXHR(filePath);
+        }
+    }
+
+    function loadBySyncXHR(path) {
+        var request = new XMLHttpRequest();
+        // Note that synchronous XMLHttpRequest is deprecated.
+        // TODO: any better approaches ?
+        request.open("GET", path, false);
+        request.send();
+        if (request.status === 200) {
+            return request.responseText;
+        } else {
+            return null;
+        }
     }
 
     function commitXMLQuery(data, query) {
         try {
-            var xmldoc = require("js/plugins/third_party/xmldoc.js");
-            var xml = new xmldoc.XmlDocument(data);
+            var xml = new XmlDocument(data);
             var result = xml.valueWithPath(query);
             return result === undefined ? null : result;
         } catch (error) {
