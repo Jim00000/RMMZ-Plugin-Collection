@@ -112,7 +112,7 @@
     }
 
     function createGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _lightsrc) {
-        const fragShaderCode = JPC.loadGLSLShaderFile(GOD_RAY_SHADER_PATH).toString();
+        const fragShaderCode = JPC.loadGLSLShaderFile(GOD_RAY_SHADER_PATH);
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             angle: _angle,
             gain: _gain,

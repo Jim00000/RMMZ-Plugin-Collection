@@ -82,7 +82,7 @@
     })();
 
     function createLightMap(_illumination) {
-        const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH).toString();
+        const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH);
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             globalIllumination: _illumination,
             lightRadius: new Float32Array(MAX_LIGHTS),
