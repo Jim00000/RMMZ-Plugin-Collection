@@ -128,6 +128,27 @@
                     }
                 }
             });
+
+            // Check whether the size is consistent
+            if (spritest_map.lightObjPos.length !== spritest_map.ambientColor.length) {
+                Graphics.printError(
+                    PLUGIN_NAME + ".js : " + new Error().lineNumber,
+                    "size of lightObjPos is not equal to ambientColor"
+                );
+            }
+
+            // Check whether the size is consistent
+            if (spritest_map.ambientColor.length !== spritest_map.lightRadius.length) {
+                Graphics.printError(
+                    PLUGIN_NAME + ".js : " + new Error().lineNumber,
+                    "size of ambientColor is not equal to lightRadius"
+                );
+            }
+
+            // Update light source' count
+            // One more count is for player
+            spritest_map.lightmap.uniforms.lightSrcSize = spritest_map.lightObjPos.length + 1;
+
             spritest_map.isLightSrcFound = true;
         }
 
@@ -147,43 +168,21 @@
             spritest_map.lightmap.uniforms.lightsrc[1] = -99999;
         }
 
-        // Check whether the size is consistent
-        if (spritest_map.lightObjPos.length !== spritest_map.ambientColor.length) {
-            Graphics.printError(
-                PLUGIN_NAME + ".js : " + new Error().lineNumber,
-                "size of lightObjPos is not equal to ambientColor"
-            );
+        // Loop to update every light object
+        for (let i = 0; i < spritest_map.lightObjPos.length; i++) {
+            // Update light source's position
+            spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 0] = spritest_map.lightObjPos[i]._x;
+            spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 1] = spritest_map.lightObjPos[i]._y;
+            // Update ambient color
+            spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 0] = spritest_map.ambientColor[i].r;
+            spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 1] = spritest_map.ambientColor[i].g;
+            spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 2] = spritest_map.ambientColor[i].b;
+            // Update light radius
+            spritest_map.lightmap.uniforms.lightRadius[1 + i] = spritest_map.lightRadius[i];
         }
 
-        // Check whether the size is consistent
-        if (spritest_map.ambientColor.length !== spritest_map.lightRadius.length) {
-            Graphics.printError(
-                PLUGIN_NAME + ".js : " + new Error().lineNumber,
-                "size of ambientColor is not equal to lightRadius"
-            );
-        }
-
-        if (spritest_map.lightObjPos.length > 0) {
-            // Loop to update every light object
-            for (let i = 0; i < spritest_map.lightObjPos.length; i++) {
-                // Update light source's position
-                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 0] = spritest_map.lightObjPos[i]._x;
-                spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 1] = spritest_map.lightObjPos[i]._y;
-                // Update ambient color
-                spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 0] = spritest_map.ambientColor[i].r;
-                spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 1] = spritest_map.ambientColor[i].g;
-                spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 2] = spritest_map.ambientColor[i].b;
-                // Update light radius
-                spritest_map.lightmap.uniforms.lightRadius[1 + i] = spritest_map.lightRadius[i];
-            }
-        }
-        
         // Update global illumination
         spritest_map.lightmap.uniforms.globalIllumination = JPC.lightmap.globalIllumination;
-
-        // Update light source' count
-        // One more count is for player
-        spritest_map.lightmap.uniforms.lightSrcSize = spritest_map.lightObjPos.length + 1;
     }
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
@@ -213,7 +212,7 @@
     Spriteset_Map.prototype.update = function () {
         _Spriteset_Map__update.apply(this, arguments);
         this.lightmap.enabled = JPC.lightmap.enable;
-        if(this.lightmap.enabled == true)
+        if (this.lightmap.enabled == true)
             this.lightmapUpdateHandler(this);
     };
 
