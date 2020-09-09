@@ -171,8 +171,10 @@
         // Loop to update every light object
         for (let i = 0; i < spritest_map.lightObjPos.length; i++) {
             // Update light source's position
-            spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 0] = spritest_map.lightObjPos[i]._x;
-            spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 1] = spritest_map.lightObjPos[i]._y;
+            var dx = (spritest_map.lightObjPos[i]._x - spritest_map.playerSprite.position._x) * $gameScreen._zoomScale;
+            var dy = (spritest_map.lightObjPos[i]._y - spritest_map.playerSprite.position._y) * $gameScreen._zoomScale;
+            spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 0] = dx + spritest_map.playerSprite.position._x;
+            spritest_map.lightmap.uniforms.lightsrc[2 + 2 * i + 1] = dy + spritest_map.playerSprite.position._y;
             // Update ambient color
             spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 0] = spritest_map.ambientColor[i].r;
             spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 1] = spritest_map.ambientColor[i].g;
