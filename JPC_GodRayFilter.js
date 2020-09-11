@@ -33,6 +33,7 @@
  *     <lacunrity>2.8</lacunrity>
  *     <parallel_light>false</parallel_light>
  *     <lightsource>[-100, -100]</lightsource>
+ *     <lightcolor>[1.0, 1.0, 1.0]</lightcolor>
  *   </godrayfilter>
  * </jpc>
  *
@@ -81,6 +82,15 @@
  * @default [0.0, -100.0]
  * @min -10000.0
  * @max 10000.0
+ *
+ * @param lightcolor
+ * @text light color
+ * @desc Set the light color (r, g, b) of God Ray filter. Default is white : (r = 1.0, g = 1.0, b = 1.0).
+ * @type number[]
+ * @decimal 3
+ * @default [1.00, 1.00, 1.00]
+ * @min 0.0
+ * @max 1.0
  */
 
 (() => {
@@ -102,6 +112,9 @@
     const IS_LIGHT_PARALLEL = JSON.parse(PLUGINPARAMS['parallel']);
     const LIGHTSRC_ARRAY = JSON.parse(PLUGINPARAMS['lightsrc']);
     const LIGHTSRC = [parseFloat(LIGHTSRC_ARRAY[0]), parseFloat(LIGHTSRC_ARRAY[1])];
+    const LIGHTCOLOR_ARRAY = JSON.parse(PLUGINPARAMS['lightcolor']);
+    const LIGHTCOLOR =
+        [parseFloat(LIGHTCOLOR_ARRAY[0]), parseFloat(LIGHTCOLOR_ARRAY[1]), parseFloat(LIGHTCOLOR_ARRAY[2])];
 
     //=============================================================================
     // Help functions
@@ -111,7 +124,7 @@
         return degree * Math.PI / 180.0;
     };
 
-    function createGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _lightsrc) {
+    function createGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _lightsrc, _lightColor) {
         const fragShaderCode = JPC.loadGLSLShaderFile(GOD_RAY_SHADER_PATH);
         const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
             angle: _angle,
@@ -121,6 +134,7 @@
             dimensions: [Graphics.boxWidth, Graphics.boxHeight],
             aspect: Graphics.boxHeight / Graphics.boxWidth,
             light: _parallel ? [Math.cos(degToRad(_angle)), Math.sin(degToRad(_angle))] : _lightsrc,
+            lightColor: _lightColor,
             utime: 0
         });
         return filter;
@@ -143,13 +157,15 @@
         if (this.isGodRayFilterApplied) {
             this.godRayFilterDelta = JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.delta') || DELTA;
             this.isGodRayLightParallel =
-                JPC.parseNoteToBoolean($dataMap.note, 'godrayfilter.parallel_light') || IS_LIGHT_PARALLEL;
+            JPC.parseNoteToBoolean($dataMap.note, 'godrayfilter.parallel_light') || IS_LIGHT_PARALLEL;
             this.godRayLightSource = JPC.parseNoteToNumArray($dataMap.note, 'godrayfilter.lightsource') || LIGHTSRC;
+            this.godRayFilterLightColor = JPC.parseNoteToNumArray($dataMap.note, 'godrayfilter.lightcolor') || LIGHTCOLOR;
             this.godRayFilter = createGodRayFilter(
                 JPC.parseNoteToInt($dataMap.note, 'godrayfilter.angle') || ANGLE,
                 JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.gain') || GAIN,
                 JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.lacunrity') || LACUNRITY, this.isGodRayLightParallel,
-                this.godRayLightSource);
+                this.godRayLightSource,
+                this.godRayFilterLightColor);
             this.filters.push(this.godRayFilter);
             this.godRayFilterUpdateHandler = updateGodRayFilter;
         }
