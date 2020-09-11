@@ -8,22 +8,22 @@
  * @author Jim00000
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_GodRayFilter.js
  * @base JPC_Core
- * @help 
- * This is an official filter provided by PiXiJS (Alain Galvan). 
- * 
- * Visit https://pixijs.io/pixi-filters/tools/demo/ for a live demo of Godray 
+ * @help
+ * This is an official filter provided by PiXiJS (Alain Galvan).
+ *
+ * Visit https://pixijs.io/pixi-filters/tools/demo/ for a live demo of Godray
  * filter.
- * 
- * https://pixijs.io/pixi-filters/docs/PIXI.filters.GodrayFilter.html offers 
- * details about every parameters. 
- * 
- * The shader file (godray.fs) comes from 
- * https://github.com/pixijs/pixi-filters/tree/master/filters/godray/src 
+ *
+ * https://pixijs.io/pixi-filters/docs/PIXI.filters.GodrayFilter.html offers
+ * details about every parameters.
+ *
+ * The shader file (godray.fs) comes from
+ * https://github.com/pixijs/pixi-filters/tree/master/filters/godray/src
  * and has a few modifications.
- * 
- * In the map properties editor, you can set parameters to the map by writing 
+ *
+ * In the map properties editor, you can set parameters to the map by writing
  * following metadata with xml format in the note. Giving an example:
- * 
+ *
  * <jpc>
  *   <godrayfilter>
  *     <enable>true</enable>
@@ -35,10 +35,10 @@
  *     <lightsource>[-100, -100]</lightsource>
  *   </godrayfilter>
  * </jpc>
- * 
- * Note that the filter will pick the default value defined in the plugin 
+ *
+ * Note that the filter will pick the default value defined in the plugin
  * manager if you do not give specific value to the parameter in the xml.
- * 
+ *
  * @param delta
  * @text Delta
  * @type number
@@ -46,7 +46,7 @@
  * @decimals 3
  * @min 0.0
  * @max 10.0
- * 
+ *
  * @param angle
  * @text Angle
  * @type number
@@ -54,26 +54,26 @@
  * @decimals 3
  * @min 0.0
  * @max 360.0
- * 
+ *
  * @param gain
  * @text Gain
  * @type number
  * @default 0.6
  * @decimals 3
  * @min 0.0
- * 
+ *
  * @param lacunrity
  * @text Lacunrity
  * @type number
  * @default 2.8
  * @decimals 3
  * @min 0.0
- * 
+ *
  * @param parallel
  * @text Parallel light
  * @type boolean
  * @default false
- * 
+ *
  * @param lightsrc
  * @text light source
  * @type number[]
@@ -88,8 +88,8 @@
     //=============================================================================
     // Fixed Parameters
     //=============================================================================
-    const PLUGIN_NAME = "JPC_GodRayFilter";
-    const GOD_RAY_SHADER_PATH = "js/plugins/shaders/godray.fs";
+    const PLUGIN_NAME = 'JPC_GodRayFilter';
+    const GOD_RAY_SHADER_PATH = 'js/plugins/shaders/godray.fs';
     const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
     //=============================================================================
@@ -109,7 +109,7 @@
 
     function degToRad(degree) {
         return degree * Math.PI / 180.0;
-    }
+    };
 
     function createGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _lightsrc) {
         const fragShaderCode = JPC.loadGLSLShaderFile(GOD_RAY_SHADER_PATH);
@@ -124,44 +124,44 @@
             utime: 0
         });
         return filter;
-    }
+    };
 
     function updateGodRayFilter(spritest_map) {
         spritest_map.godRayFilter.uniforms.utime += spritest_map.godRayFilterDelta;
         if (spritest_map.isGodRayLightParallel == false) {
-            spritest_map.godRayFilter.uniforms.light[0] = spritest_map.godRayLightSource[0] - $gameMap.displayX() * $gameMap.tileWidth();
-            spritest_map.godRayFilter.uniforms.light[1] = spritest_map.godRayLightSource[1] - $gameMap.displayY() * $gameMap.tileHeight();
+            spritest_map.godRayFilter.uniforms.light[0] =
+                spritest_map.godRayLightSource[0] - $gameMap.displayX() * $gameMap.tileWidth();
+            spritest_map.godRayFilter.uniforms.light[1] =
+                spritest_map.godRayLightSource[1] - $gameMap.displayY() * $gameMap.tileHeight();
         }
-    }
+    };
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
-    Spriteset_Map.prototype.initialize = function () {
+    Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.isGodRayFilterApplied = JPC.parseNoteToBoolean($dataMap.note, "godrayfilter.enable");
+        this.isGodRayFilterApplied = JPC.parseNoteToBoolean($dataMap.note, 'godrayfilter.enable');
         if (this.isGodRayFilterApplied) {
-            this.godRayFilterDelta = JPC.parseNoteToFloat($dataMap.note, "godrayfilter.delta") || DELTA;
-            this.isGodRayLightParallel = JPC.parseNoteToBoolean($dataMap.note, "godrayfilter.parallel_light") || IS_LIGHT_PARALLEL;
-            this.godRayLightSource = JPC.parseNoteToNumArray($dataMap.note, "godrayfilter.lightsource") || LIGHTSRC;
+            this.godRayFilterDelta = JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.delta') || DELTA;
+            this.isGodRayLightParallel =
+                JPC.parseNoteToBoolean($dataMap.note, 'godrayfilter.parallel_light') || IS_LIGHT_PARALLEL;
+            this.godRayLightSource = JPC.parseNoteToNumArray($dataMap.note, 'godrayfilter.lightsource') || LIGHTSRC;
             this.godRayFilter = createGodRayFilter(
-                JPC.parseNoteToInt($dataMap.note, "godrayfilter.angle") || ANGLE,
-                JPC.parseNoteToFloat($dataMap.note, "godrayfilter.gain") || GAIN,
-                JPC.parseNoteToFloat($dataMap.note, "godrayfilter.lacunrity") || LACUNRITY,
-                this.isGodRayLightParallel,
-                this.godRayLightSource
-            );
+                JPC.parseNoteToInt($dataMap.note, 'godrayfilter.angle') || ANGLE,
+                JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.gain') || GAIN,
+                JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.lacunrity') || LACUNRITY, this.isGodRayLightParallel,
+                this.godRayLightSource);
             this.filters.push(this.godRayFilter);
             this.godRayFilterUpdateHandler = updateGodRayFilter;
         }
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
-    Spriteset_Map.prototype.update = function () {
+    Spriteset_Map.prototype.update = function() {
         _Spriteset_Map__update.apply(this, arguments);
         if (this.isGodRayFilterApplied) {
             this.godRayFilterUpdateHandler(this);
         }
     };
-
 })();
 
 /* MIT License

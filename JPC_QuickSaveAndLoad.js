@@ -8,17 +8,17 @@
  * @author Jim00000
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_QuickSaveAndLoad.js
  * @base JPC_Core
- * @help 
- * Use F6 to quicksave, F7 to quickload in default. 
- * The quick save file is named as "quicksave.rmmzsave" in default. 
+ * @help
+ * Use F6 to quicksave, F7 to quickload in default.
+ * The quick save file is named as "quicksave.rmmzsave" in default.
  * You can also quick load the save file in the game title scene.
- * 
+ *
  * @param quick_save_name
  * @text filename
  * @desc The filename of quick save
  * @type string
  * @default quicksave
- * 
+ *
  * @param quick_save_notification_msg
  * @text Quick save message
  * @desc The notification message while quicksaving is done.
@@ -29,14 +29,14 @@
  * @text Quick load message
  * @desc The notification message while quickloading is done.
  * @type string
- * @default Quickloading... 
+ * @default Quickloading...
  *
  * @param quick_save_key
  * @text quick save key
  * @desc The key to quick save. Input should be a virtual key.
  * @type number
  * @default 117
- * 
+ *
  * @param quick_load_key
  * @text quick load key
  * @desc The key to quick load. Input should be a virtual key.
@@ -46,11 +46,11 @@
 (() => {
     'use strict';
 
-    const PLUGIN_NAME = "JPC_QuickSaveAndLoad";
+    const PLUGIN_NAME = 'JPC_QuickSaveAndLoad';
     const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
-    const QUICK_SAVE_KEY_STRING = "QuickSave";
-    const QUICK_LOAD_KEY_STRING = "QuickLoad";
+    const QUICK_SAVE_KEY_STRING = 'QuickSave';
+    const QUICK_LOAD_KEY_STRING = 'QuickLoad';
     const QUICK_SAVE_FILENAME = PLUGINPARAMS['quick_save_name'];
     const QUICK_SAVE_KEY = PLUGINPARAMS['quick_save_key'];
     const QUICK_LOAD_KEY = PLUGINPARAMS['quick_load_key'];
@@ -64,7 +64,7 @@
 
     function makeQuickSaveName() {
         return QUICK_SAVE_FILENAME;
-    }
+    };
 
     function loadGameFromQuickSave() {
         const quickSaveName = makeQuickSaveName();
@@ -74,19 +74,23 @@
             DataManager.correctDataErrors();
             return 0;
         });
-    }
+    };
 
     function doQuickSave() {
         const contents = DataManager.makeSaveContents();
         const saveName = makeQuickSaveName();
         return StorageManager.saveObject(saveName, contents);
-    }
+    };
 
     function quickSave() {
         doQuickSave()
-            .then(() => { SoundManager.playSave(); })
-            .catch(() => { SoundManager.playBuzzer(); });
-    }
+            .then(() => {
+                SoundManager.playSave();
+            })
+            .catch(() => {
+                SoundManager.playBuzzer();
+            });
+    };
 
     function quickLoad() {
         loadGameFromQuickSave()
@@ -94,15 +98,17 @@
                 SoundManager.playLoad();
                 SceneManager.goto(Scene_Map);
             })
-            .catch(() => { SoundManager.playBuzzer(); });
-    }
+            .catch(() => {
+                SoundManager.playBuzzer();
+            });
+    };
 
     function updateCallQuickSave() {
         if (isQuickSaveCalled()) {
             quickSave();
             JPC.notify(QUICK_SAVE_NOTIFICATION_MESSAGE);
         }
-    }
+    };
 
     function updateCallQuickLoad() {
         if (isQuickLoadCalled()) {
@@ -111,18 +117,18 @@
                 JPC.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
             }, 600);
         }
-    }
+    };
 
     function isQuickSaveCalled() {
         return Input.isTriggered(QUICK_SAVE_KEY_STRING);
-    }
+    };
 
     function isQuickLoadCalled() {
         return Input.isTriggered(QUICK_LOAD_KEY_STRING);
-    }
+    };
 
     const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
-    Scene_Map.prototype.updateScene = function () {
+    Scene_Map.prototype.updateScene = function() {
         _Scene_Map__updateScene.apply(this, arguments);
         if (!SceneManager.isSceneChanging()) {
             updateCallQuickSave();
@@ -133,13 +139,12 @@
     };
 
     const _Scene_Title__update = Scene_Title.prototype.update;
-    Scene_Title.prototype.update = function () {
+    Scene_Title.prototype.update = function() {
         _Scene_Title__update.apply(this, arguments);
         if (!SceneManager.isSceneChanging()) {
             updateCallQuickLoad();
         }
     };
-
 })();
 
 /* MIT License

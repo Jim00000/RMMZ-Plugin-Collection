@@ -7,15 +7,17 @@
  * @plugindesc Essential core file for JPC plugin.
  * @author Jim00000
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_Core.js
- * @help 
- * The plugin contains essential function and objects to support other JPC's 
+ * @help
+ * The plugin contains essential function and objects to support other JPC's
  * plugins.
- * 
- * This script includes and handles : 
+ *
+ * This script includes and handles :
  * - A notifier : tell information or status to the player
- * - XML parsing 
+ * - XML parsing
  */
 
+// We keep original coding style for external code
+// clang-format off
 //=============================================================================
 // sax.js v1.2.4
 // ----------------------------------------------------------------------------
@@ -1940,6 +1942,7 @@
 //=============================================================================
 // End pf xmldoc.js
 //=============================================================================
+// clang-format on
 
 var JPC = (() => {
     'use strict';
@@ -1953,8 +1956,8 @@ var JPC = (() => {
     Exported.vkeys = (() => {
         'use strict';
         var VK = {};
-        VK.VK_LBUTTON = 0x01;   // Left mouse button
-        VK.VK_RBUTTON = 0x02;   // Right mouse button
+        VK.VK_LBUTTON = 0x01;  // Left mouse button
+        VK.VK_RBUTTON = 0x02;  // Right mouse button
         VK.VK_CANCEL = 0x03;
         VK.VK_MBUTTON = 0x04;   // Middle mouse button
         VK.VK_XBUTTON1 = 0x05;  // X1 mouse button
@@ -1962,16 +1965,16 @@ var JPC = (() => {
         VK.VK_BACK = 0x08;      // BACKSPACE
         VK.VK_TAB = 0x09;
         VK.VK_CLEAR = 0x0C;
-        VK.VK_RETURN = 0x0D;    // ENTER
+        VK.VK_RETURN = 0x0D;  // ENTER
         VK.VK_SHIFT = 0x10;
         VK.VK_CONTROL = 0x11;
-        VK.VK_MENU = 0x12;      // ALT
+        VK.VK_MENU = 0x12;  // ALT
         VK.VK_PAUSE = 0x13;
-        VK.VK_CAPITAL = 0x14;   // CAPS LOCK
+        VK.VK_CAPITAL = 0x14;  // CAPS LOCK
         VK.VK_ESCAPE = 0x1B;
         VK.VK_SPACE = 0x20;
-        VK.VK_PRIOR = 0x21;     // PAGE UP
-        VK.VK_NEXT = 0x22;      // PAGE DOWN
+        VK.VK_PRIOR = 0x21;  // PAGE UP
+        VK.VK_NEXT = 0x22;   // PAGE DOWN
         VK.VK_END = 0x23;
         VK.VK_LEFT = 0x25;
         VK.VK_UP = 0x26;
@@ -2018,8 +2021,8 @@ var JPC = (() => {
         VK.VK_X = 0x58;
         VK.VK_Y = 0x59;
         VK.VK_Z = 0x5A;
-        VK.VK_LWIN = 0x5B;      // LEFT WIN
-        VK.VK_RWIN = 0x5C;      // RIGHT WIN
+        VK.VK_LWIN = 0x5B;  // LEFT WIN
+        VK.VK_RWIN = 0x5C;  // RIGHT WIN
         VK.VK_SLEEP = 0x5F;
         VK.VK_NUMPAD0 = 0x60;
         VK.VK_NUMPAD1 = 0x61;
@@ -2050,87 +2053,87 @@ var JPC = (() => {
         VK.VK_F11 = 0x7A;
         VK.VK_F12 = 0x7B;
         VK.VK_NUMLOCK = 0x90;
-        VK.VK_SCROLL = 0x91;    // SCROLL LOCK
+        VK.VK_SCROLL = 0x91;  // SCROLL LOCK
         VK.VK_LSHIFT = 0xA0;
         VK.VK_RSHIFT = 0xA1;
         VK.VK_LCONTROL = 0xA2;
         VK.VK_RCONTROL = 0xA3;
-        VK.VK_LMENU = 0xA4;     // Left MENU key
-        VK.VK_RMENU = 0xA5;     // Right MENU key
+        VK.VK_LMENU = 0xA4;  // Left MENU key
+        VK.VK_RMENU = 0xA5;  // Right MENU key
         return VK;
     })();
 
-    Exported.buildNotifier = function () {
+    Exported.buildNotifier = function() {
         return new Window_JPCNotifier();
-    }
+    };
 
-    Exported.notify = function (msg, duration = 3000) {
+    Exported.notify = function(msg, duration = 3000) {
         if (Exported.notifier !== null) {
             if (Exported.notifier.parent !== null && (Exported.notifier.parent instanceof WindowLayer) === true) {
                 Exported.notifier.submit(msg, duration);
             }
         }
-    }
+    };
 
-    Exported.registerKeyBind = function (vkey, keyName) {
+    Exported.registerKeyBind = function(vkey, keyName) {
         Input.keyMapper[vkey] = keyName;
-    }
+    };
 
-    Exported.getPluginParams = function (pluginName) {
+    Exported.getPluginParams = function(pluginName) {
         return PluginManager.parameters(pluginName);
-    }
+    };
 
-    Exported.parseNote = function (note, xmlquery) {
+    Exported.parseNote = function(note, xmlquery) {
         const JPCNote = retrieveJPCSectionFromNote(note);
         return JPCNote ? commitXMLQuery(JPCNote, xmlquery) : null;
-    }
+    };
 
-    Exported.parseNoteToBoolean = function (note, xmlquery) {
+    Exported.parseNoteToBoolean = function(note, xmlquery) {
         const bool = Exported.parseNote(note, xmlquery);
         return bool === null ? null : JSON.parse(bool);
-    }
+    };
 
-    Exported.parseNoteToInt = function (note, xmlquery) {
+    Exported.parseNoteToInt = function(note, xmlquery) {
         const int = Exported.parseNote(note, xmlquery);
         return int === null ? null : parseInt(int);
-    }
+    };
 
-    Exported.parseNoteToFloat = function (note, xmlquery) {
+    Exported.parseNoteToFloat = function(note, xmlquery) {
         const float = Exported.parseNote(note, xmlquery);
         return float === null ? null : parseFloat(float);
-    }
+    };
 
-    Exported.parseNoteToNumArray = function (note, xmlquery) {
+    Exported.parseNoteToNumArray = function(note, xmlquery) {
         const numArray = Exported.parseNote(note, xmlquery);
         return JSON.parse(numArray);
-    }
+    };
 
-    Exported.loadGLSLShaderFile = function (filePath) {
+    Exported.loadGLSLShaderFile = function(filePath) {
         return readFileAsString(filePath);
-    }
+    };
 
     function readFileAsString(filePath) {
         if (Utils.isNwjs() === true) {
-            const path = require("path"), fs = require("fs");
+            const path = require('path'), fs = require('fs');
             const shaderFile = fs.readFileSync(path.resolve(filePath));
             return shaderFile.toString();
         } else {
             return loadBySyncXHR(filePath);
         }
-    }
+    };
 
     function loadBySyncXHR(path) {
         var request = new XMLHttpRequest();
         // Note that synchronous XMLHttpRequest is deprecated.
         // TODO: any better approaches ?
-        request.open("GET", path, false);
+        request.open('GET', path, false);
         request.send();
         if (request.status === 200) {
             return request.responseText;
         } else {
             return null;
         }
-    }
+    };
 
     function commitXMLQuery(data, query) {
         try {
@@ -2140,13 +2143,13 @@ var JPC = (() => {
         } catch (error) {
             return null;
         }
-    }
+    };
 
     function retrieveJPCSectionFromNote(note) {
         const pattern = /(<jpc>[\w\s<>\/\?\.\-\[\]\,]+<\/jpc>)/;
         const match = pattern.exec(note);
         return match ? match[0] : null;
-    }
+    };
 
     //=============================================================================
     // Window_JPCNotifier
@@ -2154,13 +2157,13 @@ var JPC = (() => {
 
     function Window_JPCNotifier() {
         this.initialize(...arguments);
-    }
+    };
 
     Window_JPCNotifier.prototype = Object.create(Window_Base.prototype);
 
     Window_JPCNotifier.prototype.constructor = Window_JPCNotifier;
 
-    Window_JPCNotifier.prototype.initialize = function () {
+    Window_JPCNotifier.prototype.initialize = function() {
         Window_Base.prototype.initialize.call(this, new Rectangle(-10, -20, 0, 0));
         this._working = [];
         this._waiting = [];
@@ -2169,8 +2172,8 @@ var JPC = (() => {
         this.contents.fontFace = $gameSystem.mainFontFace();
         this.contents.fontSize = this._fontsize;
         this.backOpacity = 0;
-        this.opacity = 0; // Disable background frame
-        this._duration = 3000; // in milliseconds
+        this.opacity = 0;       // Disable background frame
+        this._duration = 3000;  // in milliseconds
         this.contentsOpacity = 0;
         this._isBusy = false;
         this._isWindow = false;
@@ -2178,7 +2181,7 @@ var JPC = (() => {
         this.refresh();
     };
 
-    Window_JPCNotifier.prototype.update = function () {
+    Window_JPCNotifier.prototype.update = function() {
         Window_Base.prototype.update.call(this);
         if (this._isBusy) {
             if (this.isExpired() == false) {
@@ -2207,39 +2210,39 @@ var JPC = (() => {
                 }
             }
         }
-    }
+    };
 
-    Window_JPCNotifier.prototype.drawTextEx = function (text, x, y, width) {
+    Window_JPCNotifier.prototype.drawTextEx = function(text, x, y, width) {
         this.contents.fontSize = this._fontsize;
         const textState = this.createTextState(text, x, y, width);
         this.processAllText(textState);
         return textState.outputWidth;
-    }
+    };
 
-    Window_JPCNotifier.prototype.outputText = function () {
-        var output = "";
+    Window_JPCNotifier.prototype.outputText = function() {
+        var output = '';
         this._working.reverse().forEach((text) => {
-            output += (text + "\n");
+            output += (text + '\n');
         });
         this._working.reverse();
         return output;
-    }
+    };
 
-    Window_JPCNotifier.prototype.resetTimer = function () {
+    Window_JPCNotifier.prototype.resetTimer = function() {
         this._start_timestamp = new Date().getTime();
-    }
+    };
 
-    Window_JPCNotifier.prototype.refresh = function () {
+    Window_JPCNotifier.prototype.refresh = function() {
         this.contents.clear();
         this.drawTextEx(this.outputText(), 0, 0, this.innerWidth);
-    }
+    };
 
-    Window_JPCNotifier.prototype.isExpired = function () {
+    Window_JPCNotifier.prototype.isExpired = function() {
         const current_timestamp = new Date().getTime();
         return current_timestamp > (this._start_timestamp + this._duration);
-    }
+    };
 
-    Window_JPCNotifier.prototype.startNotification = function () {
+    Window_JPCNotifier.prototype.startNotification = function() {
         // We have height range about 5 line in maximum
         this.move(-10, -15, Graphics.boxWidth, Graphics.boxHeight);
         this._isBusy = true;
@@ -2247,37 +2250,34 @@ var JPC = (() => {
         this.createContents();
         this.resetTimer();
         this.refresh();
-    }
+    };
 
-    Window_JPCNotifier.prototype.submit = function (text, duration) {
+    Window_JPCNotifier.prototype.submit = function(text, duration) {
         if (this._isBusy == false) {
             this.startNotification();
         }
         if (this._working.length >= this._maxWorkingQueueSize) {
-            this._waiting.unshift({
-                text: text,
-                duration: duration
-            });
+            this._waiting.unshift({text: text, duration: duration});
         } else {
             Exported.notifier.resetTimer();
             this._duration = Math.max(this._duration, duration);
             this._working.unshift(text);
         }
-    }
+    };
 
-    Window_JPCNotifier.prototype.clearText = function () {
+    Window_JPCNotifier.prototype.clearText = function() {
         this._working = [];
-    }
+    };
 
-    Window_JPCNotifier.prototype.isBusy = function () {
+    Window_JPCNotifier.prototype.isBusy = function() {
         return this._isBusy;
-    }
+    };
 
     //=============================================================================
     // Renew Scene_Map
     //=============================================================================
     const _Scene_Map__createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
-    Scene_Map.prototype.createDisplayObjects = function () {
+    Scene_Map.prototype.createDisplayObjects = function() {
         _Scene_Map__createDisplayObjects.apply(this, arguments);
         JPC.notifier = JPC.buildNotifier();
         this.addWindow(JPC.notifier);
