@@ -18,6 +18,7 @@
 - Quick Save/Load
 - God Ray Effect
 - LightMap Effect
+- Cloud Effect
 
 ## Installation
 
