@@ -91,6 +91,12 @@
  * @default [1.00, 1.00, 1.00]
  * @min 0.0
  * @max 1.0
+ *
+ * @param switchid
+ * @type switch
+ * @desc Activate only when this switch is ON, allowing day/night maps.
+ * @default 1
+ *
  */
 
 (() => {
@@ -113,6 +119,7 @@
     const LIGHTSRC_ARRAY = JSON.parse(PLUGINPARAMS['lightsrc']);
     const LIGHTSRC = [parseFloat(LIGHTSRC_ARRAY[0]), parseFloat(LIGHTSRC_ARRAY[1])];
     const LIGHTCOLOR_ARRAY = JSON.parse(PLUGINPARAMS['lightcolor']);
+    const SWITCH_ID = parseInt(PLUGINPARAMS['switchid']);
     const LIGHTCOLOR =
         [parseFloat(LIGHTCOLOR_ARRAY[0]), parseFloat(LIGHTCOLOR_ARRAY[1]), parseFloat(LIGHTCOLOR_ARRAY[2])];
 
@@ -174,9 +181,10 @@
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function() {
         _Spriteset_Map__update.apply(this, arguments);
-        if (this.isGodRayFilterApplied) {
+        if (this.isGodRayFilterApplied && $gameSwitches.value(SWITCH_ID)==true) {
+            this.godRayFilter.enabled=true;
             this.godRayFilterUpdateHandler(this);
-        }
+        }else this.godRayFilter.enabled=false;
     };
 })();
 
