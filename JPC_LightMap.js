@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc Add light map effect
+ * @plugindesc Add light map effect (WIP)
  * @author Jim00000
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_LightMap.js
  * @base JPC_Core
@@ -16,14 +16,20 @@
  * <jpc>
  *   <lightmap>
  *     <global_illumination>0.0</global_illumination>
- *     <light_radius>256.0</light_radius>
- *     <is_player_light_source>true</is_player_light_source>
+ *     <light_radius>64.0</light_radius>
  *     <enable>true</enable>
+ *     <player>
+ *       <is_light_source>true</is_light_source>
+ *       <light_radius>32.0</light_radius>
+ *       <spotlight_radius>400.0</spotlight_radius>
+ *       <perspective>15.0</perspective>
+ *       <lighttype>
+ *         <is_point_light>true</is_point_light>
+ *         <is_spotlight>true</is_spotlight>
+ *       </lighttype>
+ *     </player>
  *   </lightmap>
  * </jpc>
- *
- * Also, you can use plugin command to enable or disable the lightmap effect :
- * · set : set to enable or disable the lightmap effect.
  *
  * To make a object become glowable, in the event editor, fill following data
  * into the note textbox :
@@ -32,12 +38,26 @@
  *   <lightmap>
  *     <lightobj>true</lightobj>
  *     <r>1.0</r>
- *     <g>1.0</g>
- *     <b>1.0</b>
- *     <radius>150.0</radius>
+ *     <g>0.0</g>
+ *     <b>0.0</b>
+ *     <radius>100.0</radius>
+ *     <light_direction>down</light_direction>
+ *     <perspective>45.0</perspective>
+ *     <spotlight_radius>200.0</spotlight_radius>
+ *     <lighttype>
+ *       <is_point_light>false</is_point_light>
+ *       <is_spotlight>true</is_spotlight>
+ *     </lighttype>
  *   </lightmap>
  * </jpc>
- *
+ * 
+ * You had better remove all of newline character ('\n', input "Enter" button 
+ * to end cuurent line) because only a few lines in the note textbox remains 
+ * (the other parts will be cut off) in the event editor in RMMZ editor.
+ * 
+ * e.g. <jpc><lightmap><lightobj>true...</jpc> and put it in the 
+ * textbox of note.
+ * 
  * Note that there are at most 32 light objects allowed in a map due to in
  * consideration for the performance.
  *
@@ -73,14 +93,37 @@
         var Exported = {};
         // Tell whether the light map effect is enabled
         Exported.enable;
-        // Is player a light source
-        Exported.isPlayerLightSrc;
-        // Player's light radius
-        Exported.playerLightRadius;
         // Global illumination
         Exported.globalIllumination;
+        Exported.Player = (() => {
+            'use strict';
+            var Exported = {};
+            // Is player a light source
+            Exported.isLightSrc;
+            // Player's light radius
+            Exported.lightRadius;
+            // Player's perspective in degree
+            Exported.perspective;
+            // Player's spotlight radius
+            Exported.spotlightRadius;
+            return Exported;
+        })();
         return Exported;
     })();
+
+    function lightDirectionStringToIndex(string) {
+        if(string === 'down') {
+            return 2;
+        } else if(string === 'left') {
+            return 4;
+        } else if(string === 'right') {
+            return 6;
+        } else if(string === 'up') {
+            return 8;
+        } else {
+            return 0;
+        }
+    }
 
     function createLightMap(_illumination) {
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH);
@@ -89,7 +132,12 @@
             lightRadius: new Float32Array(MAX_LIGHTS),
             lightSrcSize: 0,
             lightsrc: new Float32Array(MAX_LIGHTS * 2),
-            ambientColor: new Float32Array(MAX_LIGHTS * 3)
+            ambientColor: new Float32Array(MAX_LIGHTS * 3),
+            lightDirIdx: 0,  // unknown light direction
+            perspective: new Float32Array(MAX_LIGHTS).fill(1.0),
+            fSpotlightRadius: new Float32Array(MAX_LIGHTS).fill(1.0),
+            lightType: new Int32Array(MAX_LIGHTS),
+            lightDirIdx: new Int32Array(MAX_LIGHTS)
         });
         return filter;
     };
@@ -122,6 +170,28 @@
                         // Append radius for each object
                         var _radius = JPC.parseNoteToFloat(note, 'lightmap.radius');
                         spritest_map.lightRadius.push(_radius !== null ? _radius : spritest_map.defaultLightRadius);
+                        // Append lighttype
+                        let _isPointLight = JPC.parseNoteToBoolean(note, 'lightmap.lighttype.is_point_light');
+                        let isPointLight = _isPointLight !== null ? _isPointLight : false;
+                        let _isSpotLight = JPC.parseNoteToBoolean(note, 'lightmap.lighttype.is_spotlight');
+                        let isSpotLight = _isSpotLight !== null ? _isSpotLight : false;
+                        let encodedLightType = 0b00;
+                        encodedLightType |= isPointLight === true ? 0b01 : 0b00;
+                        encodedLightType |= isSpotLight === true ? 0b10 : 0b00;
+                        spritest_map.lightTypes.push(encodedLightType);
+                        // Append light direction index
+                        let _lightDirString = JPC.parseNote(note, 'lightmap.light_direction');
+                        let lightDirString = _lightDirString !== null ? _lightDirString : 'down';
+                        let lightDirIdx = lightDirectionStringToIndex(lightDirString);
+                        spritest_map.lightDirIdx.push(lightDirIdx);
+                        // Append perspective for spotlight
+                        let _perspective = JPC.parseNoteToFloat(note, 'lightmap.perspective');
+                        let perspective = _perspective !== null ? _perspective : 15.0;
+                        spritest_map.perspective.push(perspective);
+                        // Append spotlight radius for spotlight
+                        let _spotlightRadius = JPC.parseNoteToFloat(note, 'lightmap.spotlight_radius');
+                        let spotlightRadius = _spotlightRadius !== null ? _spotlightRadius : 300.0;
+                        spritest_map.spotlightRadius.push(spotlightRadius);
                     }
                 }
             });
@@ -147,7 +217,7 @@
             spritest_map.isLightSrcFound = true;
         }
 
-        if (JPC.lightmap.isPlayerLightSrc == true) {
+        if (JPC.lightmap.Player.isLightSrc == true) {
             // Update player's position
             spritest_map.lightmap.uniforms.lightsrc[0] = spritest_map.playerSprite.position._x;
             spritest_map.lightmap.uniforms.lightsrc[1] = spritest_map.playerSprite.position._y;
@@ -156,7 +226,13 @@
             spritest_map.lightmap.uniforms.ambientColor[1] = 1.0;
             spritest_map.lightmap.uniforms.ambientColor[2] = 1.0;
             // Update player's light radius
-            spritest_map.lightmap.uniforms.lightRadius[0] = JPC.lightmap.playerLightRadius;
+            spritest_map.lightmap.uniforms.lightRadius[0] = JPC.lightmap.Player.lightRadius;
+            // Update player's perspective direction
+            spritest_map.lightmap.uniforms.lightDirIdx[0] = $gamePlayer.direction();
+            // Update player's perspective angle in degree
+            spritest_map.lightmap.uniforms.perspective[0] = JPC.lightmap.Player.perspective;
+            // Update player's spotlight radius
+            spritest_map.lightmap.uniforms.fSpotlightRadius[0] = JPC.lightmap.Player.spotLightRadius;
         } else {
             // Move light source of player out of the screen
             spritest_map.lightmap.uniforms.lightsrc[0] = -99999;
@@ -176,6 +252,14 @@
             spritest_map.lightmap.uniforms.ambientColor[3 + 3 * i + 2] = spritest_map.ambientColor[i].b;
             // Update light radius
             spritest_map.lightmap.uniforms.lightRadius[1 + i] = spritest_map.lightRadius[i];
+            // Update light type
+            spritest_map.lightmap.uniforms.lightType[1 + i] = spritest_map.lightTypes[i];
+            // Update light direction index
+            spritest_map.lightmap.uniforms.lightDirIdx[1 + i] = spritest_map.lightDirIdx[i];
+            // Update perspective for spotlight
+            spritest_map.lightmap.uniforms.perspective[1 + i] = spritest_map.perspective[i];
+            // Update spotlightRadius for spotlight
+            spritest_map.lightmap.uniforms.fSpotlightRadius[1 + i] = spritest_map.spotlightRadius[i];
         }
 
         // Update global illumination
@@ -197,12 +281,28 @@
         this.lightObjPos = [];         // light object's position
         this.ambientColor = [];
         this.lightRadius = [];
+        this.lightTypes = [];
+        this.lightDirIdx = [];
+        this.perspective = [];
+        this.spotlightRadius = [];
 
+        // Configure lightmap
         const enable = JPC.parseNoteToBoolean($dataMap.note, 'lightmap.enable');
         JPC.lightmap.enable = enable !== null ? enable : false;
-        const isPlayerLightSrc = JPC.parseNoteToBoolean($dataMap.note, 'lightmap.is_player_light_source');
-        JPC.lightmap.isPlayerLightSrc = isPlayerLightSrc !== null ? isPlayerLightSrc : false;
-        JPC.lightmap.playerLightRadius = this.defaultLightRadius;
+        const isPlayerLightSrc = JPC.parseNoteToBoolean($dataMap.note, 'lightmap.player.is_light_source');
+        JPC.lightmap.Player.isLightSrc = isPlayerLightSrc !== null ? isPlayerLightSrc : false;
+        const playerLightRadius = JPC.parseNoteToFloat($dataMap.note, 'lightmap.player.light_radius');
+        JPC.lightmap.Player.lightRadius = playerLightRadius !== null ? playerLightRadius : this.defaultLightRadius;
+        const playerPerspective = JPC.parseNoteToFloat($dataMap.note, 'lightmap.player.perspective');
+        JPC.lightmap.Player.perspective = playerPerspective !== null ? playerPerspective : 30.0;
+        const playerSpotLightRadius = JPC.parseNoteToFloat($dataMap.note, 'lightmap.player.spotlight_radius');
+        JPC.lightmap.Player.spotLightRadius = playerSpotLightRadius !== null ? playerSpotLightRadius : 256.0;
+        // Setup light type for Player
+        this.lightmap.uniforms.lightType[0] = 0b00;
+        var isPointLight = JPC.parseNoteToBoolean($dataMap.note, 'lightmap.player.lighttype.is_point_light');
+        this.lightmap.uniforms.lightType[0] |= isPointLight === true ? 0b01 : 0b00;
+        var isSpotLight = JPC.parseNoteToBoolean($dataMap.note, 'lightmap.player.lighttype.is_spotlight');
+        this.lightmap.uniforms.lightType[0] |= isSpotLight === true ? 0b10 : 0b00;
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
