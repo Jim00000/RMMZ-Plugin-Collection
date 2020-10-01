@@ -50,14 +50,14 @@
  *     </lighttype>
  *   </lightmap>
  * </jpc>
- * 
- * You had better remove all of newline character ('\n', input "Enter" button 
- * to end cuurent line) because only a few lines in the note textbox remains 
+ *
+ * You had better remove all of newline character ('\n', input "Enter" button
+ * to end cuurent line) because only a few lines in the note textbox remains
  * (the other parts will be cut off) in the event editor in RMMZ editor.
- * 
- * e.g. <jpc><lightmap><lightobj>true...</jpc> and put it in the 
+ *
+ * e.g. <jpc><lightmap><lightobj>true...</jpc> and put it in the
  * textbox of note.
- * 
+ *
  * Note that there are at most 32 light objects allowed in a map due to in
  * consideration for the performance.
  *
@@ -112,13 +112,13 @@
     })();
 
     function lightDirectionStringToIndex(string) {
-        if(string === 'down') {
+        if (string === 'down') {
             return 2;
-        } else if(string === 'left') {
+        } else if (string === 'left') {
             return 4;
-        } else if(string === 'right') {
+        } else if (string === 'right') {
             return 6;
-        } else if(string === 'up') {
+        } else if (string === 'up') {
             return 8;
         } else {
             return 0;
