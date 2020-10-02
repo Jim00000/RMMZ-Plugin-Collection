@@ -14,6 +14,7 @@ uniform float lightRadius[MAX_LIGHTS];
 uniform float globalIllumination;
 uniform float perspective[MAX_LIGHTS]; // angle of spotlight
 uniform float fSpotlightRadius[MAX_LIGHTS];
+uniform float uTime[MAX_LIGHTS];
 uniform int lightSrcSize;
 uniform int lightDirIdx[MAX_LIGHTS];
 uniform int lightType[MAX_LIGHTS];
@@ -65,6 +66,16 @@ float getAngle(vec2 u, vec2 v)
     return degree;
 }
 
+float vibrate(float utime)
+{
+    return (1.0 + sin(0.04 * utime) * 0.06);
+}
+
+float vibrate_brightness(float utime)
+{
+    return (1.0 + sin(0.07 * utime) * 0.12);
+}
+
 // ------------------------------------------------------------------
 // Check whether the light type is point light
 // ------------------------------------------------------------------
@@ -107,13 +118,16 @@ void main()
         float dd = lightRadius[i] - dist;
         float totalBrightness = 0.0;
         float magnitude = 1.3;
+        float time = uTime[i];
+        float vibration = vibrate(time);
+        float vibration_brightness = vibrate_brightness(time);
         int type = lightType[i];
 
         // point light
         if(isPointLight(type) == 1 && dd >= 0.0) {
             vec2 toLight = abs(lightsrc[i] - pixelPos + vec2(0.0, -24.0));
             float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0);
-            brightness *= clamp(1.0 - (length(toLight) / lightRadius[i]), 0.0, 1.0) * magnitude;
+            brightness *= clamp((1.0 - (length(toLight) / lightRadius[i] * vibration)) * vibration_brightness, 0.0, 1.0) * magnitude;
             totalBrightness += brightness;
         }
 
@@ -122,10 +136,10 @@ void main()
             vec2 lightDir = normalize(lightsrc[i] - pixelPos + vec2(0.0, -24.0)) * fSpotlightRadius[i];
             vec2 spotDir = getLightDir(lightDirIdx[i]) * fSpotlightRadius[i];
             float theta = getAngle(lightDir, spotDir);
-            if(abs(dd) >= 0.0 && theta <= perspective[i]) {
+            if(abs(dd) >= 0.0 && theta <= perspective[i] * vibration) {
                 vec2 toLight = abs(lightsrc[i] - pixelPos  + vec2(0.0, -24.0));
-                float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0) * clamp(1.0  - pow((theta / perspective[i]), 1.2), globalIllumination, 1.0);
-                brightness *= clamp(1.0 - (length(toLight) / fSpotlightRadius[i]), 0.0, 1.0) * magnitude;
+                float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0) * clamp(1.0  - pow((theta / (perspective[i] * vibration)), 1.2), globalIllumination, 1.0);
+                brightness *= clamp((1.0 - (length(toLight) / fSpotlightRadius[i])) * vibration_brightness, 0.0, 1.0) * magnitude;
                 totalBrightness += brightness;
             } 
         }

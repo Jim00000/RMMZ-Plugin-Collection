@@ -132,6 +132,7 @@
             lightRadius: new Float32Array(MAX_LIGHTS),
             lightSrcSize: 0,
             lightsrc: new Float32Array(MAX_LIGHTS * 2),
+            uTime: new Float32Array(MAX_LIGHTS),
             ambientColor: new Float32Array(MAX_LIGHTS * 3),
             lightDirIdx: 0,  // unknown light direction
             perspective: new Float32Array(MAX_LIGHTS).fill(1.0),
@@ -192,6 +193,11 @@
                         let _spotlightRadius = JPC.parseNoteToFloat(note, 'lightmap.spotlight_radius');
                         let spotlightRadius = _spotlightRadius !== null ? _spotlightRadius : 300.0;
                         spritest_map.spotlightRadius.push(spotlightRadius);
+                        // Append utime
+                        let _utime = Math.random();
+                        spritest_map.utime.push(_utime);
+                        _utime = 0.3 + 0.7 * Math.random();
+                        spritest_map.utime_steps.push(_utime);
                     }
                 }
             });
@@ -233,6 +239,8 @@
             spritest_map.lightmap.uniforms.perspective[0] = JPC.lightmap.Player.perspective;
             // Update player's spotlight radius
             spritest_map.lightmap.uniforms.fSpotlightRadius[0] = JPC.lightmap.Player.spotLightRadius;
+            // Update player's uTime
+            spritest_map.lightmap.uniforms.uTime[0] += spritest_map.utime_steps[0];
         } else {
             // Move light source of player out of the screen
             spritest_map.lightmap.uniforms.lightsrc[0] = -99999;
@@ -260,6 +268,8 @@
             spritest_map.lightmap.uniforms.perspective[1 + i] = spritest_map.perspective[i];
             // Update spotlightRadius for spotlight
             spritest_map.lightmap.uniforms.fSpotlightRadius[1 + i] = spritest_map.spotlightRadius[i];
+            // Update uTime
+            spritest_map.lightmap.uniforms.uTime[1 + i] += spritest_map.utime_steps[i];
         }
 
         // Update global illumination
@@ -285,6 +295,8 @@
         this.lightDirIdx = [];
         this.perspective = [];
         this.spotlightRadius = [];
+        this.utime = [];
+        this.utime_steps = [];
 
         // Configure lightmap
         const enable = JPC.parseNoteToBoolean($dataMap.note, 'lightmap.enable');
