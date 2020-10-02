@@ -2,6 +2,8 @@ precision highp float;
 
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
+uniform vec3 fogColor;
+uniform float density;
 uniform float fMoveX;
 uniform float fMoveY;
 
@@ -44,8 +46,8 @@ void main()
 {
     vec4 fragColor = texture2D(uSampler, vTextureCoord);
     float sum = 0.0;
-    float f = 1.6;
-    float w = 0.5;
+    float f = 1.4;
+    float w = 0.9;
     // Fractal Brownian Motion (FBM)
     for(int i = 0; i < 8; i++) { // octave = 8
         vec2 pos = vTextureCoord.xy - vec2(fMoveX, fMoveY);
@@ -53,14 +55,22 @@ void main()
         f *= 2.0;
         w *= 2.5;
     }
-    vec3 finalColor = clamp(sum, 0.3, 1.0)* fragColor.xyz;
+
+    float factor = clamp(sum, 1.0 - density, 1.0);
+    vec3 finalColor;
+    
+    if(factor == 1.0) {
+      finalColor = fragColor.xyz;
+    } else {
+      finalColor = mix(fogColor, fragColor.xyz, factor);
+    }
 
     // Improved Phase Function 
     // From "Real-time Rendering of Dynamic Clouds"
-    float g = 0.2, theta = 0.95;
-    float numerator = 1.5 * (1.0 - g * g) * (1.0 + pow(cos(theta), 2.0));
-    float denominator = (2.0 + g * g) * (1.0 + g * g - 2.0 * g * cos(theta));
-    finalColor = finalColor * numerator / denominator;
+    // float g = 0.2, theta = 0.98;
+    // float numerator = 1.5 * (1.0 - g * g) * (1.0 + pow(cos(theta), 2.0));
+    // float denominator = (2.0 + g * g) * (1.0 + g * g - 2.0 * g * cos(theta));
+    // finalColor = finalColor * numerator / denominator;
 
     gl_FragColor = vec4(finalColor, fragColor.a);
 }
