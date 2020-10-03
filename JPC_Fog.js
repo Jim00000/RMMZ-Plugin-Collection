@@ -51,7 +51,7 @@
     const FOG_COLOR = [parseFloat(STR_FOG_COLOR[0]), parseFloat(STR_FOG_COLOR[1]), parseFloat(STR_FOG_COLOR[2])];
     const OPACITY = parseFloat(PLUGINPARAMS['opacity']);
 
-    class Cloud {
+    class Fog {
         constructor(moveSpeedX = 0.0, moveSpeedY = 0.0, opacity = 0.5) {
             this.fMoveX = Math.random() * 1000.0;
             this.fMoveY = Math.random() * 1000.0;
@@ -103,15 +103,15 @@
         };
     };
 
-    Cloud.prototype.updateX = function() {
+    Fog.prototype.updateX = function() {
         return (0 - $gameMap.displayX() * $gameMap.tileWidth()) / ($gameMap.tileWidth() * 16) + this.moveX;
     };
 
-    Cloud.prototype.updateY = function() {
+    Fog.prototype.updateY = function() {
         return (0 - $gameMap.displayY() * $gameMap.tileHeight()) / ($gameMap.tileHeight() * 12) + this.moveY;
     };
 
-    Cloud.prototype.createCloudFilter = function() {
+    Fog.prototype.createCloudFilter = function() {
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH);
         const filter = new PIXI.Filter(
             PIXI.Filter.defaultVertexSrc, fragShaderCode, {fMoveX: 0.0, fMoveY: 0.0, opacity: 0.5, fogColor: [1.0, 1.0, 1.0]});
@@ -121,7 +121,7 @@
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.cloud = new Cloud(SPEED_XY[0], SPEED_XY[1], OPACITY);
+        this.cloud = new Fog(SPEED_XY[0], SPEED_XY[1], OPACITY);
         this.filters.push(this.cloud.filter);
     };
 
