@@ -196,7 +196,7 @@
                         // Append utime
                         let _utime = Math.random();
                         spritest_map.utime.push(_utime);
-                        _utime = 0.3 + 0.7 * Math.random();
+                        _utime = 0.4 + 0.6 * (Math.random() - 0.5);
                         spritest_map.utime_steps.push(_utime);
                     }
                 }
