@@ -2108,6 +2108,15 @@ var JPC = (() => {
         return JSON.parse(numArray);
     };
 
+    Exported.toStringArray = function(string) {
+        return JSON.parse(string);
+    }
+
+    Exported.toFloatArray = function(string) {
+        const string_array = Exported.toStringArray(string);
+        return string_array.map(Number);
+    }
+
     Exported.loadGLSLShaderFile = function(filePath) {
         return readFileAsString(filePath);
     };
