@@ -10,8 +10,15 @@
  * @base JPC_Core
  * @help
  *
+ * @param gameswitchid
+ * @text switch ID
+ * @desc This switch id controls the fog effect is enabled or not.
+ * @type number
+ * @min 0
+ *
  * @param speed
- * @text move speed of fog (x, y)
+ * @text move speed of fog
+ * @desc The movement speed of fog (x, y).
  * @type number[]
  * @decimals 5
  * @default [0.00000, 0.00000]
@@ -19,6 +26,7 @@
  *
  * @param fogcolor
  * @text fog color
+ * @desc This parameter configs the fog color in (R, G, B).
  * @type number[]
  * @decimals 3
  * @default [1.000, 1.000, 1.000]
@@ -26,13 +34,13 @@
  * @min 1.0
  *
  * @param opacity
- * @text opacity of fog 
+ * @text opacity
+ * @desc This parameter controls the opacity of the fog effect.
  * @type number
  * @decimals 3
  * @default 0.500
  * @min 0.000
  * @min 1.000
- * 
  */
 
 (() => {
@@ -40,25 +48,24 @@
 
     const PLUGIN_NAME = 'JPC_Fog';
     const LIGHTMAP_SHADER_PATH = 'js/plugins/shaders/fog.fs';
-    const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
+    const PLUGIN_PARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
     //=============================================================================
     // Parameters
     //=============================================================================
-    const STR_SPEED_XY = JSON.parse(PLUGINPARAMS['speed']);
-    const SPEED_XY = [parseFloat(STR_SPEED_XY[0]), parseFloat(STR_SPEED_XY[1])];
-    const STR_FOG_COLOR = JSON.parse(PLUGINPARAMS['fogcolor']);
-    const FOG_COLOR = [parseFloat(STR_FOG_COLOR[0]), parseFloat(STR_FOG_COLOR[1]), parseFloat(STR_FOG_COLOR[2])];
-    const OPACITY = parseFloat(PLUGINPARAMS['opacity']);
+    const SPEED_XY = JPC.toFloatArray(PLUGIN_PARAMS.speed);
+    const FOG_COLOR = JPC.toFloatArray(PLUGIN_PARAMS.fogcolor);
+    const OPACITY = parseFloat(PLUGIN_PARAMS.opacity);
+    const FOG_SWITCH_ID = parseInt(PLUGIN_PARAMS.gameswitchid);
 
     class Fog {
-        constructor(moveSpeedX = 0.0, moveSpeedY = 0.0, opacity = 0.5) {
-            this.fMoveX = Math.random() * 1000.0;
-            this.fMoveY = Math.random() * 1000.0;
+        constructor(moveSpeedX = 0.0, moveSpeedY = 0.0, opacity = 0.5, fogColor = [1.0, 1.0, 1.0]) {
+            this.fMoveX = this.moveRandomizer();
+            this.fMoveY = this.moveRandomizer();
             this.fMoveSpeedX = moveSpeedX;
             this.fMoveSpeedY = moveSpeedY;
             this.opacity = opacity;
-            this.fogColor = FOG_COLOR;
+            this.fogColor = fogColor;
             this.cloudFilter = this.createCloudFilter();
         };
 
@@ -76,11 +83,11 @@
 
         get moveSpeedX() {
             return this.fMoveSpeedX;
-        }
+        };
 
         get moveSpeedY() {
             return this.fMoveSpeedY;
-        }
+        };
 
         set moveX(x) {
             this.fMoveX = x;
@@ -91,16 +98,24 @@
         };
 
         update() {
-            // update the position of the cloud map
-            this.moveX += this.moveSpeedX;
-            this.moveY += this.moveSpeedY;
-            // update fog color
-            this.filter.uniforms.fogColor = this.fogColor;
-            // update fog opacity
-            this.filter.uniforms.opacity = this.opacity;
-            this.filter.uniforms.fMoveX = this.updateX();
-            this.filter.uniforms.fMoveY = this.updateY();
+            // update enable
+            this.filter.enabled = $gameSwitches.value(FOG_SWITCH_ID);
+            if (this.filter.enabled === true) {
+                // update the position of the cloud map
+                this.moveX += this.moveSpeedX;
+                this.moveY += this.moveSpeedY;
+                // update fog color
+                this.filter.uniforms.fogColor = this.fogColor;
+                // update fog opacity
+                this.filter.uniforms.opacity = this.opacity;
+                this.filter.uniforms.fMoveX = this.updateX();
+                this.filter.uniforms.fMoveY = this.updateY();
+            }
         };
+    };
+
+    Fog.prototype.moveRandomizer = function() {
+        return Math.random() * 1000.0;
     };
 
     Fog.prototype.updateX = function() {
@@ -112,16 +127,16 @@
     };
 
     Fog.prototype.createCloudFilter = function() {
-        const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH);
-        const filter = new PIXI.Filter(
-            PIXI.Filter.defaultVertexSrc, fragShaderCode, {fMoveX: 0.0, fMoveY: 0.0, opacity: 0.5, fogColor: [1.0, 1.0, 1.0]});
+        const filter = JPC.createFilter(
+            LIGHTMAP_SHADER_PATH,
+            {fMoveX: this.fMoveX, fMoveY: this.fMoveY, opacity: this.opacity, fogColor: this.fogColor});
         return filter;
     };
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.cloud = new Fog(SPEED_XY[0], SPEED_XY[1], OPACITY);
+        this.cloud = new Fog(SPEED_XY[0], SPEED_XY[1], OPACITY, FOG_COLOR);
         this.filters.push(this.cloud.filter);
     };
 
