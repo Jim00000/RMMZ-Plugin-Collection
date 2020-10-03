@@ -2110,15 +2110,21 @@ var JPC = (() => {
 
     Exported.toStringArray = function(string) {
         return JSON.parse(string);
-    }
+    };
 
     Exported.toFloatArray = function(string) {
         const string_array = Exported.toStringArray(string);
         return string_array.map(Number);
-    }
+    };
 
     Exported.loadGLSLShaderFile = function(filePath) {
         return readFileAsString(filePath);
+    };
+
+    Exported.createFilter = function(shaderPath, uniforms = {}) {
+        const fragSrc = Exported.loadGLSLShaderFile(shaderPath);
+        const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragSrc, uniforms);
+        return filter;
     };
 
     function readFileAsString(filePath) {
