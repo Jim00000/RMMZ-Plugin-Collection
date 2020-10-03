@@ -25,8 +25,8 @@
  * @min 0.0
  * @min 1.0
  *
- * @param density
- * @text density of fog 
+ * @param opacity
+ * @text opacity of fog 
  * @type number
  * @decimals 3
  * @default 0.500
@@ -49,15 +49,15 @@
     const SPEED_XY = [parseFloat(STR_SPEED_XY[0]), parseFloat(STR_SPEED_XY[1])];
     const STR_FOG_COLOR = JSON.parse(PLUGINPARAMS['fogcolor']);
     const FOG_COLOR = [parseFloat(STR_FOG_COLOR[0]), parseFloat(STR_FOG_COLOR[1]), parseFloat(STR_FOG_COLOR[2])];
-    const DENSITY = parseFloat(PLUGINPARAMS['density']);
+    const OPACITY = parseFloat(PLUGINPARAMS['opacity']);
 
     class Cloud {
-        constructor(moveSpeedX = 0.0, moveSpeedY = 0.0, density = 0.5) {
+        constructor(moveSpeedX = 0.0, moveSpeedY = 0.0, opacity = 0.5) {
             this.fMoveX = Math.random() * 1000.0;
             this.fMoveY = Math.random() * 1000.0;
             this.fMoveSpeedX = moveSpeedX;
             this.fMoveSpeedY = moveSpeedY;
-            this.density = density;
+            this.opacity = opacity;
             this.fogColor = FOG_COLOR;
             this.cloudFilter = this.createCloudFilter();
         };
@@ -96,8 +96,8 @@
             this.moveY += this.moveSpeedY;
             // update fog color
             this.filter.uniforms.fogColor = this.fogColor;
-            // update fog density
-            this.filter.uniforms.density = this.density;
+            // update fog opacity
+            this.filter.uniforms.opacity = this.opacity;
             this.filter.uniforms.fMoveX = this.updateX();
             this.filter.uniforms.fMoveY = this.updateY();
         };
@@ -114,14 +114,14 @@
     Cloud.prototype.createCloudFilter = function() {
         const fragShaderCode = JPC.loadGLSLShaderFile(LIGHTMAP_SHADER_PATH);
         const filter = new PIXI.Filter(
-            PIXI.Filter.defaultVertexSrc, fragShaderCode, {fMoveX: 0.0, fMoveY: 0.0, density: 0.5, fogColor: [1.0, 1.0, 1.0]});
+            PIXI.Filter.defaultVertexSrc, fragShaderCode, {fMoveX: 0.0, fMoveY: 0.0, opacity: 0.5, fogColor: [1.0, 1.0, 1.0]});
         return filter;
     };
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.cloud = new Cloud(SPEED_XY[0], SPEED_XY[1], DENSITY);
+        this.cloud = new Cloud(SPEED_XY[0], SPEED_XY[1], OPACITY);
         this.filters.push(this.cloud.filter);
     };
 

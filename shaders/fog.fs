@@ -3,7 +3,7 @@ precision highp float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
 uniform vec3 fogColor;
-uniform float density;
+uniform float opacity;
 uniform float fMoveX;
 uniform float fMoveY;
 
@@ -56,7 +56,7 @@ void main()
         w *= 2.5;
     }
 
-    float factor = clamp(sum, 1.0 - density, 1.0);
+    float factor = clamp(sum, 1.0 - opacity, 1.0);
     vec3 finalColor;
     
     if(factor == 1.0) {
