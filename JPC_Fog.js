@@ -66,7 +66,7 @@
             this.fMoveSpeedY = moveSpeedY;
             this.opacity = opacity;
             this.fogColor = fogColor;
-            this.cloudFilter = this.createCloudFilter();
+            this.cloudFilter = this.createFogFilter();
         };
 
         get filter() {
@@ -126,7 +126,7 @@
         return (0 - $gameMap.displayY() * $gameMap.tileHeight()) / ($gameMap.tileHeight() * 12) + this.moveY;
     };
 
-    Fog.prototype.createCloudFilter = function() {
+    Fog.prototype.createFogFilter = function() {
         const filter = JPC.createFilter(
             LIGHTMAP_SHADER_PATH,
             {fMoveX: this.fMoveX, fMoveY: this.fMoveY, opacity: this.opacity, fogColor: this.fogColor});
