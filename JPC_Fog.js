@@ -59,42 +59,64 @@
     const FOG_SWITCH_ID = parseInt(PLUGIN_PARAMS.gameswitchid);
 
     class Fog {
+        // Private Instance Fields
+        // ------------------------------------------------------------------------------------------------------------
+        // Until now, there are only a few browsers (Chrome 74+, Edge 79+, Opera 62+, etc.) supporting private instance
+        // fields. There are compatibility issues across different browsers.
+        // Reference:
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields
+        #fMoveX
+        #fMoveY
+        #fMoveSpeedX
+        #fMoveSpeedY
+        #vFogColor
+        #fogFilter
+        #fOpacity
+
         constructor(moveSpeedX = 0.0, moveSpeedY = 0.0, opacity = 0.5, fogColor = [1.0, 1.0, 1.0]) {
-            this.fMoveX = this.moveRandomizer();
-            this.fMoveY = this.moveRandomizer();
-            this.fMoveSpeedX = moveSpeedX;
-            this.fMoveSpeedY = moveSpeedY;
-            this.opacity = opacity;
-            this.fogColor = fogColor;
-            this.cloudFilter = this.createFogFilter();
+            this.#fMoveX = this.moveRandomizer();
+            this.#fMoveY = this.moveRandomizer();
+            this.#fMoveSpeedX = moveSpeedX;
+            this.#fMoveSpeedY = moveSpeedY;
+            this.#fOpacity = opacity;
+            this.#vFogColor = fogColor;
+            this.#fogFilter = this.createFogFilter();
         };
 
         get filter() {
-            return this.cloudFilter;
+            return this.#fogFilter;
         };
+
+        get color() {
+            return this.#vFogColor;
+        }
 
         get moveX() {
-            return this.fMoveX;
-        };
+            return this.#fMoveX;
+        }
 
         get moveY() {
-            return this.fMoveY;
-        };
+            return this.#fMoveY;
+        }
+
+        get opacity() {
+            return this.#fOpacity;
+        }
 
         get moveSpeedX() {
-            return this.fMoveSpeedX;
+            return this.#fMoveSpeedX;
         };
 
         get moveSpeedY() {
-            return this.fMoveSpeedY;
+            return this.#fMoveSpeedY;
         };
 
-        set moveX(x) {
-            this.fMoveX = x;
+        set moveSpeedX(x) {
+            this.#fMoveSpeedX = x;
         };
 
-        set moveY(y) {
-            this.fMoveY = y;
+        set moveSpeedY(y) {
+            this.#fMoveSpeedY = y;
         };
 
         update() {
@@ -102,10 +124,10 @@
             this.filter.enabled = $gameSwitches.value(FOG_SWITCH_ID);
             if (this.filter.enabled === true) {
                 // update the position of the cloud map
-                this.moveX += this.moveSpeedX;
-                this.moveY += this.moveSpeedY;
+                this.#fMoveX += this.moveSpeedX;
+                this.#fMoveY += this.moveSpeedY;
                 // update fog color
-                this.filter.uniforms.fogColor = this.fogColor;
+                this.filter.uniforms.fogColor = this.color;
                 // update fog opacity
                 this.filter.uniforms.opacity = this.opacity;
                 this.filter.uniforms.fMoveX = this.updateX();
@@ -129,10 +151,13 @@
     Fog.prototype.createFogFilter = function() {
         const filter = JPC.createFilter(
             LIGHTMAP_SHADER_PATH,
-            {fMoveX: this.fMoveX, fMoveY: this.fMoveY, opacity: this.opacity, fogColor: this.fogColor});
+            {fMoveX: this.moveX, fMoveY: this.moveY, opacity: this.opacity, fogColor: this.color});
         return filter;
     };
 
+    //=============================================================================
+    // Hook
+    //=============================================================================
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
