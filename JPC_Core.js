@@ -2179,28 +2179,73 @@ var JPC = (() => {
     //=============================================================================
 
     class Window_JPCNotifier extends Window_Base {
+        // Private Instance Fields
+        #maxWorkingQueueSize
+        #isBusy
+        #fontSize
+        #duration
+        #working
+        #waiting
+
         constructor() {
             super(new Rectangle(-10, -20, 0, 0));
-            this._working = [];
-            this._waiting = [];
-            this._maxWorkingQueueSize = 10;
-            this._fontsize = 16;
+            this.#working = [];
+            this.#waiting = [];
+            this.#maxWorkingQueueSize = 10;
+            this.#fontSize = 16;
             this.contents.fontFace = $gameSystem.mainFontFace();
-            this.contents.fontSize = this._fontsize;
+            this.contents.fontSize = this.fontSize;
             this.backOpacity = 0;
             this.opacity = 0;       // Disable background frame
-            this._duration = 3000;  // in milliseconds
+            this.#duration = 3000;  // in milliseconds
             this.contentsOpacity = 0;
-            this._isBusy = false;
+            this.#isBusy = false;
             this._isWindow = false;
             this.resetTimer();
             this.refresh();
         };
+
+        get maxWorkingQueueSize() {
+            return this.#maxWorkingQueueSize;
+        };
+
+        get fontSize() {
+            return this.#fontSize;
+        }
+
+        get isBusy() {
+            return this.#isBusy;
+        }
+
+        get working() {
+            return this.#working;
+        }
+
+        set working(array) {
+            this.#working = array;
+        }
+
+        get waiting() {
+            return this.#waiting;
+        }
+
+        set isBusy(boolean) {
+            this.#isBusy = boolean;
+        }
+
+        get duration() {
+            return this.#duration;
+        }
+
+        set duration(duration) {
+            this.#duration = duration;
+        }
+
     };
 
     Window_JPCNotifier.prototype.update = function() {
         Object.getPrototypeOf(this.constructor.prototype).update.call(this);  // call superclass's update
-        if (this._isBusy) {
+        if (this.isBusy) {
             if (this.isExpired() == false) {
                 this.contentsOpacity += 8;
                 this.refresh();
@@ -2209,19 +2254,19 @@ var JPC = (() => {
                 if (this.contentsOpacity <= 0) {
                     this.contentsOpacity = 0;
                     this.clearText();
-                    if (this._waiting.length > 0) {
+                    if (this.waiting.length > 0) {
                         var maxduration = 0;
                         // Move contents from waiting queue to working queue
-                        while (this._waiting.length > 0 && this._working.length < this._maxWorkingQueueSize) {
-                            const data = this._waiting.pop();
+                        while (this.waiting.length > 0 && this.working.length < this.maxWorkingQueueSize) {
+                            const data = this.waiting.pop();
                             maxduration = Math.max(data.duration, maxduration);
-                            this._working.unshift(data.text);
+                            this.working.unshift(data.text);
                         }
                         // restart the notification
-                        this._duration = maxduration;
+                        this.duration = maxduration;
                         this.startNotification();
                     } else {
-                        this._isBusy = false;
+                        this.isBusy = false;
                         this.move(-10, -20, 0, 0);
                     }
                 }
@@ -2230,7 +2275,7 @@ var JPC = (() => {
     };
 
     Window_JPCNotifier.prototype.drawTextEx = function(text, x, y, width) {
-        this.contents.fontSize = this._fontsize;
+        this.contents.fontSize = this.fontSize;
         const textState = this.createTextState(text, x, y, width);
         this.processAllText(textState);
         return textState.outputWidth;
@@ -2238,10 +2283,10 @@ var JPC = (() => {
 
     Window_JPCNotifier.prototype.outputText = function() {
         var output = '';
-        this._working.reverse().forEach((text) => {
+        this.working.reverse().forEach((text) => {
             output += (text + '\n');
         });
-        this._working.reverse();
+        this.working.reverse();
         return output;
     };
 
@@ -2256,13 +2301,13 @@ var JPC = (() => {
 
     Window_JPCNotifier.prototype.isExpired = function() {
         const current_timestamp = new Date().getTime();
-        return current_timestamp > (this._start_timestamp + this._duration);
+        return current_timestamp > (this._start_timestamp + this.duration);
     };
 
     Window_JPCNotifier.prototype.startNotification = function() {
         // We have height range about 5 line in maximum
         this.move(-10, -15, Graphics.boxWidth, Graphics.boxHeight);
-        this._isBusy = true;
+        this.isBusy = true;
         this.contentsOpacity = 0;
         this.createContents();
         this.resetTimer();
@@ -2270,24 +2315,20 @@ var JPC = (() => {
     };
 
     Window_JPCNotifier.prototype.submit = function(text, duration) {
-        if (this._isBusy == false) {
+        if (this.isBusy == false) {
             this.startNotification();
         }
-        if (this._working.length >= this._maxWorkingQueueSize) {
-            this._waiting.unshift({text: text, duration: duration});
+        if (this.working.length >= this.maxWorkingQueueSize) {
+            this.waiting.unshift({text: text, duration: duration});
         } else {
             Exported.notifier.resetTimer();
-            this._duration = Math.max(this._duration, duration);
-            this._working.unshift(text);
+            this.duration = Math.max(this.duration, duration);
+            this.working.unshift(text);
         }
     };
 
     Window_JPCNotifier.prototype.clearText = function() {
-        this._working = [];
-    };
-
-    Window_JPCNotifier.prototype.isBusy = function() {
-        return this._isBusy;
+        this.working = [];
     };
 
     //=============================================================================
