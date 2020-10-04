@@ -1940,7 +1940,7 @@
 
 })();
 //=============================================================================
-// End pf xmldoc.js
+// End of xmldoc.js
 //=============================================================================
 // clang-format on
 
@@ -2291,7 +2291,7 @@ var JPC = (() => {
     };
 
     //=============================================================================
-    // Renew Scene_Map
+    // Hook
     //=============================================================================
     const _Scene_Map__createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
     Scene_Map.prototype.createDisplayObjects = function() {
