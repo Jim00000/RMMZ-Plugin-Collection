@@ -2085,7 +2085,7 @@ var JPC = (() => {
 
     Exported.parseNote = function(note, xmlquery) {
         const JPCNote = retrieveJPCSectionFromNote(note);
-        return JPCNote ? commitXMLQuery(JPCNote, xmlquery) : null;
+        return JPCNote ? doXMLQuery(JPCNote, xmlquery) : null;
     };
 
     Exported.parseNoteToBoolean = function(note, xmlquery) {
@@ -2150,7 +2150,7 @@ var JPC = (() => {
         }
     };
 
-    function commitXMLQuery(data, query) {
+    function doXMLQuery(data, query) {
         try {
             var xml = new XmlDocument(data);
             var result = xml.valueWithPath(query);
