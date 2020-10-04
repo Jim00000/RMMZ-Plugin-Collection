@@ -2063,6 +2063,10 @@ var JPC = (() => {
         return VK;
     })();
 
+    //=============================================================================
+    // Public JPC API
+    //=============================================================================
+
     Exported.buildNotifier = function() {
         return new Window_JPCNotifier();
     };
@@ -2127,6 +2131,10 @@ var JPC = (() => {
         return filter;
     };
 
+    //=============================================================================
+    // Private functions
+    //=============================================================================
+
     function readFileAsString(filePath) {
         if (Utils.isNwjs() === true) {
             const path = require('path'), fs = require('fs');
@@ -2170,34 +2178,28 @@ var JPC = (() => {
     // Window_JPCNotifier
     //=============================================================================
 
-    function Window_JPCNotifier() {
-        this.initialize(...arguments);
-    };
-
-    Window_JPCNotifier.prototype = Object.create(Window_Base.prototype);
-
-    Window_JPCNotifier.prototype.constructor = Window_JPCNotifier;
-
-    Window_JPCNotifier.prototype.initialize = function() {
-        Window_Base.prototype.initialize.call(this, new Rectangle(-10, -20, 0, 0));
-        this._working = [];
-        this._waiting = [];
-        this._maxWorkingQueueSize = 10;
-        this._fontsize = 16;
-        this.contents.fontFace = $gameSystem.mainFontFace();
-        this.contents.fontSize = this._fontsize;
-        this.backOpacity = 0;
-        this.opacity = 0;       // Disable background frame
-        this._duration = 3000;  // in milliseconds
-        this.contentsOpacity = 0;
-        this._isBusy = false;
-        this._isWindow = false;
-        this.resetTimer();
-        this.refresh();
+    class Window_JPCNotifier extends Window_Base {
+        constructor() {
+            super(new Rectangle(-10, -20, 0, 0));
+            this._working = [];
+            this._waiting = [];
+            this._maxWorkingQueueSize = 10;
+            this._fontsize = 16;
+            this.contents.fontFace = $gameSystem.mainFontFace();
+            this.contents.fontSize = this._fontsize;
+            this.backOpacity = 0;
+            this.opacity = 0;       // Disable background frame
+            this._duration = 3000;  // in milliseconds
+            this.contentsOpacity = 0;
+            this._isBusy = false;
+            this._isWindow = false;
+            this.resetTimer();
+            this.refresh();
+        };
     };
 
     Window_JPCNotifier.prototype.update = function() {
-        Window_Base.prototype.update.call(this);
+        Object.getPrototypeOf(this.constructor.prototype).update.call(this);  // call superclass's update
         if (this._isBusy) {
             if (this.isExpired() == false) {
                 this.contentsOpacity += 8;
