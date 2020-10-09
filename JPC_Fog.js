@@ -123,7 +123,7 @@
             // update enable
             this.filter.enabled = $gameSwitches.value(FOG_SWITCH_ID);
             if (this.filter.enabled === true) {
-                // update the position of the cloud map
+                // update the position of the fog
                 this.#fMoveX += this.moveSpeedX;
                 this.#fMoveY += this.moveSpeedY;
                 // update fog color
@@ -161,14 +161,14 @@
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.cloud = new Fog(SPEED_XY[0], SPEED_XY[1], OPACITY, FOG_COLOR);
-        this.filters.push(this.cloud.filter);
+        this.fog = new Fog(SPEED_XY[0], SPEED_XY[1], OPACITY, FOG_COLOR);
+        this.filters.push(this.fog.filter);
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function() {
         _Spriteset_Map__update.apply(this, arguments);
-        this.cloud.update();
+        this.fog.update();
     };
 })();
 
