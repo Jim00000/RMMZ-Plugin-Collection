@@ -20,7 +20,7 @@
 ## Plugin List
 - Quick Save/Load
 - God Ray Effect
-- LightMap Effect
+- Lighting Effect
 - Fog Effect
 
 ## Installation
