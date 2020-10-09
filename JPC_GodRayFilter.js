@@ -183,12 +183,8 @@
     Spriteset_Map.prototype.update = function() {
         _Spriteset_Map__update.apply(this, arguments);
         if (this.isGodRayFilterApplied) {
-            if ($gameSwitches.value(SWITCH_ID) === true) {
-                this.godRayFilter.enabled = true;
-                this.godRayFilterUpdateHandler(this);
-            } else {
-                this.godRayFilter.enabled = false;
-            }
+            this.godRayFilter.enabled = $gameSwitches.value(SWITCH_ID);
+            this.godRayFilterUpdateHandler(this);
         }
     };
 })();
