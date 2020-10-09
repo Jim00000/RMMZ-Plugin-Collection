@@ -90,34 +90,12 @@
     const LIGHT_RADIUS = parseFloat(PLUGINPARAMS.default_light_radius);
     const MAX_LIGHTS = 32;  // This value must be consistent with the macro defined in the the lighting.fs shader file.
 
-    JPC.lighting = (() => {
-        'use strict';
-        var Exported = {};
-        // Global illumination
-        Exported.globalIllumination;
-        Exported.Player = (() => {
-            'use strict';
-            var Exported = {};
-            // Is player a light source
-            Exported.isLightSrc;
-            // Player's light radius
-            Exported.lightRadius;
-            // Player's perspective in degree
-            Exported.perspective;
-            // Player's spotlight radius
-            Exported.spotlightRadius;
-            return Exported;
-        })();
-        return Exported;
-    })();
-
     class Lighting {
         constructor() {
             const radius = JPC.parseNoteToFloat($dataMap.note, 'lighting.light_radius');
-            this.defaultLightRadius = radius !== null ? radius : LIGHT_RADIUS;
+            this.pointLightRadius = JPC.select(radius, LIGHT_RADIUS);
             const illumination = JPC.parseNoteToFloat($dataMap.note, 'lighting.global_illumination');
-            JPC.lighting.globalIllumination = illumination !== null ? illumination : ILLUMINATION;
-            this.filter = this.createLightingFilter(JPC.lighting.globalIllumination);
+            this.globalIllumination = JPC.select(illumination, ILLUMINATION);
             this.playerSprite = null;
             this.isLightSrcFound = false;  // do not modify this
             this.lightObjPos = [];         // light object's position
@@ -129,44 +107,56 @@
             this.spotlightRadius = [];
             this.utime = [];
             this.utime_steps = [];
+            this.filter = this.createLightingFilter(this.globalIllumination);  // lighting filter
+
+            // Configure Player
+            this.Player = {isLightSrc: false, lightRadius: 0.0, perspective: 0.0, spotLightRadius: 0.0};
 
             // Configure lighting
             const enable = JPC.parseNoteToBoolean($dataMap.note, 'lighting.enable');
-            JPC.lighting.enable = enable !== null ? enable : false;
+            this.filter.enabled = JPC.select(enable, false);
             const isPlayerLightSrc = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.is_light_source');
-            JPC.lighting.Player.isLightSrc = isPlayerLightSrc !== null ? isPlayerLightSrc : false;
+            this.Player.isLightSrc = JPC.select(isPlayerLightSrc, false);
             const playerLightRadius = JPC.parseNoteToFloat($dataMap.note, 'lighting.player.light_radius');
-            JPC.lighting.Player.lightRadius = playerLightRadius !== null ? playerLightRadius : this.defaultLightRadius;
+            this.Player.lightRadius = JPC.select(playerLightRadius, this.pointLightRadius);
             const playerPerspective = JPC.parseNoteToFloat($dataMap.note, 'lighting.player.perspective');
-            JPC.lighting.Player.perspective = playerPerspective !== null ? playerPerspective : 30.0;
+            this.Player.perspective = JPC.select(playerPerspective, 30.0);
             const playerSpotLightRadius = JPC.parseNoteToFloat($dataMap.note, 'lighting.player.spotlight_radius');
-            JPC.lighting.Player.spotLightRadius = playerSpotLightRadius !== null ? playerSpotLightRadius : 256.0;
+            this.Player.spotLightRadius = JPC.select(playerSpotLightRadius, 256.0);
             // Setup light type for Player
             this.filter.uniforms.lightType[0] = 0b00;
-            var isPointLight = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.lighttype.is_point_light');
+            let isPointLight = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.lighttype.is_point_light');
             this.filter.uniforms.lightType[0] |= isPointLight === true ? 0b01 : 0b00;
-            var isSpotLight = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.lighttype.is_spotlight');
+            let isSpotLight = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.lighttype.is_spotlight');
             this.filter.uniforms.lightType[0] |= isSpotLight === true ? 0b10 : 0b00;
         };
     };
 
     Lighting.prototype.lightDirectionStringToIndex = function(string) {
-        if (string === 'down') {
-            return 2;
-        } else if (string === 'left') {
-            return 4;
-        } else if (string === 'right') {
-            return 6;
-        } else if (string === 'up') {
-            return 8;
-        } else {
-            return 0;
+        let code = 0;
+        switch (string) {
+            case 'down':
+                code = Game_Character.ROUTE_MOVE_DOWN;
+                break;
+            case 'left':
+                code = Game_Character.ROUTE_MOVE_LEFT;
+                break;
+            case 'right':
+                code = Game_Character.ROUTE_MOVE_RIGHT;
+                break;
+            case 'up':
+                code = Game_Character.ROUTE_MOVE_UP;
+                break;
+            default:
+                throw new Error(
+                    `No such light direction type "${string}" (${PLUGIN_NAME}.js:lightDirectionStringToIndex)`);
         }
+        return code << 1;
     };
 
     Lighting.prototype.createLightingFilter = function() {
         const filter = JPC.createFilter(LIGHTING_SHADER_PATH, {
-            globalIllumination: JPC.lighting.globalIllumination,
+            globalIllumination: this.globalIllumination,
             lightRadius: new Float32Array(MAX_LIGHTS),
             lightSrcSize: 0,
             lightsrc: new Float32Array(MAX_LIGHTS * 2),
@@ -201,31 +191,31 @@
                     let r = JPC.parseNoteToFloat(note, 'lighting.r');
                     let g = JPC.parseNoteToFloat(note, 'lighting.g');
                     let b = JPC.parseNoteToFloat(note, 'lighting.b');
-                    this.ambientColor.push({r: r != null ? r : 1.0, g: g != null ? g : 1.0, b: b != null ? b : 1.0});
+                    this.ambientColor.push({r: JPC.select(r, 1.0), g: JPC.select(g, 1.0), b: JPC.select(b, 1.0)});
                     // Append radius for each object
                     let _radius = JPC.parseNoteToFloat(note, 'lighting.radius');
-                    this.lightRadius.push(_radius !== null ? _radius : this.defaultLightRadius);
+                    this.lightRadius.push(JPC.select(_radius, this.pointLightRadius));
                     // Append lighttype
                     let _isPointLight = JPC.parseNoteToBoolean(note, 'lighting.lighttype.is_point_light');
-                    let isPointLight = _isPointLight !== null ? _isPointLight : false;
+                    let isPointLight = JPC.select(_isPointLight, false);
                     let _isSpotLight = JPC.parseNoteToBoolean(note, 'lighting.lighttype.is_spotlight');
-                    let isSpotLight = _isSpotLight !== null ? _isSpotLight : false;
+                    let isSpotLight = JPC.select(_isSpotLight, false);
                     let encodedLightType = 0b00;
                     encodedLightType |= isPointLight === true ? 0b01 : 0b00;
                     encodedLightType |= isSpotLight === true ? 0b10 : 0b00;
                     this.lightTypes.push(encodedLightType);
                     // Append light direction index
                     let _lightDirString = JPC.parseNote(note, 'lighting.light_direction');
-                    let lightDirString = _lightDirString !== null ? _lightDirString : 'down';
+                    let lightDirString = JPC.select(_lightDirString, 'down');
                     let lightDirIdx = this.lightDirectionStringToIndex(lightDirString);
                     this.lightDirIdx.push(lightDirIdx);
                     // Append perspective for spotlight
                     let _perspective = JPC.parseNoteToFloat(note, 'lighting.perspective');
-                    let perspective = _perspective !== null ? _perspective : 15.0;
+                    let perspective = JPC.select(_perspective, 15.0);
                     this.perspective.push(perspective);
                     // Append spotlight radius for spotlight
                     let _spotlightRadius = JPC.parseNoteToFloat(note, 'lighting.spotlight_radius');
-                    let spotlightRadius = _spotlightRadius !== null ? _spotlightRadius : 300.0;
+                    let spotlightRadius = JPC.select(_spotlightRadius, 300.0);
                     this.spotlightRadius.push(spotlightRadius);
                     // Append utime
                     let _utime = Math.random();
@@ -280,7 +270,7 @@
     };
 
     Lighting.prototype.updatePlayer = function() {
-        if (JPC.lighting.Player.isLightSrc === true) {
+        if (this.Player.isLightSrc === true) {
             // Update player's position
             this.filter.uniforms.lightsrc[0] = this.playerSprite.position._x;
             this.filter.uniforms.lightsrc[1] = this.playerSprite.position._y;
@@ -289,13 +279,13 @@
             this.filter.uniforms.ambientColor[1] = 1.0;
             this.filter.uniforms.ambientColor[2] = 1.0;
             // Update player's light radius
-            this.filter.uniforms.lightRadius[0] = JPC.lighting.Player.lightRadius;
+            this.filter.uniforms.lightRadius[0] = this.Player.lightRadius;
             // Update player's perspective direction
             this.filter.uniforms.lightDirIdx[0] = $gamePlayer.direction();
             // Update player's perspective angle in degree
-            this.filter.uniforms.perspective[0] = JPC.lighting.Player.perspective;
+            this.filter.uniforms.perspective[0] = this.Player.perspective;
             // Update player's spotlight radius
-            this.filter.uniforms.fSpotlightRadius[0] = JPC.lighting.Player.spotLightRadius;
+            this.filter.uniforms.fSpotlightRadius[0] = this.Player.spotLightRadius;
             // Update player's uTime
             this.filter.uniforms.uTime[0] += this.utime_steps[0];
         } else {
@@ -333,7 +323,7 @@
     };
 
     Lighting.prototype.updateGlobalIllumination = function() {
-        this.filter.uniforms.globalIllumination = JPC.lighting.globalIllumination;
+        this.filter.uniforms.globalIllumination = this.globalIllumination;
     };
 
     //=============================================================================
