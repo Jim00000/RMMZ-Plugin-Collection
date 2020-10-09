@@ -2071,6 +2071,14 @@ var JPC = (() => {
         return new Window_JPCNotifier();
     };
 
+    Exported.parseJPCParams = function(note) {
+        return (note !== undefined && note !== null && note.length > 0) ? new JPCParams(note) : null;
+    };
+
+    Exported.toGeneric = function(value) {
+        return new JPCGenericValue(value);
+    }
+
     Exported.notify = function(msg, duration = 3000) {
         if (Exported.notifier !== null) {
             if (Exported.notifier.parent !== null && (Exported.notifier.parent instanceof WindowLayer) === true) {
@@ -2085,40 +2093,6 @@ var JPC = (() => {
 
     Exported.getPluginParams = function(pluginName) {
         return PluginManager.parameters(pluginName);
-    };
-
-    Exported.parseNote = function(note, xmlquery) {
-        const JPCNote = retrieveJPCSectionFromNote(note);
-        return JPCNote ? issueXMLQuery(JPCNote, xmlquery) : null;
-    };
-
-    Exported.parseNoteToBoolean = function(note, xmlquery) {
-        const bool = Exported.parseNote(note, xmlquery);
-        return bool === null ? null : JSON.parse(bool);
-    };
-
-    Exported.parseNoteToInt = function(note, xmlquery) {
-        const int = Exported.parseNote(note, xmlquery);
-        return int === null ? null : parseInt(int);
-    };
-
-    Exported.parseNoteToFloat = function(note, xmlquery) {
-        const float = Exported.parseNote(note, xmlquery);
-        return float === null ? null : parseFloat(float);
-    };
-
-    Exported.parseNoteToNumArray = function(note, xmlquery) {
-        const numArray = Exported.parseNote(note, xmlquery);
-        return JSON.parse(numArray);
-    };
-
-    Exported.toStringArray = function(string) {
-        return JSON.parse(string);
-    };
-
-    Exported.toFloatArray = function(string) {
-        const string_array = Exported.toStringArray(string);
-        return string_array.map(Number);
     };
 
     Exported.loadGLSLShaderFile = function(filePath) {
@@ -2167,19 +2141,94 @@ var JPC = (() => {
         }
     };
 
-    function issueXMLQuery(data, query) {
-        try {
-            var xml = new XmlDocument(data);
-            var result = xml.valueWithPath(query);
-            return result === undefined ? null : result;
-        } catch (error) {
-            return null;
+    //=============================================================================
+    // JPCGenericValue
+    //=============================================================================
+
+    class JPCGenericValue {
+        // Private Instance Fields
+        #data
+
+        constructor(data) {
+            this.#data = data;
+        };
+
+        get data() {
+            return this.#data;
+        }
+
+        toBool() {
+            return this.data !== undefined ? JSON.parse(this.data) : false;
+        };
+
+        toFloat() {
+            return this.data !== undefined ? parseFloat(this.data) : undefined;
+        };
+
+        toInt() {
+            return this.data !== undefined ? parseInt(this.data) : undefined;
+        };
+
+        toString() {
+            return this.data;
+        };
+
+        toIntArray() {
+            return (this.data !== undefined) ? JSON.parse(this.data) : undefined;
+        };
+
+        toStringArray() {
+            return this.data !== undefined ? JSON.parse(this.data) : undefined;
+        };
+
+        toFloatArray() {
+            return this.data !== undefined ? this.toStringArray(this.data).map(Number) : undefined;
+        };
+    };
+
+    //=============================================================================
+    // JPCParams
+    //=============================================================================
+
+    class JPCParams {
+        // Private Instance Fields
+        #data
+        #xmldoc
+        #cache
+
+        constructor(note) {
+            this.#data = this.parseXML(note);
+            this.#xmldoc = new XmlDocument(this.#data);
+            this.#cache = {};
+        };
+
+        get xmldoc() {
+            return this.#xmldoc;
+        }
+
+        get cache() {
+            return this.#cache;
         }
     };
 
-    function retrieveJPCSectionFromNote(note) {
+    JPCParams.prototype.query = function(xmlquery) {
+        let data = this.cache[xmlquery];
+        if (data === undefined) {
+            data = this.xmldoc.valueWithPath(xmlquery);
+            this.cache[xmlquery] = data;
+        }
+
+        return JPC.toGeneric(data);
+    };
+
+    JPCParams.prototype.contain =
+        function(xmlquery) {
+        return this.xmldoc.valueWithPath(xmlquery) !== undefined;
+    }
+
+        JPCParams.prototype.parseXML = function(data) {
         const pattern = /(<jpc>[\w\s<>\/\?\.\-\[\]\,]+<\/jpc>)/;
-        const match = pattern.exec(note);
+        const match = pattern.exec(data);
         return match ? match[0] : null;
     };
 
