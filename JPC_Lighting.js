@@ -86,8 +86,8 @@
     //=============================================================================
     // Parameters
     //=============================================================================
-    const ILLUMINATION = parseFloat(PLUGINPARAMS.default_global_illumination);
-    const LIGHT_RADIUS = parseFloat(PLUGINPARAMS.default_light_radius);
+    const ILLUMINATION = JPC.toGeneric(PLUGINPARAMS.default_global_illumination).toFloat();
+    const LIGHT_RADIUS = JPC.toGeneric(PLUGINPARAMS.default_light_radius).toFloat();
     const MAX_LIGHTS = 32;  // This value must be consistent with the macro defined in the the lighting.fs shader file.
 
     class Lighting {
