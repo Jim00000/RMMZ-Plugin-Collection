@@ -2131,6 +2131,15 @@ var JPC = (() => {
         return filter;
     };
 
+    Exported.select = function(...args) {
+        for (let arg of args) {
+            if (arg !== undefined && arg !== null) {
+                return arg;
+            }
+        }
+        return null;
+    };
+
     //=============================================================================
     // Private functions
     //=============================================================================
@@ -2240,7 +2249,6 @@ var JPC = (() => {
         set duration(duration) {
             this.#duration = duration;
         }
-
     };
 
     Window_JPCNotifier.prototype.update = function() {
