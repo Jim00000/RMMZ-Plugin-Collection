@@ -101,91 +101,79 @@
 
 (() => {
     'use strict';
-    //=============================================================================
-    // Fixed Parameters
-    //=============================================================================
+
     const PLUGIN_NAME = 'JPC_GodRayFilter';
     const GOD_RAY_SHADER_PATH = 'js/plugins/shaders/godray.fs';
     const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
     //=============================================================================
-    // User-defined Parameters
+    // Parameters
     //=============================================================================
-    const DELTA = parseFloat(PLUGINPARAMS['delta']);
-    const ANGLE = parseFloat(PLUGINPARAMS['angle']);
-    const GAIN = parseFloat(PLUGINPARAMS['gain']);
-    const LACUNRITY = parseFloat(PLUGINPARAMS['lacunrity']);
-    const IS_LIGHT_PARALLEL = JSON.parse(PLUGINPARAMS['parallel']);
-    const LIGHTSRC_ARRAY = JSON.parse(PLUGINPARAMS['lightsrc']);
-    const LIGHTSRC = [parseFloat(LIGHTSRC_ARRAY[0]), parseFloat(LIGHTSRC_ARRAY[1])];
-    const LIGHTCOLOR_ARRAY = JSON.parse(PLUGINPARAMS['lightcolor']);
-    const SWITCH_ID = parseInt(PLUGINPARAMS['switchid']);
-    const LIGHTCOLOR =
-        [parseFloat(LIGHTCOLOR_ARRAY[0]), parseFloat(LIGHTCOLOR_ARRAY[1]), parseFloat(LIGHTCOLOR_ARRAY[2])];
+    const DELTA = JPC.toGeneric(PLUGINPARAMS.delta).toFloat();
+    const ANGLE = JPC.toGeneric(PLUGINPARAMS.angle).toFloat();
+    const GAIN = JPC.toGeneric(PLUGINPARAMS.gain).toFloat();
+    const LACUNRITY = JPC.toGeneric(PLUGINPARAMS.lacunrity).toFloat();
+    const IS_LIGHT_PARALLEL = JPC.toGeneric(PLUGINPARAMS.parallel).toBool();
+    const LIGHTSRC = JPC.toGeneric(PLUGINPARAMS.lightsrc).toFloatArray();
+    const LIGHTCOLOR = JPC.toGeneric(PLUGINPARAMS.lightcolor).toFloatArray();
+    const SWITCH_ID = JPC.toGeneric(PLUGINPARAMS.switchid).toInt();
 
-    //=============================================================================
-    // Help functions
-    //=============================================================================
+    class GodRay {
+        constructor() {
+            this.xmlParams = JPC.parseJPCParams($dataMap.note);
+            this.delta = JPC.select(this.xmlParams.query('godrayfilter.delta').toFloat(), DELTA);
+            this.angle = JPC.select(this.xmlParams.query('godrayfilter.angle').toInt(), ANGLE);
+            this.gain = JPC.select(this.xmlParams.query('godrayfilter.gain').toFloat(), GAIN);
+            this.lacunrity = JPC.select(this.xmlParams.query('godrayfilter.lacunrity').toFloat(), LACUNRITY);
+            this.isLightParallel =
+                JPC.select(this.xmlParams.query('godrayfilter.parallel_light').toBool(), IS_LIGHT_PARALLEL);
+            this.lightSrc = JPC.select(this.xmlParams.query('godrayfilter.lightsource').toFloatArray(), LIGHTSRC);
+            this.lightColor = JPC.select(this.xmlParams.query('godrayfilter.lightcolor').toFloatArray(), LIGHTCOLOR);
+            this.filter = this.createGodRayFilter();
+        };
+    };
 
-    function degToRad(degree) {
+    GodRay.prototype.degToRad = function(degree) {
         return degree * Math.PI / 180.0;
     };
 
-    function createGodRayFilter(_angle, _gain, _uLacunrity, _parallel, _lightsrc, _lightColor) {
-        const fragShaderCode = JPC.loadGLSLShaderFile(GOD_RAY_SHADER_PATH);
-        const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragShaderCode, {
-            angle: _angle,
-            gain: _gain,
-            uLacunrity: _uLacunrity,
-            parallel: _parallel,
+    GodRay.prototype.createGodRayFilter = function() {
+        console.debug(this.lacunrity);
+        const filter = JPC.createFilter(GOD_RAY_SHADER_PATH, {
+            angle: this.angle,
+            gain: this.gain,
+            uLacunrity: this.lacunrity,
+            parallel: this.isLightParallel,
             dimensions: [Graphics.boxWidth, Graphics.boxHeight],
             aspect: Graphics.boxHeight / Graphics.boxWidth,
-            light: _parallel ? [Math.cos(degToRad(_angle)), Math.sin(degToRad(_angle))] : _lightsrc,
-            lightColor: _lightColor,
+            light: this.isLightParallel ? [Math.cos(this.degToRad(this.angle)), Math.sin(this.degToRad(this.angle))] :
+                                          this.lightSrc,
+            lightColor: this.lightColor,
             utime: 0
         });
         return filter;
     };
 
-    function updateGodRayFilter(spritest_map) {
-        spritest_map.godRayFilter.uniforms.utime += spritest_map.godRayFilterDelta;
-        if (spritest_map.isGodRayLightParallel == false) {
-            spritest_map.godRayFilter.uniforms.light[0] =
-                spritest_map.godRayLightSource[0] - $gameMap.displayX() * $gameMap.tileWidth();
-            spritest_map.godRayFilter.uniforms.light[1] =
-                spritest_map.godRayLightSource[1] - $gameMap.displayY() * $gameMap.tileHeight();
+    GodRay.prototype.update = function() {
+        this.filter.enabled = $gameSwitches.value(SWITCH_ID);
+        this.filter.uniforms.utime += this.delta;
+        if (this.isLightParallel === false) {
+            this.filter.uniforms.light[0] = this.lightSrc[0] - $gameMap.displayX() * $gameMap.tileWidth();
+            this.filter.uniforms.light[1] = this.lightSrc[1] - $gameMap.displayY() * $gameMap.tileHeight();
         }
     };
 
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.xmlParams = JPC.parseJPCParams($dataMap.note);
-        this.isGodRayFilterApplied = this.xmlParams.query('godrayfilter.enable').toBool();
-        if (this.isGodRayFilterApplied) {
-            this.godRayFilterDelta = this.xmlParams.query('godrayfilter.delta').toFloat() || DELTA;
-            this.isGodRayLightParallel =
-                this.xmlParams.query('godrayfilter.parallel_light').toBool() || IS_LIGHT_PARALLEL;
-            this.godRayLightSource = this.xmlParams.query('godrayfilter.lightsource').toIntArray() || LIGHTSRC;
-            console.debug(this.godRayLightSource);
-            this.godRayFilterLightColor = this.xmlParams.query('godrayfilter.lightcolor').toIntArray() || LIGHTCOLOR;
-            this.godRayFilter = createGodRayFilter(
-                this.xmlParams.query('godrayfilter.angle').toInt() || ANGLE,
-                this.xmlParams.query('godrayfilter.gain').toFloat() || GAIN,
-                this.xmlParams.query('godrayfilter.lacunrity').toFloat() || LACUNRITY, this.isGodRayLightParallel,
-                this.godRayLightSource, this.godRayFilterLightColor);
-            this.filters.push(this.godRayFilter);
-            this.godRayFilterUpdateHandler = updateGodRayFilter;
-        }
+        this.godray = new GodRay();
+        this.filters.push(this.godray.filter);
     };
 
     var _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function() {
         _Spriteset_Map__update.apply(this, arguments);
-        if (this.isGodRayFilterApplied) {
-            this.godRayFilter.enabled = $gameSwitches.value(SWITCH_ID);
-            this.godRayFilterUpdateHandler(this);
-        }
+        this.godray.update();
     };
 })();
 
