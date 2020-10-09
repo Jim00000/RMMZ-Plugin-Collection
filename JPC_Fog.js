@@ -47,7 +47,7 @@
     'use strict';
 
     const PLUGIN_NAME = 'JPC_Fog';
-    const LIGHTMAP_SHADER_PATH = 'js/plugins/shaders/fog.fs';
+    const FOG_SHADER_PATH = 'js/plugins/shaders/fog.fs';
     const PLUGIN_PARAMS = JPC.getPluginParams(PLUGIN_NAME);
 
     //=============================================================================
@@ -150,7 +150,7 @@
 
     Fog.prototype.createFogFilter = function() {
         const filter = JPC.createFilter(
-            LIGHTMAP_SHADER_PATH,
+            FOG_SHADER_PATH,
             {fMoveX: this.moveX, fMoveY: this.moveY, opacity: this.opacity, fogColor: this.color});
         return filter;
     };
