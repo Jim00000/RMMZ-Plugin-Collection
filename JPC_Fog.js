@@ -53,8 +53,8 @@
     //=============================================================================
     // Parameters
     //=============================================================================
-    const SPEED_XY = JPC.toFloatArray(PLUGIN_PARAMS.speed);
-    const FOG_COLOR = JPC.toFloatArray(PLUGIN_PARAMS.fogcolor);
+    const SPEED_XY = JPC.toGeneric(PLUGIN_PARAMS.speed).toFloatArray();
+    const FOG_COLOR = JPC.toGeneric(PLUGIN_PARAMS.fogcolor).toFloatArray();
     const OPACITY = parseFloat(PLUGIN_PARAMS.opacity);
     const FOG_SWITCH_ID = parseInt(PLUGIN_PARAMS.gameswitchid);
 

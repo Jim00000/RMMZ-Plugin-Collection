@@ -160,19 +160,20 @@
     var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.isGodRayFilterApplied = JPC.parseNoteToBoolean($dataMap.note, 'godrayfilter.enable');
+        this.xmlParams = JPC.parseJPCParams($dataMap.note);
+        this.isGodRayFilterApplied = this.xmlParams.query('godrayfilter.enable').toBool();
         if (this.isGodRayFilterApplied) {
-            this.godRayFilterDelta = JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.delta') || DELTA;
+            this.godRayFilterDelta = this.xmlParams.query('godrayfilter.delta').toFloat() || DELTA;
             this.isGodRayLightParallel =
-            JPC.parseNoteToBoolean($dataMap.note, 'godrayfilter.parallel_light') || IS_LIGHT_PARALLEL;
-            this.godRayLightSource = JPC.parseNoteToNumArray($dataMap.note, 'godrayfilter.lightsource') || LIGHTSRC;
-            this.godRayFilterLightColor = JPC.parseNoteToNumArray($dataMap.note, 'godrayfilter.lightcolor') || LIGHTCOLOR;
+                this.xmlParams.query('godrayfilter.parallel_light').toBool() || IS_LIGHT_PARALLEL;
+            this.godRayLightSource = this.xmlParams.query('godrayfilter.lightsource').toIntArray() || LIGHTSRC;
+            console.debug(this.godRayLightSource);
+            this.godRayFilterLightColor = this.xmlParams.query('godrayfilter.lightcolor').toIntArray() || LIGHTCOLOR;
             this.godRayFilter = createGodRayFilter(
-                JPC.parseNoteToInt($dataMap.note, 'godrayfilter.angle') || ANGLE,
-                JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.gain') || GAIN,
-                JPC.parseNoteToFloat($dataMap.note, 'godrayfilter.lacunrity') || LACUNRITY, this.isGodRayLightParallel,
-                this.godRayLightSource,
-                this.godRayFilterLightColor);
+                this.xmlParams.query('godrayfilter.angle').toInt() || ANGLE,
+                this.xmlParams.query('godrayfilter.gain').toFloat() || GAIN,
+                this.xmlParams.query('godrayfilter.lacunrity').toFloat() || LACUNRITY, this.isGodRayLightParallel,
+                this.godRayLightSource, this.godRayFilterLightColor);
             this.filters.push(this.godRayFilter);
             this.godRayFilterUpdateHandler = updateGodRayFilter;
         }

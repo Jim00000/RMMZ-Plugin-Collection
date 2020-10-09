@@ -92,9 +92,10 @@
 
     class Lighting {
         constructor() {
-            const radius = JPC.parseNoteToFloat($dataMap.note, 'lighting.light_radius');
+            this.xmlParams = JPC.parseJPCParams($dataMap.note);
+            const radius = this.xmlParams.query('lighting.light_radius').toFloat();
             this.pointLightRadius = JPC.select(radius, LIGHT_RADIUS);
-            const illumination = JPC.parseNoteToFloat($dataMap.note, 'lighting.global_illumination');
+            const illumination = this.xmlParams.query('lighting.global_illumination').toFloat();
             this.globalIllumination = JPC.select(illumination, ILLUMINATION);
             this.playerSprite = null;
             this.isLightSrcFound = false;  // do not modify this
@@ -113,21 +114,21 @@
             this.Player = {isLightSrc: false, lightRadius: 0.0, perspective: 0.0, spotLightRadius: 0.0};
 
             // Configure lighting
-            const enable = JPC.parseNoteToBoolean($dataMap.note, 'lighting.enable');
+            const enable = this.xmlParams.query('lighting.enable').toBool();
             this.filter.enabled = JPC.select(enable, false);
-            const isPlayerLightSrc = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.is_light_source');
+            const isPlayerLightSrc = this.xmlParams.query('lighting.player.is_light_source').toBool();
             this.Player.isLightSrc = JPC.select(isPlayerLightSrc, false);
-            const playerLightRadius = JPC.parseNoteToFloat($dataMap.note, 'lighting.player.light_radius');
+            const playerLightRadius = this.xmlParams.query('lighting.player.light_radius').toFloat();
             this.Player.lightRadius = JPC.select(playerLightRadius, this.pointLightRadius);
-            const playerPerspective = JPC.parseNoteToFloat($dataMap.note, 'lighting.player.perspective');
+            const playerPerspective = this.xmlParams.query('lighting.player.perspective').toFloat();
             this.Player.perspective = JPC.select(playerPerspective, 30.0);
-            const playerSpotLightRadius = JPC.parseNoteToFloat($dataMap.note, 'lighting.player.spotlight_radius');
+            const playerSpotLightRadius = this.xmlParams.query('lighting.player.spotlight_radius').toFloat();
             this.Player.spotLightRadius = JPC.select(playerSpotLightRadius, 256.0);
             // Setup light type for Player
             this.filter.uniforms.lightType[0] = 0b00;
-            let isPointLight = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.lighttype.is_point_light');
+            const isPointLight = this.xmlParams.query('lighting.player.lighttype.is_point_light').toBool();
             this.filter.uniforms.lightType[0] |= isPointLight === true ? 0b01 : 0b00;
-            let isSpotLight = JPC.parseNoteToBoolean($dataMap.note, 'lighting.player.lighttype.is_spotlight');
+            const isSpotLight = this.xmlParams.query('lighting.player.lighttype.is_spotlight').toBool();
             this.filter.uniforms.lightType[0] |= isSpotLight === true ? 0b10 : 0b00;
         };
     };
@@ -181,47 +182,50 @@
             if (character._character !== undefined && character._character instanceof Game_Event &&
                 character.isEmptyCharacter() === false) {
                 const eventId = character._character._eventId;
-                const note = $dataMap.events[eventId].note
+                const note = $dataMap.events[eventId].note;
+                const objXmlParams = JPC.parseJPCParams(note);
+                // if jpc.lighting.lightobj is undefined, then this event is not a light object
+                const isLightObj = objXmlParams !== null && objXmlParams.contain('lighting.lightobj') &&
+                    objXmlParams.query('lighting.lightobj').toBool();
                 // Skip event whose note is empty and verify that this is a light object
-                if ($dataMap.events[eventId].note.length > 0 &&
-                    JPC.parseNoteToBoolean(note, 'lighting.lightobj') === true) {
+                if (isLightObj === true) {
                     // Append to the light object list
                     this.lightObjPos.push(character.position);
                     // Append to ambient color list
-                    let r = JPC.parseNoteToFloat(note, 'lighting.r');
-                    let g = JPC.parseNoteToFloat(note, 'lighting.g');
-                    let b = JPC.parseNoteToFloat(note, 'lighting.b');
+                    let r = objXmlParams.query('lighting.r').toFloat();
+                    let g = objXmlParams.query('lighting.g').toFloat();
+                    let b = objXmlParams.query('lighting.b').toFloat();
                     this.ambientColor.push({r: JPC.select(r, 1.0), g: JPC.select(g, 1.0), b: JPC.select(b, 1.0)});
                     // Append radius for each object
-                    let _radius = JPC.parseNoteToFloat(note, 'lighting.radius');
+                    let _radius = objXmlParams.query('lighting.radius').toFloat();
                     this.lightRadius.push(JPC.select(_radius, this.pointLightRadius));
                     // Append lighttype
-                    let _isPointLight = JPC.parseNoteToBoolean(note, 'lighting.lighttype.is_point_light');
+                    let _isPointLight = objXmlParams.query('lighting.lighttype.is_point_light').toBool();
                     let isPointLight = JPC.select(_isPointLight, false);
-                    let _isSpotLight = JPC.parseNoteToBoolean(note, 'lighting.lighttype.is_spotlight');
+                    let _isSpotLight = objXmlParams.query('lighting.lighttype.is_spotlight').toBool();
                     let isSpotLight = JPC.select(_isSpotLight, false);
                     let encodedLightType = 0b00;
                     encodedLightType |= isPointLight === true ? 0b01 : 0b00;
                     encodedLightType |= isSpotLight === true ? 0b10 : 0b00;
                     this.lightTypes.push(encodedLightType);
                     // Append light direction index
-                    let _lightDirString = JPC.parseNote(note, 'lighting.light_direction');
+                    let _lightDirString = objXmlParams.query('lighting.light_direction').toString();
                     let lightDirString = JPC.select(_lightDirString, 'down');
                     let lightDirIdx = this.lightDirectionStringToIndex(lightDirString);
                     this.lightDirIdx.push(lightDirIdx);
                     // Append perspective for spotlight
-                    let _perspective = JPC.parseNoteToFloat(note, 'lighting.perspective');
+                    let _perspective = objXmlParams.query('lighting.perspective').toFloat();
                     let perspective = JPC.select(_perspective, 15.0);
                     this.perspective.push(perspective);
                     // Append spotlight radius for spotlight
-                    let _spotlightRadius = JPC.parseNoteToFloat(note, 'lighting.spotlight_radius');
+                    let _spotlightRadius = objXmlParams.query('lighting.spotlight_radius').toFloat();
                     let spotlightRadius = JPC.select(_spotlightRadius, 300.0);
                     this.spotlightRadius.push(spotlightRadius);
                     // Append utime
                     let _utime = Math.random();
                     this.utime.push(_utime);
-                    _utime = 0.4 + 0.6 * (Math.random() - 0.5);
-                    this.utime_steps.push(_utime);
+                    let _utime_step = 0.4 + 0.6 * (Math.random() - 0.5);
+                    this.utime_steps.push(_utime_step);
                 }
             }
         });
