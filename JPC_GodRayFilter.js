@@ -94,7 +94,7 @@
  *
  * @param switchid
  * @type switch
- * @desc Activate only when this switch is ON, allowing day/night maps.
+ * @desc Activate godray filter only when this switch is ON.
  * @default 1
  *
  */
