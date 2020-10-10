@@ -8,7 +8,7 @@ uniform float fMoveX;
 uniform float fMoveY;
 
 //==========================================================================================
-// Simplex 2D noise
+// Simplex 2D noise by patriciogonzalezvivo
 // Source : https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 //
 
@@ -46,14 +46,15 @@ void main()
 {
     vec4 fragColor = texture2D(uSampler, vTextureCoord);
     float sum = 0.0;
-    float f = 1.4;
-    float w = 0.9;
+    float frequency = 1.0;
+    float amplitude = 1.0;
     // Fractal Brownian Motion (FBM)
+    // Reference: https://www.scratchapixel.com/lessons/procedural-generation-virtual-worlds/procedural-patterns-noise-part-1/introduction
     for(int i = 0; i < 8; i++) { // octave = 8
         vec2 pos = vTextureCoord.xy - vec2(fMoveX, fMoveY);
-        sum += snoise(pos * f) / w;
-        f *= 2.0;
-        w *= 2.5;
+        sum += snoise(pos * frequency) * amplitude;
+        frequency *= 2.0;
+        amplitude *= 0.5;
     }
 
     float factor = clamp(sum, 1.0 - opacity, 1.0);
