@@ -55,8 +55,8 @@
     //=============================================================================
     const SPEED_XY = JPC.toGeneric(PLUGIN_PARAMS.speed).toFloatArray();
     const FOG_COLOR = JPC.toGeneric(PLUGIN_PARAMS.fogcolor).toFloatArray();
-    const OPACITY = parseFloat(PLUGIN_PARAMS.opacity);
-    const FOG_SWITCH_ID = parseInt(PLUGIN_PARAMS.gameswitchid);
+    const OPACITY = JPC.toGeneric(PLUGIN_PARAMS.opacity).toFloat();
+    const FOG_SWITCH_ID = JPC.toGeneric(PLUGIN_PARAMS.gameswitchid).toFloat();
 
     class Fog {
         // Private Instance Fields
