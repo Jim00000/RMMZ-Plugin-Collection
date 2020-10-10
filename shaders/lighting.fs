@@ -77,7 +77,7 @@ float rand(float n)
 float noise(float p)
 {
 	float fl = floor(p);
-  float fc = fract(p);
+    float fc = fract(p);
 	return mix(rand(fl), rand(fl + 1.0), fc);
 }
 	
