@@ -68,12 +68,12 @@ float getAngle(vec2 u, vec2 v)
 
 float vibrate(float utime)
 {
-    return (1.0 + sin(0.04 * utime) * 0.06);
+    return 1.0 + abs(sin(0.04 * utime)) * 0.05;
 }
 
 float vibrate_brightness(float utime)
 {
-    return (1.0 + sin(0.07 * utime) * 0.12);
+    return 1.0 + sin(0.04 * utime) * 0.2;
 }
 
 // ------------------------------------------------------------------
