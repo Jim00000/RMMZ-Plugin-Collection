@@ -66,14 +66,36 @@ float getAngle(vec2 u, vec2 v)
     return degree;
 }
 
-float vibrate(float utime)
+// ------------------------------------------------------------------
+// Generic 1D Noise by patriciogonzalezvivo
+// Source : https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+float rand(float n)
 {
-    return 1.0 + abs(sin(0.04 * utime)) * 0.05;
+    return fract(sin(n) * 43758.5453123);
 }
 
-float vibrate_brightness(float utime)
+float noise(float p)
 {
-    return 1.0 + sin(0.04 * utime) * 0.2;
+	float fl = floor(p);
+  float fc = fract(p);
+	return mix(rand(fl), rand(fl + 1.0), fc);
+}
+	
+float motion(float utime, float frequency, float amplitude)
+{
+    float noiseSum = 0.95;
+    for(int i = 0; i < 4; i++) { 
+        noiseSum += noise(utime * frequency) * amplitude;
+        frequency *= 2.0;
+        amplitude *= 0.5;
+    }
+    return noiseSum;
+}
+// ------------------------------------------------------------------
+
+float vibrate(float utime)
+{
+    return motion(utime * 0.006, 4.0, 0.25);
 }
 
 // ------------------------------------------------------------------
@@ -120,14 +142,13 @@ void main()
         float magnitude = 1.3;
         float time = uTime[i];
         float vibration = vibrate(time);
-        float vibration_brightness = vibrate_brightness(time);
         int type = lightType[i];
 
         // point light
         if(isPointLight(type) == 1 && dd >= 0.0) {
             vec2 toLight = abs(lightsrc[i] - pixelPos + vec2(0.0, -24.0));
             float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0);
-            brightness *= clamp((1.0 - (length(toLight) / lightRadius[i] * vibration)) * vibration_brightness, 0.0, 1.0) * magnitude;
+            brightness *= clamp(1.0 - (length(toLight) / lightRadius[i] * vibration), 0.0, 1.0) * magnitude;
             totalBrightness += brightness;
         }
 
@@ -139,7 +160,7 @@ void main()
             if(abs(dd) >= 0.0 && theta <= perspective[i] * vibration) {
                 vec2 toLight = abs(lightsrc[i] - pixelPos  + vec2(0.0, -24.0));
                 float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0) * clamp(1.0  - pow((theta / (perspective[i] * vibration)), 1.2), globalIllumination, 1.0);
-                brightness *= clamp((1.0 - (length(toLight) / fSpotlightRadius[i])) * vibration_brightness, 0.0, 1.0) * magnitude;
+                brightness *= clamp(1.0 - (length(toLight) / fSpotlightRadius[i]), 0.0, 1.0) * magnitude;
                 totalBrightness += brightness;
             } 
         }
