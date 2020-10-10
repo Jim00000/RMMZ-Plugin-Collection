@@ -65,12 +65,5 @@ void main()
       finalColor = mix(fogColor, fragColor.xyz, factor);
     }
 
-    // Improved Phase Function 
-    // From "Real-time Rendering of Dynamic Clouds"
-    // float g = 0.2, theta = 0.98;
-    // float numerator = 1.5 * (1.0 - g * g) * (1.0 + pow(cos(theta), 2.0));
-    // float denominator = (2.0 + g * g) * (1.0 + g * g - 2.0 * g * cos(theta));
-    // finalColor = finalColor * numerator / denominator;
-
     gl_FragColor = vec4(finalColor, fragColor.a);
 }
