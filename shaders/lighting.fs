@@ -12,14 +12,14 @@ in vec2 vTextureCoord;
 uniform sampler2D uSampler;
 uniform vec2 lightsrc[MAX_LIGHTS];
 uniform vec3 ambientColor[MAX_LIGHTS];
+uniform int lightSrcSize;
+uniform int lightDirIdx[MAX_LIGHTS];
+uniform int lightType[MAX_LIGHTS];
 uniform float lightRadius[MAX_LIGHTS];
 uniform float globalIllumination;
 uniform float perspective[MAX_LIGHTS]; // angle of spotlight
 uniform float fSpotlightRadius[MAX_LIGHTS];
 uniform float uTime[MAX_LIGHTS];
-uniform int lightSrcSize;
-uniform int lightDirIdx[MAX_LIGHTS];
-uniform int lightType[MAX_LIGHTS];
 
 out vec4 outColor;
 
@@ -34,21 +34,18 @@ out vec4 outColor;
 // lightDirIdx = 6 ---> Right
 // lightDirIdx = 8 ---> Up
 // These direction definition follows RPG Maker MZ's Spec.
-vec2 getLightDir(int idx) 
+vec2 getLightDir(const int idx) 
 {
-    if(idx == UPWARD_LIGHT_INDEX) {
-        // upward unit vector
-        return vec2(0.0, 1.0);
-    } else if(idx == DOWNWARD_LIGHT_INDEX) {
-        // downward unit vector
-        return vec2(0.0, -1.0);
-    } else if(idx == LEFTWARD_LIGHT_INDEX) {
-        // leftward unit vector
-        return vec2(1.0, 0.0);
-    } else if(idx == RIGHTWARD_LIGHT_INDEX) { 
-        // rightward unit vector
-        return vec2(-1.0, 0.0);
-    } else {
+    switch (idx) {
+        case UPWARD_LIGHT_INDEX:
+            return vec2(0.0, 1.0);
+        case DOWNWARD_LIGHT_INDEX:
+            return vec2(0.0, -1.0);
+        case LEFTWARD_LIGHT_INDEX:
+            return vec2(1.0, 0.0);
+        case RIGHTWARD_LIGHT_INDEX:
+            return vec2(-1.0, 0.0);
+        default:
         // FIXME: any way to throw exception ?
         return vec2(0.0, 0.0);
     }
@@ -61,7 +58,7 @@ vec2 getLightDir(int idx)
 // Output    : angle in degree
 // Note      : cosθ = dot(Va, Vb) / (magnitude(Va) * magnitude(Vb))
 // reference : https://onlinemschool.com/math/library/vector/angl/
-float getAngle(vec2 u, vec2 v) 
+float getAngle(const vec2 u, const vec2 v) 
 {
     float magnitude = length(u) * length(v);
     float cos_theta = dot(u, v) / magnitude;
@@ -102,32 +99,26 @@ float vibrate(float utime)
     return motion(utime * 0.006, 4.0, 0.25);
 }
 
+bool isBitSet(const int value, const int which)
+{
+    int bit = 1 << which;
+    return (value & bit) == bit;
+}
+
 // ------------------------------------------------------------------
 // Check whether the light type is point light
 // ------------------------------------------------------------------
-int isPointLight(int type) 
+bool isPointLight(const int type) 
 {
-    if(type == 1) { // 0b01
-        return 1;
-    } else if(type == 3) { // 0b11
-        return 1;
-    } else {
-        return 0;
-    }
+    return isBitSet(type, 0);
 }
 
 // ------------------------------------------------------------------
 // Check whether the light type is spotlight (flash light)
 // ------------------------------------------------------------------
-int isSpotLight(int type) 
+bool isSpotLight(const int type) 
 {
-    if(type == 2) { // 0b10
-        return 1;
-    } else if(type == 3) { // 0b11
-        return 1;
-    } else {
-        return 0;
-    }
+    return isBitSet(type, 1);
 }
 
 void main() 
@@ -147,7 +138,7 @@ void main()
         int type = lightType[i];
 
         // point light
-        if(isPointLight(type) == 1 && dd >= 0.0) {
+        if(isPointLight(type) == true && dd >= 0.0) {
             vec2 toLight = abs(lightsrc[i] - pixelPos + vec2(0.0, -24.0));
             float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0);
             brightness *= clamp(1.0 - (length(toLight) / lightRadius[i] * vibration), 0.0, 1.0) * magnitude;
@@ -155,7 +146,7 @@ void main()
         }
 
         // spotlight (flash light)
-        if(isSpotLight(type) == 1) {
+        if(isSpotLight(type) == true) {
             vec2 lightDir = normalize(lightsrc[i] - pixelPos + vec2(0.0, -24.0)) * fSpotlightRadius[i];
             vec2 spotDir = getLightDir(lightDirIdx[i]) * fSpotlightRadius[i];
             float theta = getAngle(lightDir, spotDir);
