@@ -2079,7 +2079,7 @@ var JPC = (() => {
         return new JPCGenericValue(value);
     }
 
-    Exported.notify = function(msg, duration = 3000) {
+    Exported.notify = async function(msg, duration = 3000) {
         if (Exported.notifier !== null) {
             if (Exported.notifier.parent !== null && (Exported.notifier.parent instanceof WindowLayer) === true) {
                 Exported.notifier.submit(msg, duration);
@@ -2371,7 +2371,7 @@ var JPC = (() => {
         this.refresh();
     };
 
-    Window_JPCNotifier.prototype.submit = function(text, duration) {
+    Window_JPCNotifier.prototype.submit = async function(text, duration) {
         if (this.isBusy == false) {
             this.startNotification();
         }

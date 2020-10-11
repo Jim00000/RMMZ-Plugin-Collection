@@ -51,90 +51,77 @@
 
     const QUICK_SAVE_KEY_STRING = 'QuickSave';
     const QUICK_LOAD_KEY_STRING = 'QuickLoad';
-    const QUICK_SAVE_FILENAME = PLUGINPARAMS['quick_save_name'];
-    const QUICK_SAVE_KEY = PLUGINPARAMS['quick_save_key'];
-    const QUICK_LOAD_KEY = PLUGINPARAMS['quick_load_key'];
-    const QUICK_SAVE_NOTIFICATION_MESSAGE = PLUGINPARAMS['quick_save_notification_msg'];
-    const QUICK_LOAD_NOTIFICATION_MESSAGE = PLUGINPARAMS['quick_load_notification_msg'];
+    const QUICK_SAVE_FILENAME = PLUGINPARAMS.quick_save_name;
+    const QUICK_SAVE_KEY = PLUGINPARAMS.quick_save_key;
+    const QUICK_LOAD_KEY = PLUGINPARAMS.quick_load_key;
+    const QUICK_SAVE_NOTIFICATION_MESSAGE = PLUGINPARAMS.quick_save_notification_msg;
+    const QUICK_LOAD_NOTIFICATION_MESSAGE = PLUGINPARAMS.quick_load_notification_msg;
 
     // Register F6 as quicksave hotkey
     JPC.registerKeyBind(QUICK_SAVE_KEY, QUICK_SAVE_KEY_STRING);
     // Register F7 as quickload hotkey
     JPC.registerKeyBind(QUICK_LOAD_KEY, QUICK_LOAD_KEY_STRING);
 
-    function makeQuickSaveName() {
-        return QUICK_SAVE_FILENAME;
-    };
-
-    function loadGameFromQuickSave() {
-        const quickSaveName = makeQuickSaveName();
-        return StorageManager.loadObject(quickSaveName).then(contents => {
-            DataManager.createGameObjects();
-            DataManager.extractSaveContents(contents);
-            DataManager.correctDataErrors();
-            return 0;
-        });
-    };
-
-    function doQuickSave() {
-        const contents = DataManager.makeSaveContents();
-        const saveName = makeQuickSaveName();
-        return StorageManager.saveObject(saveName, contents);
-    };
-
-    function quickSave() {
-        doQuickSave()
-            .then(() => {
+    class QuickSaveLoad {
+        static async save() {
+            const contents = DataManager.makeSaveContents();
+            try {
+                await StorageManager.saveObject(QUICK_SAVE_FILENAME, contents);
                 SoundManager.playSave();
-            })
-            .catch(() => {
+                JPC.notify(QUICK_SAVE_NOTIFICATION_MESSAGE);
+            } catch (err) {
                 SoundManager.playBuzzer();
-            });
-    };
+            }
+        };
 
-    function quickLoad() {
-        loadGameFromQuickSave()
-            .then(() => {
+        static async load() {
+            try {
+                let contents = StorageManager.loadObject(QUICK_SAVE_FILENAME);
+                DataManager.createGameObjects();
+                DataManager.extractSaveContents(await contents);
+                DataManager.correctDataErrors();
                 SoundManager.playLoad();
                 SceneManager.goto(Scene_Map);
-            })
-            .catch(() => {
+                setTimeout(() => {
+                    JPC.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
+                }, 600);
+            } catch (err) {
                 SoundManager.playBuzzer();
-            });
+            }
+        };
+
+        static updateCallQuickSave() {
+            if (QuickSaveLoad.isQuickSaveCalled()) {
+                QuickSaveLoad.save();
+            }
+        };
+
+        static updateCallQuickLoad() {
+            if (QuickSaveLoad.isQuickLoadCalled()) {
+                QuickSaveLoad.load();
+            }
+        };
+
+        static isQuickSaveCalled() {
+            return Input.isTriggered(QUICK_SAVE_KEY_STRING);
+        };
+
+        static isQuickLoadCalled() {
+            return Input.isTriggered(QUICK_LOAD_KEY_STRING);
+        };
     };
 
-    function updateCallQuickSave() {
-        if (isQuickSaveCalled()) {
-            quickSave();
-            JPC.notify(QUICK_SAVE_NOTIFICATION_MESSAGE);
-        }
-    };
-
-    function updateCallQuickLoad() {
-        if (isQuickLoadCalled()) {
-            quickLoad();
-            setTimeout(() => {
-                JPC.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
-            }, 600);
-        }
-    };
-
-    function isQuickSaveCalled() {
-        return Input.isTriggered(QUICK_SAVE_KEY_STRING);
-    };
-
-    function isQuickLoadCalled() {
-        return Input.isTriggered(QUICK_LOAD_KEY_STRING);
-    };
-
+    //=============================================================================
+    // Hook
+    //=============================================================================
     const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
     Scene_Map.prototype.updateScene = function() {
         _Scene_Map__updateScene.apply(this, arguments);
         if (!SceneManager.isSceneChanging()) {
-            updateCallQuickSave();
+            QuickSaveLoad.updateCallQuickSave();
         }
         if (!SceneManager.isSceneChanging()) {
-            updateCallQuickLoad();
+            QuickSaveLoad.updateCallQuickLoad();
         }
     };
 
@@ -142,7 +129,7 @@
     Scene_Title.prototype.update = function() {
         _Scene_Title__update.apply(this, arguments);
         if (!SceneManager.isSceneChanging()) {
-            updateCallQuickLoad();
+            QuickSaveLoad.updateCallQuickLoad();
         }
     };
 })();
