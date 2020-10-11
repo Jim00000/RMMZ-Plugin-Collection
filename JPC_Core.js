@@ -2100,8 +2100,10 @@ var JPC = (() => {
     };
 
     Exported.createFilter = function(shaderPath, uniforms = {}) {
+        // Here we use OpenGL ES 3.0
+        const vertSrc = Exported.loadGLSLShaderFile('js/plugins/shaders/default.vs');
         const fragSrc = Exported.loadGLSLShaderFile(shaderPath);
-        const filter = new PIXI.Filter(PIXI.Filter.defaultVertexSrc, fragSrc, uniforms);
+        const filter = new PIXI.Filter(vertSrc, fragSrc, uniforms);
         return filter;
     };
 

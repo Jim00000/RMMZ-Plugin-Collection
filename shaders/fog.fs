@@ -1,11 +1,15 @@
+#version 300 es
 precision highp float;
 
-varying vec2 vTextureCoord;
+in vec2 vTextureCoord;
+
 uniform sampler2D uSampler;
 uniform vec3 fogColor;
 uniform float opacity;
 uniform float fMoveX;
 uniform float fMoveY;
+
+out vec4 outColor;
 
 //==========================================================================================
 // Simplex 2D noise by patriciogonzalezvivo
@@ -44,7 +48,7 @@ float snoise(vec2 v){
 
 void main() 
 {
-    vec4 fragColor = texture2D(uSampler, vTextureCoord);
+    vec4 fragColor = texture(uSampler, vTextureCoord);
     float sum = 0.0;
     float frequency = 1.0;
     float amplitude = 1.0;
@@ -66,5 +70,5 @@ void main()
       finalColor = mix(fogColor, fragColor.xyz, factor);
     }
 
-    gl_FragColor = vec4(finalColor, fragColor.a);
+    outColor = vec4(finalColor, fragColor.a);
 }

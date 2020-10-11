@@ -1,18 +1,19 @@
+#version 300 es
 precision highp float;
 
-varying vec2 vTextureCoord;
+in vec2 vTextureCoord;
+
 uniform sampler2D uSampler;
-
 uniform vec2 dimensions;
-
 uniform vec2 light;
 uniform vec3 lightColor;
 uniform bool parallel;
 uniform float aspect;
-
 uniform float gain;
 uniform float uLacunrity;
 uniform float utime;
+
+out vec4 outColor;
 
 vec3 mod289(vec3 x)
 {
@@ -135,5 +136,5 @@ void main(void) {
     vec4 mist = vec4(lightColor, 1.0) * noise * (1.0 - coord.y);
     mist.a = 1.0;
 
-    gl_FragColor = texture2D(uSampler, vTextureCoord) + mist;
+    outColor = texture(uSampler, vTextureCoord) + mist;
 }

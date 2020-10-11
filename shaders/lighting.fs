@@ -1,3 +1,5 @@
+#version 300 es
+
 #define MAX_LIGHTS 32
 #define DOWNWARD_LIGHT_INDEX 2
 #define LEFTWARD_LIGHT_INDEX 4
@@ -5,7 +7,7 @@
 #define UPWARD_LIGHT_INDEX 8
 precision highp float;
 
-varying vec2 vTextureCoord;
+in vec2 vTextureCoord;
 
 uniform sampler2D uSampler;
 uniform vec2 lightsrc[MAX_LIGHTS];
@@ -18,6 +20,8 @@ uniform float uTime[MAX_LIGHTS];
 uniform int lightSrcSize;
 uniform int lightDirIdx[MAX_LIGHTS];
 uniform int lightType[MAX_LIGHTS];
+
+out vec4 outColor;
 
 // ------------------------------------------------------------------
 // Get unit vector for up, down, left and right direction
@@ -128,14 +132,12 @@ int isSpotLight(int type)
 
 void main() 
 {
-    vec4 diffuseColor = texture2D(uSampler, vTextureCoord);
+    vec4 diffuseColor = texture(uSampler, vTextureCoord);
     vec3 finalColor;
     vec3 mixedLightColor = vec3(globalIllumination);
     vec2 pixelPos = gl_FragCoord.xy;
 
-    for(int i = 0; i < MAX_LIGHTS; i++) {
-        // Workaround. Bypass 'loop index cannot be compared with non-constant expression' issue.
-        if (i >= lightSrcSize) { break; }
+    for(int i = 0; i < lightSrcSize; i++) {
         float dist = distance(lightsrc[i], pixelPos + vec2(0.0, 24.0));
         float dd = lightRadius[i] - dist;
         float totalBrightness = 0.0;
@@ -170,5 +172,5 @@ void main()
 
     finalColor = diffuseColor.xyz * mixedLightColor;
 
-    gl_FragColor = vec4(finalColor, diffuseColor.a);
+    outColor = vec4(finalColor, diffuseColor.a);
 }
