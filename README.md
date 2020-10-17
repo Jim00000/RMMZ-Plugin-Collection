@@ -22,6 +22,7 @@
 - God Ray Effect
 - Lighting Effect
 - Fog Effect
+- Snow Weather Effect
 
 ## Installation
 
