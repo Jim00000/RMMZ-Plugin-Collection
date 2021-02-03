@@ -119,11 +119,11 @@
         };
 
         static isQuickSaveCalled() {
-            return Input.isTriggered(QUICK_SAVE_KEY_STRING);
+            return Input.isTriggered('QuickSave');
         };
 
         static isQuickLoadCalled() {
-            return Input.isTriggered(QUICK_LOAD_KEY_STRING);
+            return Input.isTriggered('QuickLoad');
         };
     };
 
