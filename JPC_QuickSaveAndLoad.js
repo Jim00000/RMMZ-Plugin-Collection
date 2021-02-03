@@ -78,7 +78,6 @@
         }
 
         static load() {
-            const quickSavefileId = QuickSaveLoad.getQuickSavefileId();
             const saveName = QuickSaveLoad.getQuickSavefileName();
             StorageManager.loadObject(saveName)
                 .then(contents => {
