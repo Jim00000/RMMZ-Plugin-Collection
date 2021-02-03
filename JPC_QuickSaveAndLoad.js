@@ -1,7 +1,3 @@
-//=============================================================================
-// RPG Maker MZ - Quick Save/Load
-//=============================================================================
-
 /*:
  * @target MZ
  * @plugindesc Quick save/load mechanism.
@@ -20,14 +16,14 @@
  * @default quicksave
  *
  * @param quick_save_notification_msg
- * @text Quick save message
- * @desc The notification message while quicksaving is done.
+ * @text Quick save text
+ * @desc The notification text while quicksaving is done.
  * @type string
  * @default Quicksaving...
  *
  * @param quick_load_notification_msg
- * @text Quick load message
- * @desc The notification message while quickloading is done.
+ * @text Quick load text
+ * @desc The notification text while quickloading is done.
  * @type string
  * @default Quickloading...
  *
@@ -43,32 +39,32 @@
  * @type number
  * @default 118
  */
-(() => {
-    'use strict';
 
-    const PLUGIN_NAME = 'JPC_QuickSaveAndLoad';
-    const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
+(async (pluginParams) => {
+    'use strict';
 
     const QUICK_SAVE_KEY_STRING = 'QuickSave';
     const QUICK_LOAD_KEY_STRING = 'QuickLoad';
-    const QUICK_SAVE_FILENAME = PLUGINPARAMS.quick_save_name;
-    const QUICK_SAVE_KEY = PLUGINPARAMS.quick_save_key;
-    const QUICK_LOAD_KEY = PLUGINPARAMS.quick_load_key;
-    const QUICK_SAVE_NOTIFICATION_MESSAGE = PLUGINPARAMS.quick_save_notification_msg;
-    const QUICK_LOAD_NOTIFICATION_MESSAGE = PLUGINPARAMS.quick_load_notification_msg;
+    const QUICK_SAVE_FILENAME = pluginParams.quick_save_name;
+    const QUICK_SAVE_KEY = pluginParams.quick_save_key;
+    const QUICK_LOAD_KEY = pluginParams.quick_load_key;
+    const QUICK_SAVE_NOTIFICATION_MESSAGE = pluginParams.quick_save_notification_msg;
+    const QUICK_LOAD_NOTIFICATION_MESSAGE = pluginParams.quick_load_notification_msg;
 
-    // Register F6 as quicksave hotkey
-    JPC.registerKeyBind(QUICK_SAVE_KEY, QUICK_SAVE_KEY_STRING);
-    // Register F7 as quickload hotkey
-    JPC.registerKeyBind(QUICK_LOAD_KEY, QUICK_LOAD_KEY_STRING);
+    JPC.import['core_miscellany'].then(() => {
+        // Register F6 as quicksave hotkey
+        JPC.core.misc.registerKeyBinding(QUICK_SAVE_KEY, QUICK_SAVE_KEY_STRING);
+        // Register F7 as quickload hotkey
+        JPC.core.misc.registerKeyBinding(QUICK_LOAD_KEY, QUICK_LOAD_KEY_STRING);
+    });
 
     class QuickSaveLoad {
         static async save() {
             const contents = DataManager.makeSaveContents();
             try {
+                JPC.notifier.notify(QUICK_SAVE_NOTIFICATION_MESSAGE);
                 await StorageManager.saveObject(QUICK_SAVE_FILENAME, contents);
                 SoundManager.playSave();
-                JPC.notify(QUICK_SAVE_NOTIFICATION_MESSAGE);
             } catch (err) {
                 SoundManager.playBuzzer();
             }
@@ -81,10 +77,16 @@
                 DataManager.extractSaveContents(await contents);
                 DataManager.correctDataErrors();
                 SoundManager.playLoad();
-                SceneManager.goto(Scene_Map);
-                setTimeout(() => {
-                    JPC.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
-                }, 600);
+                // SceneManager.goto(Scene_Map);
+
+                new Promise((resolve, reject) => {
+                    SceneManager.goto(Scene_Map);
+                    while (Scene_Map.prototype.isFading() === true) {
+                    }
+                    resolve(true);
+                }).then((success) => {
+                    JPC.notifier.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
+                });
             } catch (err) {
                 SoundManager.playBuzzer();
             }
@@ -111,9 +113,9 @@
         };
     };
 
-    //=============================================================================
-    // Hook
-    //=============================================================================
+    ////////////////////////////////////////////
+    /////               Hook               /////
+    ////////////////////////////////////////////
     const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
     Scene_Map.prototype.updateScene = function() {
         _Scene_Map__updateScene.apply(this, arguments);
@@ -132,11 +134,11 @@
             QuickSaveLoad.updateCallQuickLoad();
         }
     };
-})();
+})(JPC.getPluginParams(document));
 
 /* MIT License
 
-Copyright (c) 2020 Jim00000
+Copyright (c) Jim00000
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
