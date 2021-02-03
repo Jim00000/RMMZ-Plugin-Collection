@@ -1,17 +1,38 @@
 /*:
  * @target MZ
- * @plugindesc Quick save/load mechanism.
+ * @plugindesc A simple, skyrim style like quick save and quick load system.
  * @author Jim00000
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_QuickSaveAndLoad.js
  * @base JPC_Core
  * @help
- * Use F6 to quicksave, F7 to quickload in default.
+ * ◼️ Introduction
+ * 
+ * A simple quicksave mechanism similar to The Elder Scrolls V: Skyrim. Use 
+ * F6 to quicksave and then F7 to quickload in default. You can quick save in 
+ * the game map scene and quick load in game map scene or game title scene. 
  * The quick save file is named as "quicksave.rmmzsave" in default.
- * You can also quick load the save file in the game title scene.
  *
+ * ◼️ Dependencies
+ * 
+ * - JPC_Core.js
+ * 
+ * ◼️ MIT License
+ * 
+ * Copyright (c) Jim00000
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy 
+ * of this software and associated documentation files (the "Software"), to 
+ * deal in the Software without restriction, including without limitation the 
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+ * sell copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions: 
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
  * @param quick_save_name
- * @text filename
- * @desc The filename of quick save
+ * @text Save file name
+ * @desc The file name of quick save
  * @type string
  * @default quicksave
  *
