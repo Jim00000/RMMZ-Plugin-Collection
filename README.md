@@ -15,7 +15,7 @@ Make it as a hobby. I will slowly update this project.
 ## Plugin List
 
 | Plugin | File name | Dependency | Status | Documentation |
-|---|---|---|---|---|
+|:---|:---|:---:|:---:|:---:|
 | Essential Core | JPC_Core.js | - | WIP | - |
 | Quick Save/Load | JPC_QuickSaveAndLoad.js | JPC_Core.js | WIP | - |
 | God Ray Effect | JPC_GodRayFilter.js | JPC_Core.js | WIP | - |
