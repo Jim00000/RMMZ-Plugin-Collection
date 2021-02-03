@@ -43,19 +43,11 @@
 (async (pluginParams) => {
     'use strict';
 
-    const QUICK_SAVE_KEY_STRING = 'QuickSave';
-    const QUICK_LOAD_KEY_STRING = 'QuickLoad';
-    const QUICK_SAVE_FILENAME = pluginParams.quick_save_name;
-    const QUICK_SAVE_KEY = pluginParams.quick_save_key;
-    const QUICK_LOAD_KEY = pluginParams.quick_load_key;
-    const QUICK_SAVE_NOTIFICATION_MESSAGE = pluginParams.quick_save_notification_msg;
-    const QUICK_LOAD_NOTIFICATION_MESSAGE = pluginParams.quick_load_notification_msg;
-
     JPC.import['core_miscellany'].then(() => {
         // Register F6 as quicksave hotkey
-        JPC.core.misc.registerKeyBinding(QUICK_SAVE_KEY, QUICK_SAVE_KEY_STRING);
+        JPC.core.misc.registerKeyBinding(pluginParams.quick_save_key, 'QuickSave');
         // Register F7 as quickload hotkey
-        JPC.core.misc.registerKeyBinding(QUICK_LOAD_KEY, QUICK_LOAD_KEY_STRING);
+        JPC.core.misc.registerKeyBinding(pluginParams.quick_load_key, 'QuickLoad');
     });
 
     class QuickSaveLoad {
@@ -82,7 +74,7 @@
                 })
                 .then(() => SoundManager.playSave())
                 .catch(() => SoundManager.playBuzzer())
-                .then(() => JPC.notifier.notify(QUICK_SAVE_NOTIFICATION_MESSAGE));
+                .then(() => JPC.notifier.notify(pluginParams.quick_save_notification_msg));
         }
 
         static load() {
@@ -99,7 +91,7 @@
                     QuickSaveLoad.fadeInOut();
                     SceneManager.goto(Scene_Map);
                     Scene_Load.prototype.reloadMapIfUpdated();
-                    JPC.notifier.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
+                    JPC.notifier.notify(pluginParams.quick_load_notification_msg);
                 })
                 .catch(() => {
                     SoundManager.playBuzzer();
