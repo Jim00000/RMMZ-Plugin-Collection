@@ -2,25 +2,17 @@ export var __notifier = {};
 
 // Global instance of Window_JPCNotifier object.
 // This instance's scope should be private to other modules.
-var _instance = null;
+__notifier.instance = null;
 
 // builder
 __notifier.build = function() {
     return new Window_JPCNotifier();
 };
 
-// get notifier instance. (singleton pattern)
-__notifier.getInstance = function() {
-    if (_instance === null) {
-        _instance = __notifier.build();
-    }
-    return _instance;
-};
-
-__notifier.notify = async function(msg, duration = 3000) {
-    if (_instance !== null) {
-        if (_instance.parent !== null && (_instance.parent instanceof WindowLayer) === true) {
-            _instance.submit(msg, duration);
+__notifier.notify = function(msg, duration = 3000) {
+    if (__notifier.instance !== null) {
+        if (__notifier.instance.parent !== null && (__notifier.instance.parent instanceof WindowLayer) === true) {
+            __notifier.instance.submit(msg, duration);
         }
     }
 };
@@ -29,19 +21,18 @@ __notifier.notify = async function(msg, duration = 3000) {
 // Window_JPCNotifier
 //=============================================================================
 
+let workingPipeline = [];
+let waitingPipeline = [];
+
 class Window_JPCNotifier extends Window_Base {
     // Private Instance Fields
     #maxWorkingQueueSize
     #isBusy
     #fontSize
     #duration
-    #working
-    #waiting
 
     constructor() {
         super(new Rectangle(-10, -20, 0, 0));
-        this.#working = [];
-        this.#waiting = [];
         this.#maxWorkingQueueSize = 10;
         this.#fontSize = 16;
         this.contents.fontFace = $gameSystem.mainFontFace();
@@ -54,6 +45,7 @@ class Window_JPCNotifier extends Window_Base {
         this._isWindow = false;
         this.resetTimer();
         this.refresh();
+        this.checkQueue();        
     };
 
     get maxWorkingQueueSize() {
@@ -69,15 +61,15 @@ class Window_JPCNotifier extends Window_Base {
     };
 
     get working() {
-        return this.#working;
+        return workingPipeline;
     };
 
     set working(array) {
-        this.#working = array;
+        workingPipeline = array;
     };
 
     get waiting() {
-        return this.#waiting;
+        return waitingPipeline;
     };
 
     set isBusy(boolean) {
@@ -92,6 +84,12 @@ class Window_JPCNotifier extends Window_Base {
         this.#duration = duration;
     };
 };
+
+Window_JPCNotifier.prototype.checkQueue = function() {
+    if(this.working.length > 0 || this.waiting.length > 0) {
+        this.startNotification();
+    }
+}
 
 Window_JPCNotifier.prototype.update = function() {
     Object.getPrototypeOf(this.constructor.prototype).update.call(this);  // call superclass's update

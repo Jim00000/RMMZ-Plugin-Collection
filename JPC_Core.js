@@ -101,7 +101,8 @@ const JPC = (() => {
     const _Scene_Map__createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
     Scene_Map.prototype.createDisplayObjects = function() {
         _Scene_Map__createDisplayObjects.apply(this, arguments);
-        this.addWindow(JPC.notifier.getInstance());
+        JPC.notifier.instance = JPC.notifier.build();
+        this.addWindow(JPC.notifier.instance);
     };
 
     return Exported;
