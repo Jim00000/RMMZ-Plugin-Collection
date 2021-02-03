@@ -59,38 +59,61 @@
     });
 
     class QuickSaveLoad {
-        static async save() {
+        static getQuickSavefileName() {
+            return pluginParams.quick_save_name;
+        }
+
+        static getQuickSavefileId() {
+            return DataManager.maxSavefiles() + 1;
+        }
+
+        static save() {
+            const quickSavefileId = QuickSaveLoad.getQuickSavefileId();
+            const saveName = QuickSaveLoad.getQuickSavefileName();
+            $gameSystem._versionId = $dataSystem.versionId;
+            $gameSystem._framesOnSave = Graphics.frameCount;
+            $gameSystem._bgmOnSave = AudioManager.saveBgm();
+            $gameSystem._bgsOnSave = AudioManager.saveBgs();
             const contents = DataManager.makeSaveContents();
-            try {
-                JPC.notifier.notify(QUICK_SAVE_NOTIFICATION_MESSAGE);
-                await StorageManager.saveObject(QUICK_SAVE_FILENAME, contents);
-                SoundManager.playSave();
-            } catch (err) {
-                SoundManager.playBuzzer();
-            }
-        };
+            StorageManager.saveObject(saveName, contents)
+                .then(() => {
+                    DataManager._globalInfo[quickSavefileId] = DataManager.makeSavefileInfo();
+                    DataManager.saveGlobalInfo();
+                })
+                .then(() => SoundManager.playSave())
+                .catch(() => SoundManager.playBuzzer())
+                .then(() => JPC.notifier.notify(QUICK_SAVE_NOTIFICATION_MESSAGE));
+        }
 
-        static async load() {
-            try {
-                let contents = StorageManager.loadObject(QUICK_SAVE_FILENAME);
-                DataManager.createGameObjects();
-                DataManager.extractSaveContents(await contents);
-                DataManager.correctDataErrors();
-                SoundManager.playLoad();
-                // SceneManager.goto(Scene_Map);
-
-                new Promise((resolve, reject) => {
+        static load() {
+            const quickSavefileId = QuickSaveLoad.getQuickSavefileId();
+            const saveName = QuickSaveLoad.getQuickSavefileName();
+            StorageManager.loadObject(saveName)
+                .then(contents => {
+                    DataManager.createGameObjects();
+                    DataManager.extractSaveContents(contents);
+                    DataManager.correctDataErrors();
+                })
+                .then(() => {
+                    SoundManager.playLoad();
+                    QuickSaveLoad.fadeInOut();
                     SceneManager.goto(Scene_Map);
-                    while (Scene_Map.prototype.isFading() === true) {
-                    }
-                    resolve(true);
-                }).then((success) => {
+                    Scene_Load.prototype.reloadMapIfUpdated();
                     JPC.notifier.notify(QUICK_LOAD_NOTIFICATION_MESSAGE);
+                })
+                .catch(() => {
+                    SoundManager.playBuzzer();
                 });
-            } catch (err) {
-                SoundManager.playBuzzer();
-            }
-        };
+        }
+
+        static fadeInOut() {
+            const time = Scene_Load.prototype.slowFadeSpeed() / 60;
+            AudioManager.fadeOutBgm(time);
+            AudioManager.fadeOutBgs(time);
+            AudioManager.fadeOutMe(time);
+            $gameScreen.startFadeOut(Scene_Load.prototype.slowFadeSpeed());
+            $gameScreen.startFadeIn(Scene_Load.prototype.slowFadeSpeed());
+        }
 
         static updateCallQuickSave() {
             if (QuickSaveLoad.isQuickSaveCalled()) {
