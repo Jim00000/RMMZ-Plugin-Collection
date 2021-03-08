@@ -42,12 +42,17 @@ const JPC = (() => {
     Exported.parseJSFileName = function(doc) {
         const path = doc.currentScript.src;
         const filenameWithExtension = path.substring(path.lastIndexOf('/') + 1);
-        const filename = filenameWithExtension.substring(0, filenameWithExtension.length - 3); // remove file extension (.js)
+        const filename = filenameWithExtension.substring(0, filenameWithExtension.length - 3);  // remove file extension (.js)
         return filename;
     };
 
-    Exported.getPluginParams = function(doc) {
+    Exported.getPluginName = function(doc) {
         const pluginName = Exported.parseJSFileName(doc);
+        return pluginName;
+    };
+
+    Exported.getPluginParams = function(doc) {
+        const pluginName = Exported.getPluginName(doc);
         return PluginManager.parameters(pluginName);
     };
 
