@@ -17,9 +17,9 @@ __notifier.notify = function(msg, duration = 3000) {
     }
 };
 
-//=============================================================================
-// Window_JPCNotifier
-//=============================================================================
+//////////////////////////////////////////////////////////////////
+/////               Class : Window_JPCNotifier               /////
+//////////////////////////////////////////////////////////////////
 
 let workingPipeline = [];
 let waitingPipeline = [];
@@ -45,7 +45,7 @@ class Window_JPCNotifier extends Window_Base {
         this._isWindow = false;
         this.resetTimer();
         this.refresh();
-        this.checkQueue();        
+        this.checkQueue();
     };
 
     get maxWorkingQueueSize() {
@@ -86,10 +86,10 @@ class Window_JPCNotifier extends Window_Base {
 };
 
 Window_JPCNotifier.prototype.checkQueue = function() {
-    if(this.working.length > 0 || this.waiting.length > 0) {
+    if (this.working.length > 0 || this.waiting.length > 0) {
         this.startNotification();
     }
-}
+};
 
 Window_JPCNotifier.prototype.update = function() {
     Object.getPrototypeOf(this.constructor.prototype).update.call(this);  // call superclass's update
