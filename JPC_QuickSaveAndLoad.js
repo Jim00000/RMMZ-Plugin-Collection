@@ -30,14 +30,10 @@
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
- * @ --- Enable / Disable ---
- *
- * @param rootdir_enable_disable
- * @text Enable / Disable
+ * @ --- Enable quick save ---
  *
  * @param enable_quicksave_system
- * @parent rootdir_enable_disable
- * @text Activate quick save/load system
+ * @text Enable quick save/load system
  * @desc Is quicksave system activated ? (Note. this option is ineffective if bound to a certain RPG Maker switches)
  * @type boolean
  * @default true
@@ -45,8 +41,8 @@
  * @off Disable
  *
  * @param rm_switch_activity
- * @parent rootdir_enable_disable
- * @text bound to RPG Maker switches
+ * @parent enable_quicksave_system
+ * @text Bound to RPG Maker switch
  * @desc Default is 0 which means it doesn't bind a RM switch.
  * Through bound to a switch, you can turn on/off the system.
  * @type switch
@@ -74,15 +70,15 @@
  * @off Not display
  *
  * @param quick_save_notification_msg
- * @parent rootdir_options
- * @text Quick save text
+ * @parent output_notification_msg
+ * @text Quick save notification message
  * @desc The notification text while quicksaving is done.
  * @type string
  * @default Quicksaving...
  *
  * @param quick_load_notification_msg
- * @parent rootdir_options
- * @text Quick load text
+ * @parent output_notification_msg
+ * @text Quick load notification message
  * @desc The notification text while quickloading is done.
  * @type string
  * @default Quickloading...
@@ -149,8 +145,15 @@
 
     // is quick save system activated
     JPC.quicksave.isEnabled = function() {
-        if (JPC.quicksave.__rm_switch_activity !== 0) return $gameSwitches.value(JPC.quicksave.__rm_switch_activity);
-        return JPC.quicksave.__isEnabled;
+        if (JPC.quicksave.__rm_switch_activity !== 0)
+            return $gameSwitches.value(JPC.quicksave.__rm_switch_activity);
+        else
+            return JPC.quicksave.__isEnabled;
+    };
+
+    // is quick save notification activated
+    JPC.quicksave.isNotificationEnabled = function() {
+        return JPC.quicksave.__isEnabledNotification;
     };
 
     JPC.import['core_typeconverter'].then(() => {
@@ -191,7 +194,7 @@
                 .then(() => SoundManager.playSave())
                 .catch(() => SoundManager.playBuzzer())
                 .then(() => {
-                    if (JPC.quicksave.__isEnabledNotification) {
+                    if (JPC.quicksave.isNotificationEnabled()) {
                         JPC.notifier.notify(pluginParams.quick_save_notification_msg);
                     }
                 });
@@ -215,7 +218,7 @@
                     SoundManager.playBuzzer();
                 })
                 .then(() => {
-                    if (JPC.quicksave.__isEnabledNotification) {
+                    if (JPC.quicksave.isNotificationEnabled()) {
                         JPC.notifier.notify(pluginParams.quick_load_notification_msg);
                     }
                 });
@@ -270,7 +273,7 @@
     const _Scene_Title__update = Scene_Title.prototype.update;
     Scene_Title.prototype.update = function() {
         _Scene_Title__update.apply(this, arguments);
-        if (JPC.quicksave.isEnabled() === true) {
+        if (JPC.quicksave.__isEnabled === true) {
             if (!SceneManager.isSceneChanging()) {
                 QuickSaveLoad.updateCallQuickLoad();
             }
