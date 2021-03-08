@@ -27,6 +27,10 @@ const JPC = (() => {
         Exported.notifier = mod.__notifier;
     });
 
+    Exported.import['core_typeconverter'] = import('./jpc/core/typeconverter.js').then(mod => {
+        Exported.core.typeconverter = mod.__typeconverter;
+    });
+
     Exported.import['core_miscellany'] = import('./jpc/core/miscellany.js').then(mod => {
         Exported.core.misc = mod.__miscellany;
     });
