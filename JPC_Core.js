@@ -35,9 +35,9 @@ const JPC = (() => {
         Exported.core.misc = mod.__miscellany;
     });
 
-    ///////////////////////////////////////////////////////////////////
-    /////               Public Synchronized Methods               /////
-    ///////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
+    /////               Public Methods               /////
+    //////////////////////////////////////////////////////
 
     Exported.parseJSFileName = function(doc) {
         const path = doc.currentScript.src;
@@ -102,16 +102,6 @@ const JPC = (() => {
         } else {
             return null;
         }
-    };
-
-    ////////////////////////////////////////////
-    /////               Hook               /////
-    ////////////////////////////////////////////
-    const _Scene_Map__createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
-    Scene_Map.prototype.createDisplayObjects = function() {
-        _Scene_Map__createDisplayObjects.apply(this, arguments);
-        JPC.notifier.instance = JPC.notifier.build();
-        this.addWindow(JPC.notifier.instance);
     };
 
     return Exported;

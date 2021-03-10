@@ -1,183 +1,289 @@
 export var __notifier = {};
 
-// Global instance of Window_JPCNotifier object.
-// This instance's scope should be private to other modules.
-__notifier.instance = null;
-
-// builder
-__notifier.build = function() {
-    return new Window_JPCNotifier();
-};
-
 __notifier.notify = function(msg, duration = 3000) {
-    if (__notifier.instance !== null) {
-        if (__notifier.instance.parent !== null && (__notifier.instance.parent instanceof WindowLayer) === true) {
-            __notifier.instance.submit(msg, duration);
-        }
+    if (__instance !== undefined && __instance !== null) {
+        __instance.notify(msg, duration)
     }
 };
 
-//////////////////////////////////////////////////////////////////
-/////               Class : Window_JPCNotifier               /////
-//////////////////////////////////////////////////////////////////
+// This is reserved for customized style setting.
+// Users should define their own's style.
+__notifier.createCustomizedStyle = null;
 
-let workingPipeline = [];
-let waitingPipeline = [];
+function createDefaultStyle() {
+    // https://pixijs.io/pixi-text-style/
+    return new PIXI.TextStyle({
+        fontFamily: "Tahoma",
+        fontSize: 20,
+        letterSpacing: 2,
+        lineJoin: "round",
+        miterLimit: 5,
+        strokeThickness: 1
+    });
+}
 
-class Window_JPCNotifier extends Window_Base {
+function createStyle() {
+    if(__notifier.createCustomizedStyle === undefined || __notifier.createCustomizedStyle === null) {
+        return createDefaultStyle();
+    } else {
+        return __notifier.createCustomizedStyle();
+    }
+}
+
+function resetNotifierPixiText() {
+    __instance.pixiText = new PIXI.Text('', createStyle());
+};
+
+class JNotifierRequest {
     // Private Instance Fields
-    #maxWorkingQueueSize
-    #isBusy
-    #fontSize
-    #duration
+    #_text
+    #_showntext
+    #_duration
+    #_timestamp
+    #_counter
+    #_isStartStageTerminated
+    #_isEndStageTerminated
+    #_default_counter
 
-    constructor() {
-        super(new Rectangle(-10, -20, 0, 0));
-        this.#maxWorkingQueueSize = 10;
-        this.#fontSize = 16;
-        this.contents.fontFace = $gameSystem.mainFontFace();
-        this.contents.fontSize = this.fontSize;
-        this.backOpacity = 0;
-        this.opacity = 0;       // Disable background frame
-        this.#duration = 3000;  // in milliseconds
-        this.contentsOpacity = 0;
-        this.#isBusy = false;
-        this._isWindow = false;
-        this.resetTimer();
-        this.refresh();
-        this.checkQueue();
+    constructor(text, timestamp, duration) {
+        this.#_text = text;
+        this.#_showntext = '';
+        this.#_timestamp = timestamp;
+        this.#_duration = duration;
+        this.#_default_counter = 2;
+        this.#_counter = this.#_default_counter;
+        this.#_isStartStageTerminated = false;
+        this.#_isEndStageTerminated = false;
     };
 
-    get maxWorkingQueueSize() {
-        return this.#maxWorkingQueueSize;
+    get text() {
+        return this.#_text;
     };
 
-    get fontSize() {
-        return this.#fontSize;
+    get showntext() {
+        return this.#_showntext;
     };
 
-    get isBusy() {
-        return this.#isBusy;
+    set showntext(text) {
+        this.#_showntext = text;
     };
 
-    get working() {
-        return workingPipeline;
+    get default_counter() {
+        return this.#_default_counter;
+    }
+
+    get counter() {
+        return this.#_counter;
     };
 
-    set working(array) {
-        workingPipeline = array;
-    };
-
-    get waiting() {
-        return waitingPipeline;
-    };
-
-    set isBusy(boolean) {
-        this.#isBusy = boolean;
+    set counter(counter) {
+        this.#_counter = counter;
     };
 
     get duration() {
-        return this.#duration;
+        return this.#_duration;
     };
 
     set duration(duration) {
-        this.#duration = duration;
+        this.#_duration = duration;
+    };
+
+    get latest_timestamp() {
+        return this.#_timestamp;
+    };
+
+    set latest_timestamp(timestamp) {
+        this.#_timestamp = timestamp;
+    };
+
+    get isStartStageTerminated() {
+        return this.#_isStartStageTerminated;
+    };
+
+    set isStartStageTerminated(boolean) {
+        this.#_isStartStageTerminated = boolean;
+    };
+
+    get isEndStageTerminated() {
+        return this.#_isEndStageTerminated;
+    };
+
+    set isEndStageTerminated(boolean) {
+        this.#_isEndStageTerminated = boolean;
     };
 };
 
-Window_JPCNotifier.prototype.checkQueue = function() {
-    if (this.working.length > 0 || this.waiting.length > 0) {
-        this.startNotification();
-    }
+JNotifierRequest.prototype.builder = function(text, duration) {
+    const timestamp = new Date().getTime();
+    return new JNotifierRequest(text, timestamp, duration);
 };
 
-Window_JPCNotifier.prototype.update = function() {
-    Object.getPrototypeOf(this.constructor.prototype).update.call(this);  // call superclass's update
-    if (this.isBusy) {
-        if (this.isExpired() == false) {
-            this.contentsOpacity += 8;
-            this.refresh();
-        } else {
-            this.contentsOpacity -= 8;
-            if (this.contentsOpacity <= 0) {
-                this.contentsOpacity = 0;
-                this.clearText();
-                if (this.waiting.length > 0) {
-                    var maxduration = 0;
-                    // Move contents from waiting queue to working queue
-                    while (this.waiting.length > 0 && this.working.length < this.maxWorkingQueueSize) {
-                        const data = this.waiting.pop();
-                        maxduration = Math.max(data.duration, maxduration);
-                        this.working.unshift(data.text);
-                    }
-                    // restart the notification
-                    this.duration = maxduration;
-                    this.startNotification();
-                } else {
-                    this.isBusy = false;
-                    this.move(-10, -20, 0, 0);
-                }
+JNotifierRequest.prototype.isExpired = function() {
+    return this.isStartStageTerminated && this.isEndStageTerminated;
+};
+
+JNotifierRequest.prototype.update = function(timestamp) {
+    const elapsed = timestamp - this.latest_timestamp;
+    this.latest_timestamp = timestamp;
+    if (this.isStartStageTerminated === false) {
+        if (this.showntext.length < this.text.length) {
+            if (this.counter > 0) {
+                this.counter -= 1;
+            } else {
+                this.counter = this.default_counter;
+                this.showntext += this.text[this.showntext.length];
             }
+        } else {
+            this.showntext = this.text;
+            this.isStartStageTerminated = true;
+        }
+    } else if (this.isStartStageTerminated === true && this.isEndStageTerminated === false && this.duration > 0) {
+        this.duration -= elapsed;
+    } else if (this.isStartStageTerminated === true && this.isEndStageTerminated === false) {
+        if (this.showntext.length > 0) {
+            if (this.counter > 0) {
+                this.counter -= 1;
+            } else {
+                this.counter = this.default_counter;
+                this.showntext = this.showntext.substring(0, this.showntext.length - 1);
+            }
+        } else {
+            this.isEndStageTerminated = true;
         }
     }
 };
 
-Window_JPCNotifier.prototype.drawTextEx = function(text, x, y, width) {
-    this.contents.fontSize = this.fontSize;
-    const textState = this.createTextState(text, x, y, width);
-    this.processAllText(textState);
-    return textState.outputWidth;
+class JNotifierScheduler {
+    // Private Instance Fields
+    #_working
+    #_maximum_working
+    #_waiting
+
+    constructor() {
+        this.#_working = [];
+        this.#_waiting = [];
+        this.#_maximum_working = 3;
+    };
+
+    get maximum_working_size() {
+        return this.#_maximum_working;
+    };
+
+    get working() {
+        return this.#_working;
+    };
+
+    set working(working) {
+        return this.#_working = working;
+    };
+
+    get waiting() {
+        return this.#_waiting;
+    };
 };
 
-Window_JPCNotifier.prototype.outputText = function() {
-    var output = '';
-    this.working.reverse().forEach((text) => {
-        output += (text + '\n');
-    });
-    this.working.reverse();
-    return output;
+JNotifierScheduler.prototype.update = function(timestamp) {
+    let newworking = [];
+    for (let i = 0; i < this.working.length; i++) {
+        this.working[i].update(timestamp);
+        if (this.working[i].isExpired() === false) {
+            newworking.push(this.working[i]);
+        }
+    }
+
+    this.working = newworking;
+
+    while (this.waiting.length > 0 && this.working.length < this.maximum_working_size) {
+        const request = this.waiting.pop();
+        this.working.unshift(request);
+    }
 };
 
-Window_JPCNotifier.prototype.resetTimer = function() {
-    this._start_timestamp = new Date().getTime();
+JNotifierScheduler.prototype.getShownText = function() {
+    let outputText = '';
+    for (let i = 0; i < this.working.length; i++) {
+        outputText += (this.working[i].showntext + '\n');
+    }
+    return outputText;
 };
 
-Window_JPCNotifier.prototype.refresh = function() {
-    this.contents.clear();
-    this.drawTextEx(this.outputText(), 0, 0, this.innerWidth);
+JNotifierScheduler.prototype.submit = function(request) {
+    if (this.working.length < this.maximum_working_size) {
+        this.working.unshift(request);
+    } else {
+        this.waiting.unshift(request);
+    }
 };
 
-Window_JPCNotifier.prototype.isExpired = function() {
-    const current_timestamp = new Date().getTime();
-    return current_timestamp > (this._start_timestamp + this.duration);
+class JNotifier {
+    // Private Instance Fields
+    #_scheduler
+    #_pixitext
+
+    constructor(scheduler) {
+        this.#_scheduler = scheduler;
+        this.#_pixitext = new PIXI.Text('', createStyle());
+    };
+
+    get scheduler() {
+        return this.#_scheduler;
+    };
+
+    get pixiText() {
+        return this.#_pixitext;
+    };
+
+    set pixiText(pixitext) {
+        this.#_pixitext = pixitext;
+    };
 };
 
-Window_JPCNotifier.prototype.startNotification = function() {
-    // We have height range about 5 line in maximum
-    this.move(-10, -15, Graphics.boxWidth, Graphics.boxHeight);
-    this.isBusy = true;
-    this.contentsOpacity = 0;
-    this.createContents();
-    this.resetTimer();
+JNotifier.prototype.update = function() {
+    const timestamp = new Date().getTime();
+    this.scheduler.update(timestamp);
     this.refresh();
 };
 
-Window_JPCNotifier.prototype.submit = async function(text, duration) {
-    if (this.isBusy == false) {
-        this.startNotification();
-    }
-    if (this.working.length >= this.maxWorkingQueueSize) {
-        this.waiting.unshift({text: text, duration: duration});
+JNotifier.prototype.refresh = function() {
+    this.pixiText._text = this.scheduler.getShownText();
+    this.pixiText.x = 5;
+    this.pixiText.updateText();
+};
+
+JNotifier.prototype.notify = function(text, duration) {
+    const request = JNotifierRequest.prototype.builder(text, duration);
+    this.scheduler.submit(request);
+};
+
+JNotifier.prototype.build = function() {
+    const scheduler = new JNotifierScheduler();
+    return new JNotifier(scheduler);
+};
+
+////////////////////////////////////////////
+/////               Hook               /////
+////////////////////////////////////////////
+
+const _Scene_Base__initialize = Scene_Base.prototype.initialize;
+Scene_Base.prototype.initialize = function() {
+    _Scene_Base__initialize.apply(this, arguments);
+    this._IsJPCNotifierInitialized = false;
+};
+
+const _Scene_Base__update = Scene_Base.prototype.update;
+Scene_Base.prototype.update = function() {
+    _Scene_Base__update.apply(this, arguments);
+    if (this._IsJPCNotifierInitialized === false) {
+        resetNotifierPixiText();
+        this.addChild(__instance.pixiText);
+        this._IsJPCNotifierInitialized = true;
     } else {
-        this.resetTimer();
-        this.duration = Math.max(this.duration, duration);
-        this.working.unshift(text);
+        __instance.update();
     }
 };
 
-Window_JPCNotifier.prototype.clearText = function() {
-    this.working = [];
-};
+// Private notifier object.
+const __instance = new JNotifier.prototype.build();
 
 /* MIT License
 
