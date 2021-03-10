@@ -195,7 +195,7 @@
                 .catch(() => SoundManager.playBuzzer())
                 .then(() => {
                     if (JPC.quicksave.isNotificationEnabled()) {
-                        JPC.notifier.notify(pluginParams.quick_save_notification_msg);
+                        JPC.notifier.notify(pluginParams.quick_save_notification_msg, 1000);
                     }
                 });
         }
@@ -219,7 +219,7 @@
                 })
                 .then(() => {
                     if (JPC.quicksave.isNotificationEnabled()) {
-                        JPC.notifier.notify(pluginParams.quick_load_notification_msg);
+                        JPC.notifier.notify(pluginParams.quick_load_notification_msg, 1000);
                     }
                 });
         }
