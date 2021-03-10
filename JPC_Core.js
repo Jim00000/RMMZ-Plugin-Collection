@@ -35,6 +35,12 @@ const JPC = (() => {
         Exported.core.misc = mod.__miscellany;
     });
 
+    ///////////////////////////////////////////////
+    /////               Options               /////
+    ///////////////////////////////////////////////
+    Exported.core.options = {};
+    Exported.core.options.outputMsgInTitleScene = true;
+
     //////////////////////////////////////////////////////
     /////               Public Methods               /////
     //////////////////////////////////////////////////////
@@ -42,7 +48,8 @@ const JPC = (() => {
     Exported.parseJSFileName = function(doc) {
         const path = doc.currentScript.src;
         const filenameWithExtension = path.substring(path.lastIndexOf('/') + 1);
-        const filename = filenameWithExtension.substring(0, filenameWithExtension.length - 3);  // remove file extension (.js)
+        const filename =
+            filenameWithExtension.substring(0, filenameWithExtension.length - 3);  // remove file extension (.js)
         return filename;
     };
 
@@ -101,6 +108,22 @@ const JPC = (() => {
             return request.responseText;
         } else {
             return null;
+        }
+    };
+
+    ////////////////////////////////////////////
+    /////               Hook               /////
+    ////////////////////////////////////////////
+
+    const _Scene_Title__start = Scene_Title.prototype.start;
+    Scene_Title.prototype.start = function() {
+        _Scene_Title__start.apply(this, arguments);
+        if (JPC.core.options.outputMsgInTitleScene) {
+            JPC.notifier.notify('Welcome to use Jim00000\'s Plugin Collection (JPC)', 3500);
+            JPC.notifier.notify('Enabled plugins : ', 7000);
+            $plugins.forEach((plugin, index) => {
+                if (plugin.status === true) JPC.notifier.notify(`${plugin.name}`, 7000);
+            });
         }
     };
 
