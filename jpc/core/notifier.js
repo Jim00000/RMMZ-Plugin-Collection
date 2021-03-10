@@ -13,12 +13,13 @@ __notifier.createCustomizedStyle = null;
 function createDefaultStyle() {
     // https://pixijs.io/pixi-text-style/
     return new PIXI.TextStyle({
+        fill: "white",
         fontFamily: "Tahoma",
         fontSize: 20,
         letterSpacing: 2,
-        lineJoin: "round",
+        lineJoin: "bevel",
         miterLimit: 5,
-        strokeThickness: 1
+        strokeThickness: 4
     });
 }
 
