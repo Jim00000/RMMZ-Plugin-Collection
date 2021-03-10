@@ -163,7 +163,7 @@ class JNotifierScheduler {
     constructor() {
         this.#_working = [];
         this.#_waiting = [];
-        this.#_maximum_working = 3;
+        this.#_maximum_working = 10;
     };
 
     get maximum_working_size() {
@@ -195,8 +195,8 @@ JNotifierScheduler.prototype.update = function(timestamp) {
     this.working = newworking;
 
     while (this.waiting.length > 0 && this.working.length < this.maximum_working_size) {
-        const request = this.waiting.pop();
-        this.working.unshift(request);
+        const request = this.waiting.shift();
+        this.working.push(request);
     }
 };
 
@@ -210,9 +210,9 @@ JNotifierScheduler.prototype.getShownText = function() {
 
 JNotifierScheduler.prototype.submit = function(request) {
     if (this.working.length < this.maximum_working_size) {
-        this.working.unshift(request);
+        this.working.push(request);
     } else {
-        this.waiting.unshift(request);
+        this.waiting.push(request);
     }
 };
 
