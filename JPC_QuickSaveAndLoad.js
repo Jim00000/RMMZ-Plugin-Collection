@@ -5,6 +5,8 @@
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_QuickSaveAndLoad.js
  * @base JPC_Core
  * @help
+ * QuickSaveAndLoad v1.0.0
+ * 
  * ◼️ Introduction
  *
  * A simple quicksave mechanism similar to The Elder Scrolls V: Skyrim. Use
@@ -15,6 +17,21 @@
  * ◼️ Dependencies
  *
  * - JPC_Core.js
+ * 
+ * ◼️ Plugin Commands
+ * 
+ * ▷ enableQuickSaveSystem  : enable quick save system
+ * 
+ * ▷ disableQuickSaveSystem : disable quick save system
+ * 
+ * ▷ enableNotification     : enable quick save notification
+ * 
+ * ▷ disableNotification    : disable quick save notification
+ * 
+ * ◼️ Change Log
+ * 
+ * ✻ v1.0.0
+ *   ▷ Initial release
  *
  * ◼️ MIT License
  *
@@ -120,6 +137,9 @@
 (async (pluginName, pluginParams) => {
     'use strict';
 
+    JPC.quicksave = {};
+    JPC.quicksave.__version = "1.0.0";
+
     ///////////////////////////////////////////////////////
     /////               Plugin Commands               /////
     ///////////////////////////////////////////////////////
@@ -140,8 +160,6 @@
     PluginManager.registerCommand(pluginName, 'disableNotification', args => {
         JPC.quicksave.__isEnabledNotification = false;
     });
-
-    JPC.quicksave = {};
 
     // is quick save system activated
     JPC.quicksave.isEnabled = function() {
