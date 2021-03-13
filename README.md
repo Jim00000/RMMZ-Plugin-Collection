@@ -20,8 +20,8 @@ Make it as a hobby. I will slowly update this project.
 | Quick Save/Load | JPC_QuickSaveAndLoad.js | JPC_Core.js | WIP | - |
 | God Ray Effect | JPC_GodRayFilter.js | JPC_Core.js | WIP | - |
 | Lighting Effect | JPC_Lighting.js | JPC_Core.js | WIP | - |
-| Fog Effect | JPC_QuickSaveAndLoad.js | JPC_Core.js | WIP | - |
-| Snow Weather Effect | JPC_QuickSaveAndLoad.js | JPC_Core.js | WIP | - |
+| Fog Effect | JPC_Fog.js | JPC_Core.js | WIP | - |
+| Snow Weather Effect | JPC_Snow.js | JPC_Core.js | WIP | - |
 
 ## Installation
 
