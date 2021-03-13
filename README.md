@@ -18,10 +18,10 @@ Make it as a hobby. I will slowly update this project.
 |:---|:---|:---:|:---:|:---:|
 | Essential Core | JPC_Core.js | - | WIP | - |
 | Quick Save/Load | JPC_QuickSaveAndLoad.js | JPC_Core.js | v1.0.0 | - |
-| God Ray Effect | JPC_GodRayFilter.js | JPC_Core.js | WIP | - |
+| God Ray Effect | JPC_GodRayFilter.js | JPC_Core.js | WIP (not working right now) | - |
 | Lighting Effect | JPC_Lighting.js | JPC_Core.js | WIP | - |
-| Fog Effect | JPC_Fog.js | JPC_Core.js | WIP | - |
-| Snow Weather Effect | JPC_Snow.js | JPC_Core.js | WIP | - |
+| Fog Effect | JPC_Fog.js | JPC_Core.js | WIP (not working right now) | - |
+| Snow Weather Effect | JPC_Snow.js | JPC_Core.js | WIP (not working right now) | - |
 
 ## Installation
 

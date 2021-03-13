@@ -1,20 +1,36 @@
-export const __miscellany = {};
+export const __glsl = {};
 
-__miscellany.registerKeyBinding = function(vkey, keyName) {
-    Input.keyMapper[vkey] = keyName;
+__glsl.createFilter = function(shaderPath, uniforms = {}) {
+    // Here we use OpenGL ES 3.0
+    const vertSrc = loadGLSLShaderFile('js/plugins/jpc/shaders/default.vs');
+    const fragSrc = loadGLSLShaderFile(shaderPath);
+    const filter = new PIXI.Filter(vertSrc, fragSrc, uniforms);
+    return filter;
 };
 
-__miscellany.sleep = function(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function loadGLSLShaderFile(filePath) {
+    return readFileAsString(filePath);
 };
 
-__miscellany.select = function(...args) {
-    for (const arg of args) {
-        if (arg !== undefined && arg !== null) {
-            return arg;
-        }
+function readFileAsString(filePath) {
+    if (Utils.isNwjs() === true) {
+        const path = require('path'), fs = require('fs');
+        const shaderFile = fs.readFileSync(path.resolve(filePath));
+        return shaderFile.toString();
+    } else {
+        return loadBySyncXHR(filePath);
     }
-    return null;
+};
+
+function loadBySyncXHR(path) {
+    const request = new XMLHttpRequest();
+    request.open('GET', path, false);
+    request.send();
+    if (request.status === 200) {
+        return request.responseText;
+    } else {
+        return null;
+    }
 };
 
 /* MIT License

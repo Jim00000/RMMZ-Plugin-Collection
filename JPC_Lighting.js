@@ -10,156 +10,428 @@
  * @base JPC_Core
  * @help
  *
- * This script adds point light or spotlight effect to the player or objects on the map. You can add
- * following tags in the map's note to configure parameters of lighting :
- *
- * <jpc>
- *   <lighting>
- *     <global_illumination>0.0</global_illumination>
- *     <light_radius>64.0</light_radius>
- *     <enable>true</enable>
- *     <player>
- *       <is_light_source>true</is_light_source>
- *       <light_radius>32.0</light_radius>
- *       <spotlight_radius>400.0</spotlight_radius>
- *       <perspective>15.0</perspective>
- *       <lighttype>
- *         <is_point_light>true</is_point_light>
- *         <is_spotlight>true</is_spotlight>
- *       </lighttype>
- *     </player>
- *   </lighting>
- * </jpc>
- *
- * To make a object become glowable, in the event editor, fill following data
- * into the note textbox :
- *
- * <jpc>
- *   <lighting>
- *     <lightobj>true</lightobj>
- *     <r>1.0</r>
- *     <g>0.0</g>
- *     <b>0.0</b>
- *     <radius>100.0</radius>
- *     <light_direction>down</light_direction>
- *     <perspective>45.0</perspective>
- *     <spotlight_radius>200.0</spotlight_radius>
- *     <lighttype>
- *       <is_point_light>false</is_point_light>
- *       <is_spotlight>true</is_spotlight>
- *     </lighttype>
- *   </lighting>
- * </jpc>
- *
- * You had better remove all of newline character ('\n', input "Enter" button
- * to end cuurent line) because only a few lines in the note textbox remains
- * (the other parts will be cut off) in the event editor in RMMZ editor.
- *
- * e.g. <jpc><lighting><lightobj>true...</jpc> and put it in the
- * textbox of note.
- *
- * Note that there are at most 32 light objects allowed in a map due to in
- * consideration for the performance.
- *
- * @param default_light_radius
- * @text Default radius of the light.
- * @type number
- * @default 256.0
- * @min 0.0
- *
- * @param default_global_illumination
- * @text Default global illumination for the environment/map.
- * @type number
- * @default 1.0
- * @min 0.0
- * @max 1.0
+ * This script adds point light or spotlight effect to the player or objects on the map.
  *
  */
 
-(() => {
+(async (pluginName, pluginParams) => {
     'use strict';
 
-    const PLUGIN_NAME = 'JPC_Lighting';
-    const LIGHTING_SHADER_PATH = 'js/plugins/shaders/lighting.fs';
-    const PLUGINPARAMS = JPC.getPluginParams(PLUGIN_NAME);
+    JPC.lighting = {};
+    JPC.lighting.__version = 'wip';
 
-    //=============================================================================
-    // Parameters
-    //=============================================================================
-    const ILLUMINATION = JPC.toGeneric(PLUGINPARAMS.default_global_illumination).toFloat();
-    const LIGHT_RADIUS = JPC.toGeneric(PLUGINPARAMS.default_light_radius).toFloat();
-    const MAX_LIGHTS = 32;  // This value must be consistent with the macro defined in the the lighting.fs shader file.
+    // Awating jpc.core.logger is ready.
+    await JPC.import['core_logger'];
+    // Awating jpc.core.typeconverter is ready.
+    await JPC.import['core_typeconverter'];
+    // Awating jpc.core.xmlparser is ready.
+    await JPC.import['core_xmlparser'];
+    // Awating jpc.core.glsl is ready.
+    await JPC.import['core_glsl'];
+    // Awating jpc.core.miscellany is ready.
+    await JPC.import['core_miscellany'];
 
-    class Lighting {
-        constructor() {
-            this.xmlParams = JPC.parseJPCParams($dataMap.note);
-            const radius = this.xmlParams.query('lighting.light_radius').toFloat();
-            this.pointLightRadius = JPC.select(radius, LIGHT_RADIUS);
-            const illumination = this.xmlParams.query('lighting.global_illumination').toFloat();
-            this.globalIllumination = JPC.select(illumination, ILLUMINATION);
-            this.playerSprite = null;
-            this.isLightSrcFound = false;  // do not modify this
-            this.lightObjPos = [];         // light object's position
-            this.ambientColor = [];
-            this.lightRadius = [];
-            this.lightTypes = [];
-            this.lightDirIdx = [];
-            this.perspective = [];
-            this.spotlightRadius = [];
-            this.utime = [];
-            this.utime_steps = [];
-            this.filter = this.createLightingFilter(this.globalIllumination);  // lighting filter
+    class JLightingType {
+        static get PointLight() {
+            return 0b01;
+        };
 
-            // Configure Player
-            this.Player = {isLightSrc: false, lightRadius: 0.0, perspective: 0.0, spotLightRadius: 0.0};
-
-            // Configure lighting
-            const enable = this.xmlParams.query('lighting.enable').toBool();
-            this.filter.enabled = JPC.select(enable, false);
-            const isPlayerLightSrc = this.xmlParams.query('lighting.player.is_light_source').toBool();
-            this.Player.isLightSrc = JPC.select(isPlayerLightSrc, false);
-            const playerLightRadius = this.xmlParams.query('lighting.player.light_radius').toFloat();
-            this.Player.lightRadius = JPC.select(playerLightRadius, this.pointLightRadius);
-            const playerPerspective = this.xmlParams.query('lighting.player.perspective').toFloat();
-            this.Player.perspective = JPC.select(playerPerspective, 30.0);
-            const playerSpotLightRadius = this.xmlParams.query('lighting.player.spotlight_radius').toFloat();
-            this.Player.spotLightRadius = JPC.select(playerSpotLightRadius, 256.0);
-            // Setup light type for Player
-            this.filter.uniforms.lightType[0] = 0b00;
-            const isPointLight = this.xmlParams.query('lighting.player.lighttype.is_point_light').toBool();
-            this.filter.uniforms.lightType[0] |= isPointLight === true ? 0b01 : 0b00;
-            const isSpotLight = this.xmlParams.query('lighting.player.lighttype.is_spotlight').toBool();
-            this.filter.uniforms.lightType[0] |= isSpotLight === true ? 0b10 : 0b00;
+        static get SpotLight() {
+            return 0b10;
         };
     };
 
-    Lighting.prototype.lightDirectionStringToIndex = function(string) {
-        let code = 0;
-        switch (string) {
-            case 'down':
-                code = Game_Character.ROUTE_MOVE_DOWN;
-                break;
-            case 'left':
-                code = Game_Character.ROUTE_MOVE_LEFT;
-                break;
-            case 'right':
-                code = Game_Character.ROUTE_MOVE_RIGHT;
-                break;
-            case 'up':
-                code = Game_Character.ROUTE_MOVE_UP;
-                break;
+    JLightingType.prototype.parse = function(string) {
+        switch (string.toLowerCase()) {
+            case 'point':
+                return JLightingDirection.PointLight;
+            case 'spot':
+                return JLightingDirection.SpotLight;
+            case 'both':
+                return JLightingDirection.PointLight | JLightingDirection.SpotLight;
             default:
-                throw new Error(
-                    `No such light direction type "${string}" (${PLUGIN_NAME}.js:lightDirectionStringToIndex)`);
+                return undefined;
         }
-        return code << 1;
     };
 
-    Lighting.prototype.createLightingFilter = function() {
-        const filter = JPC.createFilter(LIGHTING_SHADER_PATH, {
-            globalIllumination: this.globalIllumination,
+    class JLightingDirection {
+        static get Down() {
+            return Game_Character.ROUTE_MOVE_DOWN;
+        };
+
+        static get Left() {
+            return Game_Character.ROUTE_MOVE_LEFT;
+        };
+
+        static get Right() {
+            return Game_Character.ROUTE_MOVE_RIGHT;
+        };
+
+        static get Up() {
+            return Game_Character.ROUTE_MOVE_UP;
+        };
+    };
+
+    JLightingDirection.prototype.parse = function(string) {
+        switch (string.toLowerCase()) {
+            case 'down':
+                return JLightingDirection.Down;
+            case 'left':
+                return JLightingDirection.Left;
+            case 'right':
+                return JLightingDirection.Right;
+            case 'up':
+                return JLightingDirection.Up;
+            default:
+                return undefined;
+        }
+    };
+
+    // This class contains metadata of the game map related to lighting.
+    class JLightingMapConfig extends JPC.core.xmlparser.XMLDocument {
+        #_enable
+        #_global_illumination
+
+        constructor(text) {
+            super(text);
+            const select = JPC.core.misc.select;
+            this.#_enable = select(this.query('jpc', 'lighting', 'enable').boolean, JLightingMapDefaultConfig.enable);
+            this.#_global_illumination = select(
+                this.query('jpc', 'lighting', 'global_illumination').number,
+                JLightingMapDefaultConfig.global_illumination);
+        };
+
+        get enable() {
+            return this.#_enable;
+        };
+
+        get global_illumination() {
+            return this.#_global_illumination;
+        };
+    };
+
+    // default configuration of game map setting
+    class JLightingMapDefaultConfig {
+        static get enable() {
+            return false;
+        };
+
+        static get global_illumination() {
+            return 1.0;
+        };
+    };
+
+    class JLightingCommonConfig {
+        #_x
+        #_y
+        #_r
+        #_g
+        #_b
+        #_is_light_source
+        #_pointlight_radius
+        #_spotlight_radius
+        #_perspective
+        #_lighttype
+        #_delta;
+
+        constructor() {
+            this.#_x = 0;
+            this.#_y = 0;
+            this.#_r = 1.0;
+            this.#_g = 1.0;
+            this.#_b = 1.0;
+            this.#_is_light_source = true;
+            this.#_pointlight_radius = 128.0;
+            this.#_spotlight_radius = 128.0;
+            this.#_perspective = 15.0;
+            this.#_lighttype = JLightingType.PointLight;
+            this.#_delta = this.createDelta();
+        };
+
+        get x() {
+            return this.#_x;
+        };
+
+        get y() {
+            return this.#_y;
+        };
+
+        get r() {
+            return this.#_r;
+        };
+
+        get g() {
+            return this.#_g;
+        };
+
+        get b() {
+            return this.#_b;
+        };
+
+        get is_light_source() {
+            return this.#_is_light_source;
+        };
+
+        get pointlight_radius() {
+            return this.#_pointlight_radius;
+        };
+
+        get spotlight_radius() {
+            return this.#_spotlight_radius;
+        };
+
+        get perspective() {
+            return this.#_perspective;
+        };
+
+        get lighttype() {
+            return this.#_lighttype;
+        };
+
+        get delta() {
+            return this.#_delta;
+        }
+
+        set is_light_source(bool) {
+            this.#_is_light_source = bool;
+        };
+
+        set pointlight_radius(radius) {
+            this.#_pointlight_radius = radius;
+        };
+
+        set spotlight_radius(radius) {
+            this.#_spotlight_radius = radius;
+        };
+
+        set perspective(perspective) {
+            this.#_perspective = perspective;
+        };
+
+        set lighttype(type) {
+            this.#_lighttype = type;
+        };
+
+        set x(x) {
+            this.#_x = x;
+        };
+
+        set y(y) {
+            this.#_y = y;
+        };
+
+        set r(r) {
+            this.#_r = r;
+        };
+
+        set g(g) {
+            this.#_g = g;
+        };
+
+        set b(b) {
+            this.#_b = b;
+        };
+    };
+
+    JLightingCommonConfig.prototype.createDelta = function() {
+        return 0.4 + 0.6 * (Math.random() - 0.5);
+    };
+
+    class JLightingPlayerConfig extends JLightingCommonConfig {
+        constructor() {
+            super();
+        };
+    };
+
+    // player's lighting config
+    JPC.lighting.player = new JLightingPlayerConfig();
+
+    class JLightingObjectConfig extends JLightingCommonConfig {
+        #_event_id
+        #_event_name
+        #_index
+        #_light_direction
+
+        constructor() {
+            super();
+            this.#_index = -1;
+            this.#_event_id = -1;
+            this.#_event_name = '';
+            this.#_light_direction = JLightingDirection.Down;
+        };
+
+        get index() {
+            return this.#_index;
+        };
+
+        get event_id() {
+            return this.#_event_id;
+        };
+
+        get event_name() {
+            return this.#_event_name;
+        };
+
+        get direction() {
+            return this.#_light_direction;
+        };
+
+        set event_id(eid) {
+            this.#_event_id = eid;
+        };
+
+        set event_name(name) {
+            this.#_event_name = name;
+        };
+
+        set index(idx) {
+            this.#_index = idx;
+        }
+
+        set direction(dir) {
+            this.#_light_direction = dir;
+        };
+    };
+
+    class JLightingInterpreter {
+        #_lightConfigAlias
+
+        constructor(config) {
+            this.#_lightConfigAlias = config;
+        };
+
+        get config() {
+            return this.#_lightConfigAlias;
+        };
+    };
+
+    JLightingInterpreter.prototype.interpret = function(assign_statement) {
+        const values = assign_statement.split('=');
+        if (values.length == 2) {
+            const lvalue = values[0].toLowerCase().trim();
+            const rvalue = values[1].trim();
+            this.onAssignment(lvalue, rvalue);
+        }
+    };
+
+    JLightingInterpreter.prototype.onAssignment = function(lvalue, rvalue) {
+        switch (lvalue) {
+            case 'r':
+                this.config.r = JPC.core.typeconverter.toNumber(rvalue);
+                break;
+            case 'g':
+                this.config.g = JPC.core.typeconverter.toNumber(rvalue);
+                break;
+            case 'b':
+                this.config.b = JPC.core.typeconverter.toNumber(rvalue);
+                break;
+            case 'is_light_source':
+                this.config.is_light_source = JPC.core.typeconverter.toBoolean(rvalue);
+                break;
+            case 'pointlight_radius':
+                this.config.pointlight_radius = JPC.core.typeconverter.toNumber(rvalue);
+                break;
+            case 'spotlight_radius':
+                this.config.spotlight_radius = JPC.core.typeconverter.toNumber(rvalue);
+                break;
+            case 'perspective':
+                this.config.perspective = JPC.core.typeconverter.toNumber(rvalue);
+                break;
+            case 'lighttype':
+                this.config.lighttype = JLightingType.prototype.parse(rvalue);
+                break;
+            case 'direction':
+                this.config.direction = JLightingDirection.prototype.parse(rvalue);
+                break;
+            default:
+                JPC.core.logger.warn(`Unhandled case occurs. lvalue : ${lvalue}, rvalue : ${rvalue}`);
+                break;
+        };
+    };
+
+    class JLightingManager {
+        #_mapConfig
+        #_playerConfig
+        #_playerSprite
+        #_lightObjConfigsNameTable
+        #_lightObjConfigsIdTable
+        #_lightEventCount
+        #_dispatch_index
+        #_filter
+        #_isInitialized
+
+        constructor() {
+            this.#_dispatch_index = 0;
+            this.#_lightEventCount = 0;
+            this.#_mapConfig = new JLightingMapConfig($dataMap.note);
+            this.#_playerConfig = JPC.lighting.player;
+            this.#_filter = this.createDefaultFilter();
+            this.#_playerSprite = null;
+            this.#_lightObjConfigsNameTable = {};
+            this.#_lightObjConfigsIdTable = {};
+            this.#_isInitialized = false;
+            this.initializeLightEvent();
+        };
+
+        get dispatch_index() {
+            return this.#_dispatch_index;
+        };
+
+        get isInitialized() {
+            return this.#_isInitialized;
+        };
+
+        get filter() {
+            return this.#_filter;
+        };
+
+        get playerSprite() {
+            return this.#_playerSprite;
+        };
+
+        get playerConfig() {
+            return this.#_playerConfig;
+        };
+
+        get mapConfig() {
+            return this.#_mapConfig;
+        };
+
+        get objConfigsNameTable() {
+            return this.#_lightObjConfigsNameTable;
+        };
+
+        get objConfigsIdTable() {
+            return this.#_lightObjConfigsIdTable;
+        };
+
+        get lightEventCount() {
+            return this.#_lightEventCount;
+        };
+
+        set isInitialized(bool) {
+            this.#_isInitialized = bool;
+        };
+
+        set playerSprite(sprite) {
+            this.#_playerSprite = sprite;
+        };
+
+        set lightEventCount(count) {
+            this.#_lightEventCount = count;
+        };
+
+        set dispatch_index(idx) {
+            this.#_dispatch_index = idx;
+        };
+    };
+
+    JLightingManager.prototype.createDefaultFilter = function() {
+        const MAX_LIGHTS = 32;
+        const filter = JPC.core.glsl.createFilter('js/plugins/jpc/shaders/lighting.fs', {
+            globalIllumination: this.mapConfig.global_illumination,
             lightRadius: new Float32Array(MAX_LIGHTS),
-            lightSrcSize: 0,
+            lightSrcSize: 0,  // unknown light source count
             lightsrc: new Float32Array(MAX_LIGHTS * 2),
             uTime: new Float32Array(MAX_LIGHTS),
             ambientColor: new Float32Array(MAX_LIGHTS * 3),
@@ -172,184 +444,181 @@
         return filter;
     };
 
-    Lighting.prototype.findPlayerSprite = function() {
-        return SceneManager._scene._spriteset._characterSprites.find(
-            character => character._character instanceof Game_Player);
+    JLightingManager.prototype.initialize = function() {
+        if (this.isInitialized === false) {
+            // Find Player's sprite
+            this.playerSprite = this.findPlayerSprite();
+            // Initialize light event position. We can only get data
+            // after Spriteset_Map starts to update.
+            this.updateLightEventPosition();
+            this.isInitialized = true;
+        }
     };
 
-    Lighting.prototype.configLightObjects = function() {
-        SceneManager._scene._spriteset._characterSprites.forEach(character => {
-            if (character._character !== undefined && character._character instanceof Game_Event &&
-                character.isEmptyCharacter() === false) {
-                const eventId = character._character._eventId;
-                const note = $dataMap.events[eventId].note;
-                const objXmlParams = JPC.parseJPCParams(note);
-                // if jpc.lighting.lightobj is undefined, then this event is not a light object
-                const isLightObj = objXmlParams !== null && objXmlParams.contain('lighting.lightobj') &&
-                    objXmlParams.query('lighting.lightobj').toBool();
-                // Skip event whose note is empty and verify that this is a light object
-                if (isLightObj === true) {
-                    // Append to the light object list
-                    this.lightObjPos.push(character.position);
-                    // Append to ambient color list
-                    let r = objXmlParams.query('lighting.r').toFloat();
-                    let g = objXmlParams.query('lighting.g').toFloat();
-                    let b = objXmlParams.query('lighting.b').toFloat();
-                    this.ambientColor.push({r: JPC.select(r, 1.0), g: JPC.select(g, 1.0), b: JPC.select(b, 1.0)});
-                    // Append radius for each object
-                    let _radius = objXmlParams.query('lighting.radius').toFloat();
-                    this.lightRadius.push(JPC.select(_radius, this.pointLightRadius));
-                    // Append lighttype
-                    let _isPointLight = objXmlParams.query('lighting.lighttype.is_point_light').toBool();
-                    let isPointLight = JPC.select(_isPointLight, false);
-                    let _isSpotLight = objXmlParams.query('lighting.lighttype.is_spotlight').toBool();
-                    let isSpotLight = JPC.select(_isSpotLight, false);
-                    let encodedLightType = 0b00;
-                    encodedLightType |= isPointLight === true ? 0b01 : 0b00;
-                    encodedLightType |= isSpotLight === true ? 0b10 : 0b00;
-                    this.lightTypes.push(encodedLightType);
-                    // Append light direction index
-                    let _lightDirString = objXmlParams.query('lighting.light_direction').toString();
-                    let lightDirString = JPC.select(_lightDirString, 'down');
-                    let lightDirIdx = this.lightDirectionStringToIndex(lightDirString);
-                    this.lightDirIdx.push(lightDirIdx);
-                    // Append perspective for spotlight
-                    let _perspective = objXmlParams.query('lighting.perspective').toFloat();
-                    let perspective = JPC.select(_perspective, 15.0);
-                    this.perspective.push(perspective);
-                    // Append spotlight radius for spotlight
-                    let _spotlightRadius = objXmlParams.query('lighting.spotlight_radius').toFloat();
-                    let spotlightRadius = JPC.select(_spotlightRadius, 300.0);
-                    this.spotlightRadius.push(spotlightRadius);
-                    // Append utime
-                    let _utime = Math.random();
-                    this.utime.push(_utime);
-                    let _utime_step = 0.4 + 0.6 * (Math.random() - 0.5);
-                    this.utime_steps.push(_utime_step);
+    JLightingManager.prototype.updateLightEventPosition = function() {
+        SceneManager._scene._spriteset._characterSprites.forEach(sprite => {
+            if (sprite._character !== undefined && sprite._character instanceof Game_Event &&
+                (sprite._character.eventId() in this.objConfigsIdTable)) {
+                const event_id = sprite._character.eventId();
+                let config = this.objConfigsIdTable[event_id];
+                if (config !== null && config.is_light_source === true) {
+                    config.x = sprite.position._x;
+                    config.y = sprite.position._y;
                 }
             }
         });
     };
 
-    Lighting.prototype.config = function() {
-        // Find Player's sprite
-        if (this.playerSprite === null) {
-            this.playerSprite = this.findPlayerSprite();
-        }
+    JLightingManager.prototype.initializeLightEvent = function() {
+        // Initialize light events
+        this.findLightEvent();
+        // Update light source' count
+        // One more count is for player
+        this.filter.uniforms.lightSrcSize = this.lightEventCount + 1;
+    };
 
-        // Find game events which represents light source
-        if (this.isLightSrcFound === false) {
-            // Configure parameters for light objects
-            this.configLightObjects();
-
-            // Check whether the size is consistent
-            if (this.lightObjPos.length !== this.ambientColor.length) {
-                Graphics.printError(
-                    PLUGIN_NAME + '.js : ' + new Error().lineNumber,
-                    'size of lightObjPos is not equal to ambientColor');
+    JLightingManager.prototype.findLightEvent = function() {
+        for (const event of $dataMap.events) {
+            if (event !== null) {
+                if (this.isLightEvent(event)) {
+                    this.lightEventHandler(event);
+                    this.lightEventCount += 1;
+                }
             }
-
-            // Check whether the size is consistent
-            if (this.ambientColor.length !== this.lightRadius.length) {
-                Graphics.printError(
-                    PLUGIN_NAME + '.js : ' + new Error().lineNumber,
-                    'size of ambientColor is not equal to lightRadius');
-            }
-
-            // Update light source' count
-            // One more count is for player
-            this.filter.uniforms.lightSrcSize = this.lightObjPos.length + 1;
-
-            this.isLightSrcFound = true;
         }
     };
 
-    Lighting.prototype.update = function() {
-        if (this.filter.enabled === true) {
-            this.config();
-            this.updatePlayer();
-            this.updateLightObjects();
-            this.updateGlobalIllumination();
-        }
+    JLightingManager.prototype.isLightEvent = function(event) {
+        const hint = event.pages[0].list[0];
+        return (hint !== null) && (hint.code === 108) && (hint.parameters[0].toLowerCase() === '!jpc_light');
     };
 
-    Lighting.prototype.updatePlayer = function() {
-        if (this.Player.isLightSrc === true) {
-            // Update player's position
-            this.filter.uniforms.lightsrc[0] = this.playerSprite.position._x;
-            this.filter.uniforms.lightsrc[1] = this.playerSprite.position._y;
-            // Update player's ambient color
-            this.filter.uniforms.ambientColor[0] = 1.0;
-            this.filter.uniforms.ambientColor[1] = 1.0;
-            this.filter.uniforms.ambientColor[2] = 1.0;
-            // Update player's light radius
-            this.filter.uniforms.lightRadius[0] = this.Player.lightRadius;
-            // Update player's perspective direction
-            this.filter.uniforms.lightDirIdx[0] = $gamePlayer.direction();
-            // Update player's perspective angle in degree
-            this.filter.uniforms.perspective[0] = this.Player.perspective;
-            // Update player's spotlight radius
-            this.filter.uniforms.fSpotlightRadius[0] = this.Player.spotLightRadius;
-            // Update player's uTime
-            this.filter.uniforms.uTime[0] += this.utime_steps[0];
-        } else {
-            // Move light source of player out of the screen
-            this.filter.uniforms.lightsrc[0] = -99999;
-            this.filter.uniforms.lightsrc[1] = -99999;
+    JLightingManager.prototype.lightEventHandler = function(event) {
+        const params = event.pages[0].list.clone();
+        params.shift();  // remove "jpc_light"
+        params.pop();    // remove end of statement
+        let config = new JLightingObjectConfig();
+        config.event_name = event.name;
+        config.event_id = event.id;
+        config.index = this.dispatchUniformIndex();
+        const intepreter = new JLightingInterpreter(config);
+        for (const param of params) {
+            const assign_statement = param.parameters[0];
+            intepreter.interpret(assign_statement);
         }
+        // store the config
+        this.objConfigsNameTable[event.name] = config;
+        this.objConfigsIdTable[event.id] = config;
     };
 
-    Lighting.prototype.updateLightObjects = function() {
-        // Loop to update every light object
-        for (let i = 0; i < this.lightObjPos.length; i++) {
+    JLightingManager.prototype.dispatchUniformIndex = function() {
+        const dispatched_index = this.dispatch_index;
+        this.dispatch_index += 1;
+        return dispatched_index;
+    };
+
+    JLightingManager.prototype.refreshUniforms = function(config) {
+        if (config instanceof JLightingObjectConfig) {
+            const i = config.index;
             // Update light source's position
-            var dx = (this.lightObjPos[i]._x - this.playerSprite.position._x) * $gameScreen._zoomScale;
-            var dy = (this.lightObjPos[i]._y - this.playerSprite.position._y) * $gameScreen._zoomScale;
+            let dx = (config.x - this.playerSprite.position._x);
+            let dy = (config.y - this.playerSprite.position._y);
             this.filter.uniforms.lightsrc[2 + 2 * i + 0] = dx + this.playerSprite.position._x;
             this.filter.uniforms.lightsrc[2 + 2 * i + 1] = dy + this.playerSprite.position._y;
             // Update ambient color
-            this.filter.uniforms.ambientColor[3 + 3 * i + 0] = this.ambientColor[i].r;
-            this.filter.uniforms.ambientColor[3 + 3 * i + 1] = this.ambientColor[i].g;
-            this.filter.uniforms.ambientColor[3 + 3 * i + 2] = this.ambientColor[i].b;
-            // Update light radius
-            this.filter.uniforms.lightRadius[1 + i] = this.lightRadius[i];
+            this.filter.uniforms.ambientColor[3 + 3 * i + 0] = config.r;
+            this.filter.uniforms.ambientColor[3 + 3 * i + 1] = config.g;
+            this.filter.uniforms.ambientColor[3 + 3 * i + 2] = config.b;
+            // Update pointlight radius
+            this.filter.uniforms.lightRadius[1 + i] = config.pointlight_radius;
             // Update light type
-            this.filter.uniforms.lightType[1 + i] = this.lightTypes[i];
-            // Update light direction index
-            this.filter.uniforms.lightDirIdx[1 + i] = this.lightDirIdx[i];
-            // Update perspective for spotlight
-            this.filter.uniforms.perspective[1 + i] = this.perspective[i];
+            this.filter.uniforms.lightType[1 + i] = config.lighttype;
+            // Update light direction
+            this.filter.uniforms.lightDirIdx[1 + i] = config.direction;
+            // Update perspective
+            this.filter.uniforms.perspective[1 + i] = config.perspective;
             // Update spotlightRadius for spotlight
-            this.filter.uniforms.fSpotlightRadius[1 + i] = this.spotlightRadius[i];
+            this.filter.uniforms.fSpotlightRadius[1 + i] = config.spotlight_radius;
             // Update uTime
-            this.filter.uniforms.uTime[1 + i] += this.utime_steps[i];
+            this.filter.uniforms.uTime[1 + i] += config.delta;
+        } else if (config instanceof JLightingPlayerConfig) {
+            // Update player's position
+            this.filter.uniforms.lightsrc[0] = config.x;
+            this.filter.uniforms.lightsrc[1] = config.y;
+            // Update player's ambient color
+            this.filter.uniforms.ambientColor[0] = config.r;
+            this.filter.uniforms.ambientColor[1] = config.g;
+            this.filter.uniforms.ambientColor[2] = config.b;
+            // Update player's light type
+            this.filter.uniforms.lightType[0] = config.lighttype;
+            // Update player's light radius
+            this.filter.uniforms.lightRadius[0] = config.pointlight_radius;
+            // Update player's perspective direction
+            this.filter.uniforms.lightDirIdx[0] = $gamePlayer.direction();
+            // Update player's perspective angle in degree
+            this.filter.uniforms.perspective[0] = config.perspective;
+            // Update player's spotlight radius
+            this.filter.uniforms.fSpotlightRadius[0] = config.spotlight_radius;
+            // Update player's uTime
+            this.filter.uniforms.uTime[0] += config.delta;
+        } else {
+            JPC.core.logger.warn('Unidentified configuration.');
         }
     };
 
-    Lighting.prototype.updateGlobalIllumination = function() {
-        this.filter.uniforms.globalIllumination = this.globalIllumination;
+    JLightingManager.prototype.findPlayerSprite = function() {
+        return SceneManager._scene._spriteset._characterSprites.find(
+            character => character._character instanceof Game_Player);
     };
 
-    //=============================================================================
-    // Hook
-    //=============================================================================
-    var _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
+    JLightingManager.prototype.update = function() {
+        this.initialize();
+        if (this.filter.enabled === true) {
+            this.updatePlayer();
+            this.updateLightEventPosition();
+            this.updateLightEvent();
+        }
+    };
+
+    JLightingManager.prototype.updatePlayer = function() {
+        if (this.playerConfig.is_light_source === true) {
+            this.playerConfig.x = this.playerSprite.position._x;
+            this.playerConfig.y = this.playerSprite.position._y;
+        } else {
+            this.playerConfig.x = 9999999.0;
+            this.playerConfig.y = 9999999.0;
+        }
+        this.refreshUniforms(this.playerConfig);
+    };
+
+    JLightingManager.prototype.updateLightEvent = function() {
+        for (const name in this.objConfigsNameTable) {
+            const config = this.objConfigsNameTable[name];
+            this.refreshUniforms(config);
+        }
+    };
+
+    ////////////////////////////////////////////
+    /////               Hook               /////
+    ////////////////////////////////////////////
+
+    const _Spriteset_Map__initialize = Spriteset_Map.prototype.initialize;
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
-        this.lighting = new Lighting();
-        this.filters.push(this.lighting.filter);
+        this.lighting_manager = new JLightingManager();
+        this.filters.push(this.lighting_manager.filter);
     };
 
-    var _Spriteset_Map__update = Spriteset_Map.prototype.update;
+    const _Spriteset_Map__update = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function() {
         _Spriteset_Map__update.apply(this, arguments);
-        this.lighting.update();
+        this.lighting_manager.update();
     };
-})();
+})(JPC.getPluginName(document), JPC.getPluginParams(document));
 
 /* MIT License
 
-Copyright (c) 2020 Jim00000
+Copyright (c) Jim00000
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

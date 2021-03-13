@@ -48,6 +48,20 @@ const JPC = (() => {
         });
     });
 
+    Exported.import['core_xmlparser'] = import('./jpc/core/xmlparser.js').then(mod => {
+        Exported.core.xmlparser = mod.__xmlparser;
+        Exported.import['core_logger'].then(() => {
+            Exported.core.logger.debug('JPC.core.xmlparser is ready.');
+        });
+    });
+
+    Exported.import['core_glsl'] = import('./jpc/core/glsl.js').then(mod => {
+        Exported.core.glsl = mod.__glsl;
+        Exported.import['core_logger'].then(() => {
+            Exported.core.logger.debug('JPC.core.glsl is ready.');
+        });
+    });
+
     Exported.import['core_miscellany'] = import('./jpc/core/miscellany.js').then(mod => {
         Exported.core.misc = mod.__miscellany;
         Exported.import['core_logger'].then(() => {
@@ -91,54 +105,6 @@ const JPC = (() => {
     Exported.getPluginParams = function(doc) {
         const pluginName = Exported.getPluginName(doc);
         return PluginManager.parameters(pluginName);
-    };
-
-    Exported.loadGLSLShaderFile = function(filePath) {
-        return readFileAsString(filePath);
-    };
-
-    Exported.createFilter = function(shaderPath, uniforms = {}) {
-        // Here we use OpenGL ES 3.0
-        const vertSrc = Exported.loadGLSLShaderFile('js/plugins/shaders/default.vs');
-        const fragSrc = Exported.loadGLSLShaderFile(shaderPath);
-        const filter = new PIXI.Filter(vertSrc, fragSrc, uniforms);
-        return filter;
-    };
-
-    Exported.select = function(...args) {
-        for (const arg of args) {
-            if (arg !== undefined && arg !== null) {
-                return arg;
-            }
-        }
-        return null;
-    };
-
-    //=============================================================================
-    // Private functions
-    //=============================================================================
-
-    function readFileAsString(filePath) {
-        if (Utils.isNwjs() === true) {
-            const path = require('path'), fs = require('fs');
-            const shaderFile = fs.readFileSync(path.resolve(filePath));
-            return shaderFile.toString();
-        } else {
-            return loadBySyncXHR(filePath);
-        }
-    };
-
-    function loadBySyncXHR(path) {
-        let request = new XMLHttpRequest();
-        // Note that synchronous XMLHttpRequest is deprecated.
-        // TODO: any better approaches ?
-        request.open('GET', path, false);
-        request.send();
-        if (request.status === 200) {
-            return request.responseText;
-        } else {
-            return null;
-        }
     };
 
     ////////////////////////////////////////////

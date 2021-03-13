@@ -1,20 +1,37 @@
-export const __miscellany = {};
+export const __xmlparser = {};
 
-__miscellany.registerKeyBinding = function(vkey, keyName) {
-    Input.keyMapper[vkey] = keyName;
+__xmlparser.parse = function(text) {
+    const parser = new DOMParser();
+    const xmldoc = parser.parseFromString(text, "text/xml");
+    return xmldoc;
+}
+
+class XMLDocument {
+    #_xmlDoc
+
+    constructor(text) {
+        this.#_xmlDoc = JPC.core.xmlparser.parse(text);
+    };
+
+    get doc() {
+        return this.#_xmlDoc;
+    };
 };
 
-__miscellany.sleep = function(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
+__xmlparser.XMLDocument = XMLDocument;
 
-__miscellany.select = function(...args) {
-    for (const arg of args) {
-        if (arg !== undefined && arg !== null) {
-            return arg;
-        }
+XMLDocument.prototype.query = function(...tags) {
+    const stringToGeneric = JPC.core.typeconverter.stringToGeneric;
+    if (this.doc !== undefined && this.doc !== null) {
+        let node = this.doc;
+        for (const tag of tags) {
+            node = node.getElementsByTagName(tag).item(0);
+            if (node === null) return stringToGeneric(null);
+        };
+        return stringToGeneric(node.textContent);
+    } else {
+        return stringToGeneric(null);
     }
-    return null;
 };
 
 /* MIT License

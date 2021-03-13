@@ -1,5 +1,46 @@
 export const __typeconverter = {};
 
+class GenericValue {
+    #_string
+    #_valid
+
+    constructor(string) {
+        this.#_string = string;
+        this.#_valid = (string !== null && typeof (string) === 'string');
+    };
+
+    get string() {
+        if (this.valid)
+            return this.#_string;
+        else
+            return null;
+    };
+
+    get boolean() {
+        if (this.valid)
+            return __typeconverter.toBoolean(this.string);
+        else
+            return null;
+    };
+
+    get number() {
+        if (this.valid)
+            return __typeconverter.toNumber(this.string);
+        else
+            return null;
+    };
+
+    get valid() {
+        return this.#_valid;
+    };
+};
+
+class InvalidValue extends GenericValue {
+    constructor() {
+        super(null);
+    };
+};
+
 __typeconverter.toBoolean = function(objects) {
     if (typeof (objects) === 'boolean') {
         return objects;
@@ -28,6 +69,13 @@ __typeconverter.toNumber = function(objects) {
             return objects;
         }
     }
+};
+
+__typeconverter.stringToGeneric = function(string) {
+    if (typeof (string) === 'string')
+        return new GenericValue(string);
+    else
+        return new InvalidValue();
 };
 
 /* MIT License
