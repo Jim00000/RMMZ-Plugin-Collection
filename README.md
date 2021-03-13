@@ -28,6 +28,7 @@ Make it as a hobby. I will slowly update this project.
 "Code" → "Download ZIP", unzip and put all of the files under \<path-to-your-RMMZ-project-directory\>\js\plugins folder.
 
 ## Credits
+- [js-logger](https://github.com/jonnyreeves/js-logger)
 - [godray filter (by Alain Galvan)](https://github.com/pixijs/pixi-filters/tree/master/filters/godray)
 - [GLSL Noise Algorithms (by patriciogonzalezvivo)](https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83)
 

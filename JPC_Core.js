@@ -19,27 +19,57 @@ const JPC = (() => {
     Exported.import = {};  // import will place objects/functions from other modules
     Exported.core = {};
 
+    // js-logger v1.6.1
+    Exported.import['core_logger'] = import('./jpc/core/third_party/logger.js').then(mod => {
+        Exported.core.logger = mod.__logger;
+        Exported.core.logger.useDefaults({formatter: jpc_logger_formatter});
+        Exported.core.logger.setLevel(Exported.core.logger.DEBUG);
+        Exported.core.logger.debug('JPC.core.logger is ready.');
+    });
+
     Exported.import['core_vkeys'] = import('./jpc/core/vkeys.js').then(mod => {
         Exported.core.vkeys = mod.__vkeys;
+        Exported.import['core_logger'].then(() => {
+            Exported.core.logger.debug('JPC.core.vkeys is ready.');
+        });
     });
 
     Exported.import['core_notifier'] = import('./jpc/core/notifier.js').then(mod => {
         Exported.notifier = mod.__notifier;
+        Exported.import['core_logger'].then(() => {
+            Exported.core.logger.debug('JPC.notifier is ready.');
+        });
     });
 
     Exported.import['core_typeconverter'] = import('./jpc/core/typeconverter.js').then(mod => {
         Exported.core.typeconverter = mod.__typeconverter;
+        Exported.import['core_logger'].then(() => {
+            Exported.core.logger.debug('JPC.core.typeconverter is ready.');
+        });
     });
 
     Exported.import['core_miscellany'] = import('./jpc/core/miscellany.js').then(mod => {
         Exported.core.misc = mod.__miscellany;
+        Exported.import['core_logger'].then(() => {
+            Exported.core.logger.debug('JPC.core.misc is ready.');
+        });
     });
 
     ///////////////////////////////////////////////
     /////               Options               /////
     ///////////////////////////////////////////////
+
     Exported.core.options = {};
     Exported.core.options.outputMsgInTitleScene = true;
+
+    ////////////////////////////////////////////////////////
+    /////               Logger Formatter               /////
+    ////////////////////////////////////////////////////////
+
+    function jpc_logger_formatter(messages, context) {
+        const date = new Date();
+        messages.unshift(`[${context.level.name}][${date.toLocaleDateString()} ${date.toLocaleTimeString()}.${date.getMilliseconds()}]`);
+    };
 
     //////////////////////////////////////////////////////
     /////               Public Methods               /////

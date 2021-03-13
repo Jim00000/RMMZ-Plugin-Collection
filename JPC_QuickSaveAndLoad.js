@@ -106,15 +106,15 @@
  * @command disableQuickSaveSystem
  * @text Disable
  * @desc Deactivate quick save system.
- * 
+ *
  * @command enableNotification
  * @text Enable quicksave message
  * @desc Output message after quick save or quick load is finished.
- * 
+ *
  * @command disableNotification
  * @text Disable quicksave message
  * @desc No output message after quick save or quick load is finished.
- * 
+ *
  */
 
 (async (pluginName, pluginParams) => {
@@ -155,6 +155,9 @@
     JPC.quicksave.isNotificationEnabled = function() {
         return JPC.quicksave.__isEnabledNotification;
     };
+
+    // Waiting for JPC logger is ready
+    await JPC.import['core_logger'];
 
     JPC.import['core_typeconverter'].then(() => {
         JPC.quicksave.__isEnabled = JPC.core.typeconverter.toBoolean(pluginParams.enable_quicksave_system);
@@ -257,6 +260,7 @@
     ////////////////////////////////////////////
     /////               Hook               /////
     ////////////////////////////////////////////
+
     const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
     Scene_Map.prototype.updateScene = function() {
         _Scene_Map__updateScene.apply(this, arguments);
@@ -279,6 +283,9 @@
             }
         }
     };
+
+    // Loading plugin is complete.
+    JPC.core.logger.debug(`${pluginName} is ready.`);
 })(JPC.getPluginName(document), JPC.getPluginParams(document));
 
 /* MIT License
