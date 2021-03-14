@@ -76,6 +76,9 @@ const JPC = (() => {
     Exported.core.options = {};
     Exported.core.options.outputMsgInTitleScene = true;
 
+    // make message appear in title scene one time only.
+    let _isMsgPrintedInTitleSceneEnd = false; 
+
     ////////////////////////////////////////////////////////
     /////               Logger Formatter               /////
     ////////////////////////////////////////////////////////
@@ -114,12 +117,13 @@ const JPC = (() => {
     const _Scene_Title__start = Scene_Title.prototype.start;
     Scene_Title.prototype.start = function() {
         _Scene_Title__start.apply(this, arguments);
-        if (JPC.core.options.outputMsgInTitleScene) {
+        if (JPC.core.options.outputMsgInTitleScene && _isMsgPrintedInTitleSceneEnd === false) {
             JPC.notifier.notify('Welcome to use Jim00000\'s Plugin Collection (JPC)', 3500);
             JPC.notifier.notify('Enabled plugins : ', 7000);
             $plugins.forEach((plugin, index) => {
                 if (plugin.status === true) JPC.notifier.notify(`${plugin.name}`, 7000);
             });
+            _isMsgPrintedInTitleSceneEnd = true;
         }
     };
 
