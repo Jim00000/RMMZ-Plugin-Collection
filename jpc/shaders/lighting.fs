@@ -132,16 +132,13 @@ void main()
         float dist = distance(lightsrc[i], pixelPos + vec2(0.0, 24.0));
         float dd = lightRadius[i] - dist;
         float totalBrightness = 0.0;
-        float magnitude = 1.3;
         float time = uTime[i];
         float vibration = vibrate(time);
         int type = lightType[i];
 
         // point light
         if(isPointLight(type) == true && dd >= 0.0) {
-            vec2 toLight = abs(lightsrc[i] - pixelPos + vec2(0.0, -24.0));
-            float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0);
-            brightness *= clamp(1.0 - (length(toLight) / lightRadius[i] * vibration), 0.0, 1.0) * magnitude;
+            float brightness = 1.0 - dist / lightRadius[i];
             totalBrightness += brightness;
         }
 
@@ -153,12 +150,16 @@ void main()
             if(abs(dd) >= 0.0 && theta <= perspective[i] * vibration) {
                 vec2 toLight = abs(lightsrc[i] - pixelPos  + vec2(0.0, -24.0));
                 float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0) * clamp(1.0  - pow((theta / (perspective[i] * vibration)), 1.2), globalIllumination, 1.0);
-                brightness *= clamp(1.0 - (length(toLight) / fSpotlightRadius[i]), 0.0, 1.0) * magnitude;
-                totalBrightness += brightness;
+                brightness *= clamp(1.0 - (length(toLight) / fSpotlightRadius[i]), globalIllumination, 1.0);
+                totalBrightness = max(brightness, totalBrightness);
             } 
         }
 
-        mixedLightColor += clamp(totalBrightness, globalIllumination, 1.0) * ambientColor[i];
+        // Original method. With this approach, the light verge is quite explicit if multiple light sources overlap
+        //mixedLightColor += totalBrightness * ambientColor[i];
+
+        // Use this approach to make light verge smoother if multiple light sources overlap.
+        mixedLightColor = mix(mixedLightColor, ambientColor[i], pow(totalBrightness, 1.4));
     }
 
     finalColor = diffuseColor.xyz * mixedLightColor;
