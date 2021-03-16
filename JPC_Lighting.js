@@ -19,6 +19,8 @@
 
     JPC.lighting = {};
     JPC.lighting.__version = 'wip';
+    JPC.lighting.manager = null;
+    JPC.lighting.enable = false; 
 
     // Awating jpc.core.logger is ready.
     await JPC.import['core_logger'];
@@ -89,24 +91,27 @@
 
     // This class contains metadata of the game map related to lighting.
     class JLightingMapConfig extends JPC.core.xmlparser.XMLDocument {
-        #_enable
         #_global_illumination
 
         constructor(text) {
             super(text);
             const select = JPC.core.misc.select;
-            this.#_enable = select(this.query('jpc', 'lighting', 'enable').boolean, JLightingMapDefaultConfig.enable);
+            JPC.lighting.enable = select(this.query('jpc', 'lighting', 'enable').boolean, JLightingMapDefaultConfig.enable);
             this.#_global_illumination = select(
                 this.query('jpc', 'lighting', 'global_illumination').number,
                 JLightingMapDefaultConfig.global_illumination);
         };
 
         get enable() {
-            return this.#_enable;
+            return JPC.lighting.enable;
         };
 
         get global_illumination() {
             return this.#_global_illumination;
+        };
+
+        set global_illumination(value) {
+            this.#_global_illumination = value;
         };
     };
 
@@ -577,7 +582,9 @@
             this.updatePlayer();
             this.updateLightEventPosition();
             this.updateLightEvent();
+            this.updateGlobalIllumination();
         }
+        this.updateEnableFilter();
     };
 
     JLightingManager.prototype.updatePlayer = function() {
@@ -598,6 +605,15 @@
         }
     };
 
+    JLightingManager.prototype.updateGlobalIllumination = function() {
+        this.filter.uniforms.globalIllumination = this.mapConfig.global_illumination;
+        this.filter.enabled = this.mapConfig.enable;
+    };
+
+    JLightingManager.prototype.updateEnableFilter = function() {
+        this.filter.enabled = this.mapConfig.enable;
+    }
+
     ////////////////////////////////////////////
     /////               Hook               /////
     ////////////////////////////////////////////
@@ -606,6 +622,7 @@
     Spriteset_Map.prototype.initialize = function() {
         _Spriteset_Map__initialize.apply(this, arguments);
         this.lighting_manager = new JLightingManager();
+        JPC.lighting.manager = this.lighting_manager;
         this.filters.push(this.lighting_manager.filter);
     };
 
