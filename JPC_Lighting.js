@@ -44,11 +44,11 @@
     JLightingType.prototype.parse = function(string) {
         switch (string.toLowerCase()) {
             case 'point':
-                return JLightingDirection.PointLight;
+                return JLightingType.PointLight;
             case 'spot':
-                return JLightingDirection.SpotLight;
+                return JLightingType.SpotLight;
             case 'both':
-                return JLightingDirection.PointLight | JLightingDirection.SpotLight;
+                return JLightingType.PointLight | JLightingType.SpotLight;
             default:
                 return undefined;
         }
@@ -56,19 +56,19 @@
 
     class JLightingDirection {
         static get Down() {
-            return Game_Character.ROUTE_MOVE_DOWN;
+            return 2;
         };
 
         static get Left() {
-            return Game_Character.ROUTE_MOVE_LEFT;
+            return 4;
         };
 
         static get Right() {
-            return Game_Character.ROUTE_MOVE_RIGHT;
+            return 6;
         };
 
         static get Up() {
-            return Game_Character.ROUTE_MOVE_UP;
+            return 8;
         };
     };
 
