@@ -96,7 +96,7 @@ float motion(float utime, float frequency, float amplitude)
 
 float vibrate(float utime)
 {
-    return motion(utime * 0.006, 4.0, 0.25);
+    return motion(utime * 0.03, 4.0, 0.25);
 }
 
 bool isBitSet(const int value, const int which)
@@ -138,7 +138,7 @@ void main()
 
         // point light
         if(isPointLight(type) == true && dd >= 0.0) {
-            float brightness = 1.0 - dist / lightRadius[i];
+            float brightness = clamp(1.0 - dist / lightRadius[i] * vibration, globalIllumination, 1.0) ;
             totalBrightness += brightness;
         }
 
