@@ -74,10 +74,13 @@ const JPC = (() => {
     ///////////////////////////////////////////////
 
     Exported.core.options = {};
+    // Whether show the plugin information on the title screen
     Exported.core.options.outputMsgInTitleScene = true;
+    // Speedup the gameplay (like speedhack)
+    Exported.core.options.speed_multiplier = 1;
 
     // make message appear in title scene one time only.
-    let _isMsgPrintedInTitleSceneEnd = false; 
+    let _isMsgPrintedInTitleSceneEnd = false;
 
     ////////////////////////////////////////////////////////
     /////               Logger Formatter               /////
@@ -85,7 +88,8 @@ const JPC = (() => {
 
     function jpc_logger_formatter(messages, context) {
         const date = new Date();
-        messages.unshift(`[${context.level.name}][${date.toLocaleDateString()} ${date.toLocaleTimeString()}.${date.getMilliseconds()}]`);
+        messages.unshift(`[${context.level.name}][${date.toLocaleDateString()} ${date.toLocaleTimeString()}.${
+            date.getMilliseconds()}]`);
     };
 
     //////////////////////////////////////////////////////
@@ -113,6 +117,12 @@ const JPC = (() => {
     ////////////////////////////////////////////
     /////               Hook               /////
     ////////////////////////////////////////////
+
+    const _Scene_Base__update = Scene_Base.prototype.update;
+    Scene_Base.prototype.update = function() {
+        _Scene_Base__update.apply(this, arguments);
+        Graphics.app.ticker.speed = JPC.core.options.speed_multiplier;
+    };
 
     const _Scene_Title__start = Scene_Title.prototype.start;
     Scene_Title.prototype.start = function() {
