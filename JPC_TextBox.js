@@ -2,7 +2,7 @@
  * @target MZ
  * @plugindesc Input text box (Support Windows platform only.)
  * @author Jim00000
- * @url
+ * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_TextBox.js
  * @help
  * 
  * @ --- Command ---
