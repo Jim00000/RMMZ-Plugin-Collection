@@ -2,8 +2,19 @@
 
 <div>
     <p align="left">
+        <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/issues">
+            <img src="https://img.shields.io/github/issues/Jim00000/RMMZ-Plugin-Collection" alt="issues">
+        </a>
         <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/LICENSE">
-            <img src="https://img.shields.io/github/license/Jim00000/RMMZ-Plugin-Collection" alt="License">
+            <img src="https://img.shields.io/github/license/Jim00000/RMMZ-Plugin-Collection" alt="license">
+        </a>
+    </p>
+    <p align="left">
+        <a>
+            <img src="https://img.shields.io/github/repo-size/Jim00000/RMMZ-Plugin-Collection" alt="repo size">
+        </a>
+        <a>
+            <img src="https://img.shields.io/tokei/lines/github/Jim00000/RMMZ-Plugin-Collection" alt="total lines">
         </a>
     </p>
 </div>
