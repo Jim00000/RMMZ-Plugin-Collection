@@ -529,8 +529,13 @@
             // Update light source's position
             let dx = (config.x - this.playerSprite.position._x);
             let dy = (config.y - this.playerSprite.position._y);
-            this.filter.uniforms.lightsrc[2 + 2 * i + 0] = dx + this.playerSprite.position._x;
-            this.filter.uniforms.lightsrc[2 + 2 * i + 1] = dy + this.playerSprite.position._y;
+            if (config.is_light_source === false) {
+                this.filter.uniforms.lightsrc[2 + 2 * i + 0] = 9999999.0;
+                this.filter.uniforms.lightsrc[2 + 2 * i + 0] = 9999999.0;
+            } else {
+                this.filter.uniforms.lightsrc[2 + 2 * i + 0] = dx + this.playerSprite.position._x;
+                this.filter.uniforms.lightsrc[2 + 2 * i + 1] = dy + this.playerSprite.position._y;
+            }
             // Update ambient color
             this.filter.uniforms.ambientColor[3 + 3 * i + 0] = config.r;
             this.filter.uniforms.ambientColor[3 + 3 * i + 1] = config.g;
