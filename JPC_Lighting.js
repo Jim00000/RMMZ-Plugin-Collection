@@ -612,7 +612,7 @@
 
     JLightingManager.prototype.updateEnableFilter = function() {
         this.filter.enabled = this.mapConfig.enable;
-    }
+    };
 
     ////////////////////////////////////////////
     /////               Hook               /////
