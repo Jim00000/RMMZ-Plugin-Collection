@@ -145,7 +145,7 @@
             this.#_r = 1.0;
             this.#_g = 1.0;
             this.#_b = 1.0;
-            this.#_is_light_source = true;
+            this.#_is_light_source = false;
             this.#_pointlight_radius = 128.0;
             this.#_spotlight_radius = 128.0;
             this.#_perspective = 15.0;
@@ -245,6 +245,7 @@
     class JLightingPlayerConfig extends JLightingCommonConfig {
         constructor() {
             super();
+            this.is_light_source = true;
         };
     };
 
