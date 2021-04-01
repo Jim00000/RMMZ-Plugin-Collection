@@ -632,6 +632,9 @@
         _Spriteset_Map__update.apply(this, arguments);
         this.lighting_manager.update();
     };
+
+    // Loading plugin is complete.
+    JPC.core.logger.debug(`${pluginName} is ready.`);
 })(JPC.getPluginName(document), JPC.getPluginParams(document));
 
 /* MIT License
