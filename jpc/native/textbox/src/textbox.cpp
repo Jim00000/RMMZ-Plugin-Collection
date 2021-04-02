@@ -14,6 +14,7 @@ namespace {
     WCHAR INPUT_BUFFER[BUFSIZ];
 
     LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    VOID forceForegroundWindow(HWND hWnd);
 
     HRESULT __impl_open(CONST LPCWSTR CLASS_NAME, CONST LPCWSTR WINDOW_TITLE, std::wstring& text, 
         CONST UINT X, CONST UINT Y, CONST UINT WIDTH, CONST UINT HEIGHT)
@@ -123,9 +124,9 @@ namespace {
         SendMessageW(hClearBtn, WM_SETFONT, (WPARAM)hFont, TRUE);
         SendMessageW(hEditBox, WM_SETFONT, (WPARAM)hFont, TRUE);
 
+        forceForegroundWindow(hWnd);
         ShowWindow(hWnd, nCmdShow);
         UpdateWindow(hWnd);
-        SetForegroundWindow(hWnd);
 
         // Run the message loop.
         MSG msg = { };
@@ -199,6 +200,20 @@ namespace {
             return DefWindowProc(hWnd, uMsg, wParam, lParam);
         }
         return S_NORMAL;
+    }
+
+    VOID forceForegroundWindow(HWND hWnd) {
+        DWORD dwCurrentThread = GetCurrentThreadId();
+        DWORD dwFGThread = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+        AttachThreadInput(dwCurrentThread, dwFGThread, TRUE);
+
+        SetForegroundWindow(hWnd);
+        //SetCapture(hWnd);
+        //SetFocus(hWnd);
+        //SetActiveWindow(hWnd);
+        //EnableWindow(hWnd, TRUE);
+
+        AttachThreadInput(dwCurrentThread, dwFGThread, FALSE);
     }
 }
 
