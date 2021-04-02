@@ -12,6 +12,271 @@
  *
  * This script adds point light or spotlight effect to the player or objects on the map.
  *
+ * @ --- Command ---
+ *
+ * @command enableLightingSystem
+ * @text Enable JPC lighting system
+ * @desc Enable JPC lighting system (effect on all lighting events and player).
+ *
+ * @command disableLightingSystem
+ * @text Disable JPC lighting system
+ * @desc Disable JPC lighting system (effect on all lighting events and player).
+ *
+ * @command setGlobalIllumination
+ * @text Set global illumination
+ * @desc Set global illumination to the map. Range from 0 to 1.
+ *
+ * @arg global_illumination
+ * @text global illumination
+ * @desc Set global illumination [0.000, 1.000].
+ * @type number
+ * @default 1.000
+ * @min 0.000
+ * @max 1.000
+ * @decimals 3
+ *
+ * @command toggleLight
+ * @text Toggle light (event)
+ * @desc Toggle light on events identified by event name.
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg enabled
+ * @text enable
+ * @type boolean
+ * @default true
+ * @on Enable
+ * @off Disable
+ *
+ * @command setRChannel
+ * @text Set R channel (event)
+ * @desc Set R channel given an event name.
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg r
+ * @text r
+ * @desc R channel (red color) [0.000 ~ ∞].
+ * @type number
+ * @default 1.000
+ * @min 0.000
+ * @decimals 3
+ *
+ * @command setGChannel
+ * @text Set G channel (event)
+ * @desc Set G channel given an event name.
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg g
+ * @text g
+ * @desc G channel (green color) [0.000 ~ ∞].
+ * @type number
+ * @default 1.000
+ * @min 0.000
+ * @decimals 3
+ *
+ * @command setBChannel
+ * @text Set B channel (event)
+ * @desc Set B channel given an event name.
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg b
+ * @text b
+ * @desc b channel (blue color) [0.000 ~ ∞].
+ * @type number
+ * @default 1.000
+ * @min 0.000
+ * @decimals 3
+ *
+ * @command setPointLightRadius
+ * @text Set point light radius (event)
+ * @desc set the radius of point light given an event name.
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg radius
+ * @text radius
+ * @desc radius of point light source.
+ * @type number
+ * @default 128
+ * @min 0
+ *
+ * @command setSpotLightRadius
+ * @text Set spot light radius (event)
+ * @desc set the radius of spot light given an event name.
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg radius
+ * @text radius
+ * @desc radius of spot light source.
+ * @type number
+ * @default 128
+ * @min 0
+ *
+ * @command setLightDirection
+ * @text Set spot light direction (event)
+ * @desc Set spot light direction (Up, Down, Left, Right).
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg direction
+ * @text direction
+ * @desc Spot light direction.
+ * @type select
+ *
+ * @option Up
+ * @value 8
+ * @option Down
+ * @value 2
+ * @option Left
+ * @value 4
+ * @option Right
+ * @value 6
+ * @default Down
+ *
+ * @command setFOV
+ * @text Set FOV for spot light (event)
+ * @desc Set field of view for a certain spot light given an event name
+ *
+ * @arg event_name
+ * @text event name
+ * @desc event name to identify. Be careful that every event name should be unique.
+ * @type text
+ *
+ * @arg fov
+ * @text field of view
+ * @desc field of view (in angle).
+ * @type number
+ * @default 30
+ * @min 1
+ * @max 90
+ * 
+ * @ --- Command (Player) ---
+ * 
+ * @command togglePlayerLight
+ * @text Toggle light (player)
+ * @desc Toggle light on player.
+ *
+ * @arg enabled
+ * @text enable
+ * @type boolean
+ * @default true
+ * @on Enable
+ * @off Disable
+ * 
+ * @command setPlayerRChannel
+ * @text Set R channel (player)
+ * @desc Set R channel on player.
+ *
+ * @arg r
+ * @text r
+ * @desc R channel (red color) [0.000 ~ ∞].
+ * @type number
+ * @default 1.000
+ * @min 0.000
+ * @decimals 3
+ * 
+ * @command setPlayerGChannel
+ * @text Set G channel (player)
+ * @desc Set G channel on player.
+ *
+ * @arg g
+ * @text g
+ * @desc G channel (green color) [0.000 ~ ∞].
+ * @type number
+ * @default 1.000
+ * @min 0.000
+ * @decimals 3
+ * 
+ * @command setPlayerBChannel
+ * @text Set B channel (player)
+ * @desc Set B channel on player.
+ *
+ * @arg b
+ * @text b
+ * @desc B channel (blue color) [0.000 ~ ∞].
+ * @type number
+ * @default 1.000
+ * @min 0.000
+ * @decimals 3
+ * 
+ * @command setPlayerPointLightRadius
+ * @text Set point light radius (player)
+ * @desc Set the radius of point light on player.
+ * 
+ * @arg radius
+ * @text radius
+ * @desc radius of point light source.
+ * @type number
+ * @default 128
+ * @min 0
+ * 
+ * @command setPlayerSpotLightRadius
+ * @text Set spot light radius (player)
+ * @desc Set the radius of spot light on player.
+ * 
+ * @arg radius
+ * @text radius
+ * @desc radius of spot light source.
+ * @type number
+ * @default 128
+ * @min 0
+ * 
+ * @command setPlayerFOV
+ * @text Set FOV for spot light on player
+ * @desc Set field of view on player
+ *
+ * @arg fov
+ * @text field of view
+ * @desc field of view (in angle).
+ * @type number
+ * @default 30
+ * @min 1
+ * @max 90
+ * 
+ * @command setPlayerLightType
+ * @text Set player light type (player)
+ * @desc Set player light type (point | spot) on player.
+ * 
+ * @arg lighttype_point
+ * @text point light
+ * @desc Enable point light
+ * @type boolean
+ * @default false
+ * @on Enabled
+ * @off Disabled
+ * 
+ * @arg lighttype_spot
+ * @text spot light
+ * @desc Enable point light
+ * @type boolean
+ * @default false
+ * @on Enabled
+ * @off Disabled
  */
 
 (async (pluginName, pluginParams) => {
@@ -22,6 +287,190 @@
     JPC.lighting.manager = null;
     JPC.lighting.enable = false;
     JPC.lighting.global_illumination = 1.0;
+
+    ///////////////////////////////////////////////////////
+    /////               Plugin Commands               /////
+    ///////////////////////////////////////////////////////
+
+    PluginManager.registerCommand(pluginName, 'enableLightingSystem', () => {
+        JPC.core.logger.debug(`Call ${pluginName}:enableLightingSystem command.`);
+        JPC.lighting.enable = true;
+        JPC.core.logger.debug(`JPC lighting system activates.`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'disableLightingSystem', () => {
+        JPC.core.logger.debug(`Call ${pluginName}:disableLightingSystem command.`);
+        JPC.lighting.enable = false;
+        JPC.core.logger.debug(`JPC lighting system deactivates.`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setGlobalIllumination', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setGlobalIllumination command.`);
+        JPC.lighting.global_illumination = args.global_illumination;
+        JPC.core.logger.debug(`Global illumination is set to ${JPC.lighting.global_illumination}`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'toggleLight', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:toggleLight command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.is_light_source = JPC.core.typeconverter.toBoolean(args.enabled);
+            if (event.is_light_source === true)
+                JPC.core.logger.debug(`Light event ${args.event_name} is enabled.`);
+            else
+                JPC.core.logger.debug(`Light event ${args.event_name} is disabled.`);
+        } else {
+            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'setRChannel', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setRChannel command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.r = args.r;
+            JPC.core.logger.debug(`Event ${args.event_name} R channel is changed to ${event.r}.`);
+        } else {
+            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'setGChannel', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setGChannel command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.g = args.g;
+            JPC.core.logger.debug(`Event ${args.event_name} G channel is changed to ${event.g}.`);
+        } else {
+            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'setBChannel', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setBChannel command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.b = args.b;
+            JPC.core.logger.debug(`Event ${args.event_name} B channel is changed to ${event.b}.`);
+        } else {
+            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPointLightRadius', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPointLightRadius command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.pointlight_radius = args.radius;
+            JPC.core.logger.debug(`Event ${args.event_name} point light radius is changed to ${args.radius}.`);
+        } else {
+            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'setSpotLightRadius', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setSpotLightRadius command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.spotlight_radius = args.radius;
+            JPC.core.logger.debug(`Event ${args.event_name} spot light radius is changed to ${args.radius}.`);
+        } else {
+            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'setLightDirection', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setLightDirection command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.direction = args.direction;
+            JPC.core.logger.debug(`Event ${args.event_name} direction is changed to ${
+                JLightingDirection.prototype.toString(args.direction)}.`);
+        } else {
+            JPC.core.logger.warn(
+                `Target event ${JLightingDirection.prototype.toString(args.direction)} cannot be found.`);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'setFOV', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setFOV command.`);
+        const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
+        if (event !== undefined && event !== null) {
+            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            event.perspective = JPC.core.typeconverter.toNumber(args.fov);
+            JPC.core.logger.debug(`Event ${args.event_name} fov is changed to ${args.fov}.`);
+        } else {
+            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+        }
+    });
+
+    // plugin commands for player
+    PluginManager.registerCommand(pluginName, 'togglePlayerLight', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:togglePlayerLight command.`);
+        JPC.lighting.player.is_light_source = JPC.core.typeconverter.toBoolean(args.enabled);
+        if (JPC.lighting.player.is_light_source === true)
+            JPC.core.logger.debug(`Light source of player is enabled.`);
+        else
+            JPC.core.logger.debug(`Light source of player is disabled.`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPlayerRChannel', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPlayerRChannel command.`);
+        JPC.lighting.player.r = JPC.core.typeconverter.toNumber(args.r);
+        JPC.core.logger.debug(`Set R channel to ${JPC.lighting.player.r} on Player`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPlayerGChannel', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPlayerGChannel command.`);
+        JPC.lighting.player.g = JPC.core.typeconverter.toNumber(args.g);
+        JPC.core.logger.debug(`Set G channel to ${JPC.lighting.player.g} on Player`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPlayerBChannel', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPlayerBChannel command.`);
+        JPC.lighting.player.b = JPC.core.typeconverter.toNumber(args.b);
+        JPC.core.logger.debug(`Set B channel to ${JPC.lighting.player.b} on Player`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPlayerPointLightRadius', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPlayerPointLightRadius command.`);
+        JPC.lighting.player.pointlight_radius = JPC.core.typeconverter.toNumber(args.radius);
+        JPC.core.logger.debug(`Set point light radius to ${JPC.lighting.player.pointlight_radius} on Player`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPlayerSpotLightRadius', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPlayerSpotLightRadius command.`);
+        JPC.lighting.player.spotlight_radius = JPC.core.typeconverter.toNumber(args.radius);
+        JPC.core.logger.debug(`Set spot light radius to ${JPC.lighting.player.spotlight_radius} on Player`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPlayerFOV', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPlayerFOV command.`);
+        JPC.lighting.player.perspective = JPC.core.typeconverter.toNumber(args.fov);
+        JPC.core.logger.debug(`Set FOV to ${JPC.lighting.player.perspective} on Player`);
+    });
+
+    PluginManager.registerCommand(pluginName, 'setPlayerLightType', args => {
+        JPC.core.logger.debug(`Call ${pluginName}:setPlayerLightType command.`);
+        JPC.lighting.player.lighttype = 0;
+        
+        if(JPC.core.typeconverter.toBoolean(args.lighttype_point) === true){
+            JPC.lighting.player.lighttype |= JLightingType.PointLight;
+            JPC.core.logger.debug('Enable point light type on Player');
+        }
+
+        if(JPC.core.typeconverter.toBoolean(args.lighttype_spot) === true) {
+            JPC.lighting.player.lighttype |= JLightingType.SpotLight;
+            JPC.core.logger.debug('Enable spot light type on Player');
+        }
+    });
 
     // Awating jpc.core.logger is ready.
     await JPC.import['core_logger'];
