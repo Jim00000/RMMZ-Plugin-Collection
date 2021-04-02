@@ -9,8 +9,29 @@
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_Lighting.js
  * @base JPC_Core
  * @help
+ * Lighting Work-In-Progress
+ *
+ * ◼️ Introduction
  *
  * This script adds point light or spotlight effect to the player or objects on the map.
+ *
+ * ◼️ Remarks
+ *
+ * Make sure every light event name should be unique. Otherwise, you may encounter some problems.
+ *
+ * ◼️ MIT License
+ *
+ * Copyright (c) 2021 Jim00000
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
  * @ --- Command ---
  *
