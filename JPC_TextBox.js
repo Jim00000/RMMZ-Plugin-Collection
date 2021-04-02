@@ -22,6 +22,21 @@
  * @desc textbox window title's text
  * @type text
  * @default Input text window
+ * 
+ * @command openNameInput
+ * @text Open name input process
+ * @desc Open the name input window and set the name to selected actor.
+ * 
+ * @arg title
+ * @text title
+ * @desc window's title
+ * @type text
+ * @default What is your name ?
+ * 
+ * @arg actorId
+ * @text actor
+ * @type actor
+ * @default 0
  */
 
 (async (pluginName, pluginParams) => {
@@ -39,6 +54,13 @@
         if(JPC.textbox.open !== null && args.vid !== 0) {
             const text = JPC.textbox.open(args.title);
             $gameVariables.setValue(args.vid, text);
+        }
+    });
+
+    PluginManager.registerCommand(pluginName, 'openNameInput', args => {
+        if(JPC.textbox.open !== null && args.actorId !== 0) {
+            const name = JPC.textbox.open(args.title);
+            $gameActors.actor(args.actorId).setName(name);
         }
     });
 
