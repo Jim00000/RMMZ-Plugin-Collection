@@ -90,6 +90,21 @@
         }
     };
 
+    JLightingDirection.prototype.toString = function(val) {
+        switch (Number(val)) {
+            case JLightingDirection.Down:
+                return 'Down';
+            case JLightingDirection.Left:
+                return 'Left';
+            case JLightingDirection.Right:
+                return 'Right';
+            case JLightingDirection.Up:
+                return 'Up';
+            default:
+                return undefined;
+        }
+    };
+
     // This class contains metadata of the game map related to lighting.
     class JLightingMapConfig extends JPC.core.xmlparser.XMLDocument {
         constructor(text) {
