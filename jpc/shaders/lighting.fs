@@ -138,7 +138,9 @@ void main()
 
         // point light
         if(isPointLight(type) == true && dd >= 0.0) {
-            float brightness = clamp(1.0 - dist / lightRadius[i] * vibration, globalIllumination, 1.0) ;
+            vec2 toLight = abs(lightsrc[i] - pixelPos + vec2(0.0, -24.0));
+            float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0);
+            brightness *= clamp(1.0 - (length(toLight) / lightRadius[i] * vibration), 0.0, 1.0);
             totalBrightness += brightness;
         }
 
@@ -147,19 +149,22 @@ void main()
             vec2 lightDir = normalize(lightsrc[i] - pixelPos + vec2(0.0, -24.0)) * fSpotlightRadius[i];
             vec2 spotDir = getLightDir(lightDirIdx[i]) * fSpotlightRadius[i];
             float theta = getAngle(lightDir, spotDir);
+            float brightness = 0.0;
+
             if(abs(dd) >= 0.0 && theta <= perspective[i] * vibration) {
                 vec2 toLight = abs(lightsrc[i] - pixelPos  + vec2(0.0, -24.0));
-                float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0) * clamp(1.0  - pow((theta / (perspective[i] * vibration)), 1.2), globalIllumination, 1.0);
-                brightness *= clamp(1.0 - (length(toLight) / fSpotlightRadius[i]), globalIllumination, 1.0);
-                totalBrightness = max(brightness, totalBrightness);
-            } 
+                brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0) * clamp(1.0  - pow((theta / (perspective[i] * vibration)), 1.2), 0.0, 1.0);
+                brightness *= clamp(1.0 - (length(toLight) / fSpotlightRadius[i]), 0.0, 1.0);
+                totalBrightness += brightness;
+            }
+
         }
 
         // Original method. With this approach, the light verge is quite explicit if multiple light sources overlap
-        //mixedLightColor += totalBrightness * ambientColor[i];
+        mixedLightColor += totalBrightness * ambientColor[i];
 
         // Use this approach to make light verge smoother if multiple light sources overlap.
-        mixedLightColor = mix(mixedLightColor, ambientColor[i], pow(totalBrightness, 1.4));
+        //mixedLightColor = mix(mixedLightColor, ambientColor[i], pow(totalBrightness, 1.1));
     }
 
     finalColor = diffuseColor.xyz * mixedLightColor;
