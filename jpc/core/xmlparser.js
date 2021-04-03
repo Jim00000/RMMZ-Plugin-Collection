@@ -10,7 +10,7 @@ class XMLDocument {
     #_xmlDoc
 
     constructor(text) {
-        this.#_xmlDoc = JPC.core.xmlparser.parse(text);
+        this.#_xmlDoc = __xmlparser.parse(text);
     };
 
     get doc() {
