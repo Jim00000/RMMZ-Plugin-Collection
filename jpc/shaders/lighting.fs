@@ -121,6 +121,31 @@ bool isSpotLight(const int type)
     return isBitSet(type, 1);
 }
 
+float calculatePointLightBrightness(const float dist, const float lightRadius, float vibration)
+{
+    // Linear attenuations model
+    //float brightness = smoothstep(0.0, 1.0, 1.0 - dist / lightRadius * vibration);
+
+    // Exponential attenuations model
+    float x = dist / lightRadius * vibration;
+    float brightness = exp(-5.0 * pow(x, 1.2) * log(2.0 + pow(x, 1.8)));
+    return brightness;
+}
+
+float calculateSpotLightBrightness(const float dist, const float lightRadius,
+    const float theta, const float perspective, float vibration)
+{
+    float decay = pow(clamp(1.0 - theta / perspective * vibration, 0.0, 1.0), 1.0);
+
+    // Linear attenuations model
+    //float brightness = smoothstep(0.0, 1.0, 1.0 - dist / lightRadius * vibration) * decay;
+
+    // Exponential attenuations model
+    float x = dist / lightRadius * vibration;
+    float brightness = exp(-3.5 * pow(x, 2.4) * log(3.0 + pow(x, 2.8))) * decay;
+    return brightness;
+}
+
 void main() 
 {
     vec4 diffuseColor = texture(uSampler, vTextureCoord);
@@ -137,10 +162,8 @@ void main()
         int type = lightType[i];
 
         // point light
-        if(isPointLight(type) == true && dd >= 0.0) {
-            vec2 toLight = abs(lightsrc[i] - pixelPos + vec2(0.0, -24.0));
-            float brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0);
-            brightness *= clamp(1.0 - (length(toLight) / lightRadius[i] * vibration), 0.0, 1.0);
+        if(isPointLight(type) == true && dist < lightRadius[i]) {
+            float brightness = calculatePointLightBrightness(dist, lightRadius[i], vibration);
             totalBrightness += brightness;
         }
 
@@ -149,19 +172,17 @@ void main()
             vec2 lightDir = normalize(lightsrc[i] - pixelPos + vec2(0.0, -24.0)) * fSpotlightRadius[i];
             vec2 spotDir = getLightDir(lightDirIdx[i]) * fSpotlightRadius[i];
             float theta = getAngle(lightDir, spotDir);
-            float brightness = 0.0;
 
-            if(abs(dd) >= 0.0 && theta <= perspective[i] * vibration) {
-                vec2 toLight = abs(lightsrc[i] - pixelPos  + vec2(0.0, -24.0));
-                brightness = clamp(dot(normalize(toLight), pixelPos), 0.0, 1.0) * clamp(1.0  - pow((theta / (perspective[i] * vibration)), 1.2), 0.0, 1.0);
-                brightness *= clamp(1.0 - (length(toLight) / fSpotlightRadius[i]), 0.0, 1.0);
+            if(theta <= perspective[i] && dist < fSpotlightRadius[i]){
+                float brightness = calculateSpotLightBrightness(dist, fSpotlightRadius[i], theta, perspective[i], vibration);
                 totalBrightness += brightness;
             }
-
         }
 
         // Original method. With this approach, the light verge is quite explicit if multiple light sources overlap
         mixedLightColor += totalBrightness * ambientColor[i];
+        // Limit the brightness to avoid bright light effect
+        //mixedLightColor = min(mixedLightColor, vec3(1.2, 1.2, 1.2));
 
         // Use this approach to make light verge smoother if multiple light sources overlap.
         //mixedLightColor = mix(mixedLightColor, ambientColor[i], pow(totalBrightness, 1.1));
