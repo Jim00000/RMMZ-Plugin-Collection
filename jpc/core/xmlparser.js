@@ -1,9 +1,16 @@
 export const __xmlparser = {};
 
 __xmlparser.parse = function(text) {
+    const jpcxml = __xmlparser.filter(text);
     const parser = new DOMParser();
-    const xmldoc = parser.parseFromString(text, "text/xml");
+    const xmldoc = parser.parseFromString(jpcxml, "text/xml");
     return xmldoc;
+}
+
+__xmlparser.filter = function(text) {
+    const re = /(^<jpc>[\w\s\<\>\_\/\.]*?<\/jpc>$)/m;
+    const match = re.exec(text);
+    return match ? match[1] : text;
 }
 
 class XMLDocument {
