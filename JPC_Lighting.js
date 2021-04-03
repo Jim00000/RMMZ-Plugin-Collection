@@ -195,9 +195,9 @@
  * @default 30
  * @min 1
  * @max 90
- * 
+ *
  * @ --- Command (Player) ---
- * 
+ *
  * @command togglePlayerLight
  * @text Toggle light (player)
  * @desc Toggle light on player.
@@ -208,7 +208,7 @@
  * @default true
  * @on Enable
  * @off Disable
- * 
+ *
  * @command setPlayerRChannel
  * @text Set R channel (player)
  * @desc Set R channel on player.
@@ -220,7 +220,7 @@
  * @default 1.000
  * @min 0.000
  * @decimals 3
- * 
+ *
  * @command setPlayerGChannel
  * @text Set G channel (player)
  * @desc Set G channel on player.
@@ -232,7 +232,7 @@
  * @default 1.000
  * @min 0.000
  * @decimals 3
- * 
+ *
  * @command setPlayerBChannel
  * @text Set B channel (player)
  * @desc Set B channel on player.
@@ -244,29 +244,29 @@
  * @default 1.000
  * @min 0.000
  * @decimals 3
- * 
+ *
  * @command setPlayerPointLightRadius
  * @text Set point light radius (player)
  * @desc Set the radius of point light on player.
- * 
+ *
  * @arg radius
  * @text radius
  * @desc radius of point light source.
  * @type number
  * @default 128
  * @min 0
- * 
+ *
  * @command setPlayerSpotLightRadius
  * @text Set spot light radius (player)
  * @desc Set the radius of spot light on player.
- * 
+ *
  * @arg radius
  * @text radius
  * @desc radius of spot light source.
  * @type number
  * @default 128
  * @min 0
- * 
+ *
  * @command setPlayerFOV
  * @text Set FOV for spot light on player
  * @desc Set field of view on player
@@ -278,11 +278,11 @@
  * @default 30
  * @min 1
  * @max 90
- * 
+ *
  * @command setPlayerLightType
  * @text Set player light type (player)
  * @desc Set player light type (point | spot) on player.
- * 
+ *
  * @arg lighttype_point
  * @text point light
  * @desc Enable point light
@@ -290,7 +290,7 @@
  * @default false
  * @on Enabled
  * @off Disabled
- * 
+ *
  * @arg lighttype_spot
  * @text spot light
  * @desc Enable point light
@@ -481,13 +481,13 @@
     PluginManager.registerCommand(pluginName, 'setPlayerLightType', args => {
         JPC.core.logger.debug(`Call ${pluginName}:setPlayerLightType command.`);
         JPC.lighting.player.lighttype = 0;
-        
-        if(JPC.core.typeconverter.toBoolean(args.lighttype_point) === true){
+
+        if (JPC.core.typeconverter.toBoolean(args.lighttype_point) === true) {
             JPC.lighting.player.lighttype |= JLightingType.PointLight;
             JPC.core.logger.debug('Enable point light type on Player');
         }
 
-        if(JPC.core.typeconverter.toBoolean(args.lighttype_spot) === true) {
+        if (JPC.core.typeconverter.toBoolean(args.lighttype_spot) === true) {
             JPC.lighting.player.lighttype |= JLightingType.SpotLight;
             JPC.core.logger.debug('Enable spot light type on Player');
         }
