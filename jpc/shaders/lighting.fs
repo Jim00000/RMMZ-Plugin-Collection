@@ -1,27 +1,28 @@
 #version 300 es
+precision highp float;
 
 #define MAX_LIGHTS 32
 #define DOWNWARD_LIGHT_INDEX 2
 #define LEFTWARD_LIGHT_INDEX 4
 #define RIGHTWARD_LIGHT_INDEX 6
 #define UPWARD_LIGHT_INDEX 8
-precision highp float;
 
 in vec2 vTextureCoord;
 
 uniform sampler2D uSampler;
-uniform vec2 lightsrc[MAX_LIGHTS];
-uniform vec3 ambientColor[MAX_LIGHTS];
-uniform int lightSrcSize;
-uniform int lightDirIdx[MAX_LIGHTS];
-uniform int lightType[MAX_LIGHTS];
-uniform float lightRadius[MAX_LIGHTS];
-uniform float globalIllumination;
-uniform float perspective[MAX_LIGHTS]; // angle of spotlight
-uniform float fSpotlightRadius[MAX_LIGHTS];
-uniform float uTime[MAX_LIGHTS];
 
-out vec4 outColor;
+uniform int lightCount;
+uniform int directions[MAX_LIGHTS];
+uniform int types[MAX_LIGHTS];
+uniform float pointRadius[MAX_LIGHTS];
+uniform float globalIllumination;
+uniform float FOV[MAX_LIGHTS]; // angle of spotlight
+uniform float spotRadius[MAX_LIGHTS];
+uniform float times[MAX_LIGHTS];
+uniform vec2 positions[MAX_LIGHTS];
+uniform vec3 colors[MAX_LIGHTS];
+
+out vec4 outputColor;
 
 // ------------------------------------------------------------------
 // Get unit vector for up, down, left and right direction
@@ -34,9 +35,8 @@ out vec4 outColor;
 // lightDirIdx = 6 ---> Right
 // lightDirIdx = 8 ---> Up
 // These direction definition follows RPG Maker MZ's Spec.
-vec2 getLightDir(const int idx) 
-{
-    switch (idx) {
+vec2 getLightDir(const int idx) {
+    switch(idx) {
         case UPWARD_LIGHT_INDEX:
             return vec2(0.0, 1.0);
         case DOWNWARD_LIGHT_INDEX:
@@ -47,7 +47,7 @@ vec2 getLightDir(const int idx)
             return vec2(-1.0, 0.0);
         default:
         // FIXME: any way to throw exception ?
-        return vec2(0.0, 0.0);
+            return vec2(0.0, 0.0);
     }
 }
 
@@ -58,8 +58,7 @@ vec2 getLightDir(const int idx)
 // Output    : angle in degree
 // Note      : cosθ = dot(Va, Vb) / (magnitude(Va) * magnitude(Vb))
 // reference : https://onlinemschool.com/math/library/vector/angl/
-float getAngle(const vec2 u, const vec2 v) 
-{
+float getAngle(const vec2 u, const vec2 v) {
     float magnitude = length(u) * length(v);
     float cos_theta = dot(u, v) / magnitude;
     float theta = acos(cos_theta);
@@ -70,22 +69,19 @@ float getAngle(const vec2 u, const vec2 v)
 // ------------------------------------------------------------------
 // Generic 1D Noise by patriciogonzalezvivo
 // Source : https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
-float rand(float n)
-{
+float rand(float n) {
     return fract(sin(n) * 43758.5453123);
 }
 
-float noise(float p)
-{
-	float fl = floor(p);
+float noise(float p) {
+    float fl = floor(p);
     float fc = fract(p);
-	return mix(rand(fl), rand(fl + 1.0), fc);
+    return mix(rand(fl), rand(fl + 1.0), fc);
 }
-	
-float motion(float utime, float frequency, float amplitude)
-{
+
+float motion(float utime, float frequency, float amplitude) {
     float noiseSum = 0.95;
-    for(int i = 0; i < 4; i++) { 
+    for(int i = 0; i < 4; i++) {
         noiseSum += noise(utime * frequency) * amplitude;
         frequency *= 2.0;
         amplitude *= 0.5;
@@ -94,13 +90,11 @@ float motion(float utime, float frequency, float amplitude)
 }
 // ------------------------------------------------------------------
 
-float vibrate(float utime)
-{
+float vibrate(float utime) {
     return motion(utime * 0.03, 4.0, 0.25);
 }
 
-bool isBitSet(const int value, const int which)
-{
+bool isBitSet(const int value, const int which) {
     int bit = 1 << which;
     return (value & bit) == bit;
 }
@@ -108,21 +102,18 @@ bool isBitSet(const int value, const int which)
 // ------------------------------------------------------------------
 // Check whether the light type is point light
 // ------------------------------------------------------------------
-bool isPointLight(const int type) 
-{
+bool isPointLight(const int type) {
     return isBitSet(type, 0);
 }
 
 // ------------------------------------------------------------------
 // Check whether the light type is spotlight (flash light)
 // ------------------------------------------------------------------
-bool isSpotLight(const int type) 
-{
+bool isSpotLight(const int type) {
     return isBitSet(type, 1);
 }
 
-float calculatePointLightBrightness(const float dist, const float lightRadius, float vibration)
-{
+float calculatePointLightBrightness(const float dist, const float lightRadius, float vibration) {
     // Linear attenuations model
     //float brightness = smoothstep(0.0, 1.0, 1.0 - dist / lightRadius * vibration);
 
@@ -132,10 +123,8 @@ float calculatePointLightBrightness(const float dist, const float lightRadius, f
     return brightness;
 }
 
-float calculateSpotLightBrightness(const float dist, const float lightRadius,
-    const float theta, const float perspective, float vibration)
-{
-    float decay = pow(clamp(1.0 - theta / perspective * vibration, 0.0, 1.0), 1.0);
+float calculateSpotLightBrightness(const float dist, const float lightRadius, const float theta, const float fov, float vibration) {
+    float decay = pow(clamp(1.0 - theta / fov * vibration, 0.0, 1.0), 1.0);
 
     // Linear attenuations model
     //float brightness = smoothstep(0.0, 1.0, 1.0 - dist / lightRadius * vibration) * decay;
@@ -146,40 +135,37 @@ float calculateSpotLightBrightness(const float dist, const float lightRadius,
     return brightness;
 }
 
-void main() 
-{
+void main() {
     vec4 diffuseColor = texture(uSampler, vTextureCoord);
     vec3 finalColor;
-    vec3 mixedLightColor = vec3(globalIllumination);
+    vec3 ambientColor = vec3(globalIllumination);
     vec2 pixelPos = gl_FragCoord.xy;
 
-    for(int i = 0; i < lightSrcSize; i++) {
-        float dist = distance(lightsrc[i], pixelPos + vec2(0.0, 24.0));
-        float totalBrightness = 0.0;
-        float time = uTime[i];
+    for(int i = 0; i < lightCount; i++) {
+        float dist = distance(positions[i], pixelPos + vec2(0.0, 24.0));
+        float brightness = 0.0;
+        float time = times[i];
         float vibration = vibrate(time);
-        int type = lightType[i];
+        int type = types[i];
 
         // point light
-        if(isPointLight(type) == true && dist < lightRadius[i]) {
-            float brightness = calculatePointLightBrightness(dist, lightRadius[i], vibration);
-            totalBrightness += brightness;
+        if(isPointLight(type) == true && dist < pointRadius[i]) {
+            brightness += calculatePointLightBrightness(dist, pointRadius[i], vibration);
         }
 
-        // spotlight (flash light)
+        // spot light
         if(isSpotLight(type) == true) {
-            vec2 lightDir = normalize(lightsrc[i] - pixelPos + vec2(0.0, -24.0)) * fSpotlightRadius[i];
-            vec2 spotDir = getLightDir(lightDirIdx[i]) * fSpotlightRadius[i];
+            vec2 lightDir = normalize(positions[i] - pixelPos + vec2(0.0, -24.0)) * spotRadius[i];
+            vec2 spotDir = getLightDir(directions[i]) * spotRadius[i];
             float theta = getAngle(lightDir, spotDir);
 
-            if(theta <= perspective[i] && dist < fSpotlightRadius[i]){
-                float brightness = calculateSpotLightBrightness(dist, fSpotlightRadius[i], theta, perspective[i], vibration);
-                totalBrightness += brightness;
+            if(theta <= FOV[i] && dist < spotRadius[i]) {
+                brightness += calculateSpotLightBrightness(dist, spotRadius[i], theta, FOV[i], vibration);
             }
         }
 
         // Original method. With this approach, the light verge is quite explicit if multiple light sources overlap
-        mixedLightColor += totalBrightness * ambientColor[i];
+        ambientColor += brightness * colors[i];
         // Limit the brightness to avoid bright light effect
         //mixedLightColor = min(mixedLightColor, vec3(1.2, 1.2, 1.2));
 
@@ -187,7 +173,7 @@ void main()
         //mixedLightColor = mix(mixedLightColor, ambientColor[i], pow(totalBrightness, 1.1));
     }
 
-    finalColor = diffuseColor.xyz * mixedLightColor;
+    finalColor = diffuseColor.xyz * ambientColor;
 
-    outColor = vec4(finalColor, diffuseColor.a);
+    outputColor = vec4(finalColor, diffuseColor.a);
 }

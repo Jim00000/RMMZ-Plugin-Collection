@@ -425,7 +425,7 @@
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
             JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
-            event.perspective = JPC.core.typeconverter.toNumber(args.fov);
+            event.fov = JPC.core.typeconverter.toNumber(args.fov);
             JPC.core.logger.debug(`Event ${args.event_name} fov is changed to ${args.fov}.`);
         } else {
             JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
@@ -474,8 +474,8 @@
 
     PluginManager.registerCommand(pluginName, 'setPlayerFOV', args => {
         JPC.core.logger.debug(`Call ${pluginName}:setPlayerFOV command.`);
-        JPC.lighting.player.perspective = JPC.core.typeconverter.toNumber(args.fov);
-        JPC.core.logger.debug(`Set FOV to ${JPC.lighting.player.perspective} on Player`);
+        JPC.lighting.player.fov = JPC.core.typeconverter.toNumber(args.fov);
+        JPC.core.logger.debug(`Set FOV to ${JPC.lighting.player.fov} on Player`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerLightType', args => {
@@ -620,7 +620,7 @@
         #_is_light_source
         #_pointlight_radius
         #_spotlight_radius
-        #_perspective
+        #_fov
         #_lighttype
         #_delta;
 
@@ -633,7 +633,7 @@
             this.#_is_light_source = false;
             this.#_pointlight_radius = 128.0;
             this.#_spotlight_radius = 128.0;
-            this.#_perspective = 15.0;
+            this.#_fov = 15.0;
             this.#_lighttype = JLightingType.PointLight;
             this.#_delta = this.createDelta();
         };
@@ -670,8 +670,8 @@
             return this.#_spotlight_radius;
         };
 
-        get perspective() {
-            return this.#_perspective;
+        get fov() {
+            return this.#_fov;
         };
 
         get lighttype() {
@@ -694,8 +694,8 @@
             this.#_spotlight_radius = radius;
         };
 
-        set perspective(perspective) {
-            this.#_perspective = perspective;
+        set fov(fov) {
+            this.#_fov = fov;
         };
 
         set lighttype(type) {
@@ -825,8 +825,8 @@
             case 'spotlight_radius':
                 this.config.spotlight_radius = JPC.core.typeconverter.toNumber(rvalue);
                 break;
-            case 'perspective':
-                this.config.perspective = JPC.core.typeconverter.toNumber(rvalue);
+            case 'fov':
+                this.config.fov = JPC.core.typeconverter.toNumber(rvalue);
                 break;
             case 'lighttype':
                 this.config.lighttype = JLightingType.prototype.parse(rvalue);
@@ -921,16 +921,15 @@
         const MAX_LIGHTS = 32;
         const filter = JPC.core.glsl.createFilter('js/plugins/jpc/shaders/lighting.fs', {
             globalIllumination: this.mapConfig.global_illumination,
-            lightRadius: new Float32Array(MAX_LIGHTS),
-            lightSrcSize: 0,  // unknown light source count
-            lightsrc: new Float32Array(MAX_LIGHTS * 2),
-            uTime: new Float32Array(MAX_LIGHTS),
-            ambientColor: new Float32Array(MAX_LIGHTS * 3),
-            lightDirIdx: 0,  // unknown light direction
-            perspective: new Float32Array(MAX_LIGHTS).fill(1.0),
-            fSpotlightRadius: new Float32Array(MAX_LIGHTS).fill(1.0),
-            lightType: new Int32Array(MAX_LIGHTS),
-            lightDirIdx: new Int32Array(MAX_LIGHTS)
+            pointRadius: new Float32Array(MAX_LIGHTS),
+            lightCount: 0,  // unknown light source count
+            positions: new Float32Array(MAX_LIGHTS * 2),
+            times: new Float32Array(MAX_LIGHTS),
+            colors: new Float32Array(MAX_LIGHTS * 3),
+            FOV: new Float32Array(MAX_LIGHTS).fill(1.0),
+            spotRadius: new Float32Array(MAX_LIGHTS).fill(1.0),
+            types: new Int32Array(MAX_LIGHTS),
+            directions: new Int32Array(MAX_LIGHTS)
         });
         return filter;
     };
@@ -965,7 +964,7 @@
         this.findLightEvent();
         // Update light source' count
         // One more count is for player
-        this.filter.uniforms.lightSrcSize = this.lightEventCount + 1;
+        this.filter.uniforms.lightCount = this.lightEventCount + 1;
     };
 
     JLightingManager.prototype.findLightEvent = function() {
@@ -1015,48 +1014,48 @@
             let dx = (config.x - this.playerSprite.position._x);
             let dy = (config.y - this.playerSprite.position._y);
             if (config.is_light_source === false) {
-                this.filter.uniforms.lightsrc[2 + 2 * i + 0] = 9999999.0;
-                this.filter.uniforms.lightsrc[2 + 2 * i + 1] = 9999999.0;
+                this.filter.uniforms.positions[2 + 2 * i + 0] = 9999999.0;
+                this.filter.uniforms.positions[2 + 2 * i + 1] = 9999999.0;
             } else {
-                this.filter.uniforms.lightsrc[2 + 2 * i + 0] = dx + this.playerSprite.position._x;
-                this.filter.uniforms.lightsrc[2 + 2 * i + 1] = dy + this.playerSprite.position._y;
+                this.filter.uniforms.positions[2 + 2 * i + 0] = dx + this.playerSprite.position._x;
+                this.filter.uniforms.positions[2 + 2 * i + 1] = dy + this.playerSprite.position._y;
             }
             // Update ambient color
-            this.filter.uniforms.ambientColor[3 + 3 * i + 0] = config.r;
-            this.filter.uniforms.ambientColor[3 + 3 * i + 1] = config.g;
-            this.filter.uniforms.ambientColor[3 + 3 * i + 2] = config.b;
+            this.filter.uniforms.colors[3 + 3 * i + 0] = config.r;
+            this.filter.uniforms.colors[3 + 3 * i + 1] = config.g;
+            this.filter.uniforms.colors[3 + 3 * i + 2] = config.b;
             // Update pointlight radius
-            this.filter.uniforms.lightRadius[1 + i] = config.pointlight_radius;
+            this.filter.uniforms.pointRadius[1 + i] = config.pointlight_radius;
             // Update light type
-            this.filter.uniforms.lightType[1 + i] = config.lighttype;
+            this.filter.uniforms.types[1 + i] = config.lighttype;
             // Update light direction
-            this.filter.uniforms.lightDirIdx[1 + i] = config.direction;
-            // Update perspective
-            this.filter.uniforms.perspective[1 + i] = config.perspective;
+            this.filter.uniforms.directions[1 + i] = config.direction;
+            // Update fov
+            this.filter.uniforms.FOV[1 + i] = config.fov;
             // Update spotlightRadius for spotlight
-            this.filter.uniforms.fSpotlightRadius[1 + i] = config.spotlight_radius;
+            this.filter.uniforms.spotRadius[1 + i] = config.spotlight_radius;
             // Update uTime
-            this.filter.uniforms.uTime[1 + i] += config.delta;
+            this.filter.uniforms.times[1 + i] += config.delta;
         } else if (config instanceof JLightingPlayerConfig) {
             // Update player's position
-            this.filter.uniforms.lightsrc[0] = config.x;
-            this.filter.uniforms.lightsrc[1] = config.y;
+            this.filter.uniforms.positions[0] = config.x;
+            this.filter.uniforms.positions[1] = config.y;
             // Update player's ambient color
-            this.filter.uniforms.ambientColor[0] = config.r;
-            this.filter.uniforms.ambientColor[1] = config.g;
-            this.filter.uniforms.ambientColor[2] = config.b;
+            this.filter.uniforms.colors[0] = config.r;
+            this.filter.uniforms.colors[1] = config.g;
+            this.filter.uniforms.colors[2] = config.b;
             // Update player's light type
-            this.filter.uniforms.lightType[0] = config.lighttype;
+            this.filter.uniforms.types[0] = config.lighttype;
             // Update player's light radius
-            this.filter.uniforms.lightRadius[0] = config.pointlight_radius;
-            // Update player's perspective direction
-            this.filter.uniforms.lightDirIdx[0] = $gamePlayer.direction();
-            // Update player's perspective angle in degree
-            this.filter.uniforms.perspective[0] = config.perspective;
+            this.filter.uniforms.pointRadius[0] = config.pointlight_radius;
+            // Update player's direction
+            this.filter.uniforms.directions[0] = $gamePlayer.direction();
+            // Update player's FOV
+            this.filter.uniforms.FOV[0] = config.fov;
             // Update player's spotlight radius
-            this.filter.uniforms.fSpotlightRadius[0] = config.spotlight_radius;
+            this.filter.uniforms.spotRadius[0] = config.spotlight_radius;
             // Update player's uTime
-            this.filter.uniforms.uTime[0] += config.delta;
+            this.filter.uniforms.times[0] += config.delta;
         } else {
             JPC.core.logger.warn('Unidentified configuration.');
         }
