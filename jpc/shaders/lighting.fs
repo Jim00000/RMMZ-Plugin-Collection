@@ -155,7 +155,6 @@ void main()
 
     for(int i = 0; i < lightSrcSize; i++) {
         float dist = distance(lightsrc[i], pixelPos + vec2(0.0, 24.0));
-        float dd = lightRadius[i] - dist;
         float totalBrightness = 0.0;
         float time = uTime[i];
         float vibration = vibrate(time);
