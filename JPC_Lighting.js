@@ -993,8 +993,10 @@
         config.index = this.dispatchUniformIndex();
         const intepreter = new JLightingInterpreter(config);
         for (const param of params) {
-            const assign_statement = param.parameters[0];
-            intepreter.interpret(assign_statement);
+            if (param.code == 108) { // make sure it is a comment
+                const assign_statement = param.parameters[0];
+                intepreter.interpret(assign_statement);
+            }
         }
         // store the config
         this.objConfigsNameTable[event.name] = config;
