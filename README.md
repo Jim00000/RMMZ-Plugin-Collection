@@ -25,7 +25,7 @@ Make it as a hobby. I will slowly update this project.
 
 ## Plugin List
 
-| Plugin | File name | Dependency | Status | Documentation |
+| Plugin | File name | Dependency | Status | Sample |
 |:---|:---|:---:|:---:|:---:|
 | Essential Core | JPC_Core.js | - | WIP | - |
 | Quick Save/Load | JPC_QuickSaveAndLoad.js | JPC_Core.js | v1.0.0 | - |
