@@ -50,7 +50,7 @@
  * @off Disable
  *
  * @param enableLog
- * @text Enable log
+ * @text Console log
  * @desc Use logger to track plugin's status. Take performance into account, 
  * this option should be disabled while the game is released.
  * @type boolean
