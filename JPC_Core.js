@@ -133,6 +133,11 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
     // make message appear in title scene one time only.
     let _isMsgPrintedInTitleSceneEnd = false;
 
+    // Handle log level
+    if(JPC.core.typeconverter.toBoolean(pluginParams.enableLog) === false) {
+        JPC.core.logger.setLevel(JPC.core.logger.OFF);
+    }
+
     ////////////////////////////////////////////
     /////               Hook               /////
     ////////////////////////////////////////////
