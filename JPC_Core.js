@@ -4,8 +4,72 @@
  * @author Jim00000
  * @url https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/JPC_Core.js
  * @help
+ * JPC Plugins - Essential Core - WIP
+ *
+ * ◼️ Introduction
+ *
  * The plugin contains essential functions and modules to support other JPC's
- * plugins.
+ * plugins. This plugin should be put before other JPC plugins. Some features
+ * are provided by this plugin :
+ *
+ * ▷ Logger (js-logger v1.6.1)
+ * ▷ Virtual Key
+ * ▷ A simple notifier
+ * ▷ XML parsing
+ * ▷ GLSL support and helper
+ * ▷ Miscellaneous
+ *
+ * ◼️ Dependencies
+ *
+ * No
+ *
+ * ◼️ Plugin Commands
+ *
+ * ◼️ MIT License
+ *
+ * Copyright (c) 2021 Jim00000
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * @ --- Parameters ---
+ *
+ * @param titleScreenMessageFlag
+ * @text Show plugin info
+ * @desc Print plugin(s) information in the title scene
+ * @type boolean
+ * @default false
+ * @on Enable
+ * @off Disable
+ *
+ * @param enableLog
+ * @text Enable log
+ * @desc Use logger to track plugin's status. Take performance into account, 
+ * this option should be disabled while the game is released.
+ * @type boolean
+ * @default false
+ * @on Enable
+ * @off Disable
+ * 
+ * @param speed_multiplier
+ * @text Game speed
+ * @desc Speedup the game with a factor just like the speedhack in Cheat Engine.
+ * 1.0x means normal gameplay speed. More larger the multiplier is, more faster
+ * the game runs.
+ * @type number
+ * @default 1.0
+ * @decimals 2
+ * @min 0.0
+ * @max 16.0
+ *
+ * @ --- Plugin Commands ---
  */
 
 const JPC = (() => {
