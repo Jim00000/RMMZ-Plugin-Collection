@@ -300,7 +300,7 @@
  * @off Disabled
  */
 
-(async (pluginName, pluginParams) => {
+JPC.import['lighting'] = (async (pluginName, pluginParams) => {
     'use strict';
 
     JPC.lighting = {};
@@ -308,6 +308,9 @@
     JPC.lighting.manager = null;
     JPC.lighting.enable = false;
     JPC.lighting.global_illumination = 1.0;
+
+    // Waiting for JPC core is ready
+    await JPC.import['core'];
 
     ///////////////////////////////////////////////////////
     /////               Plugin Commands               /////
@@ -492,17 +495,6 @@
             JPC.core.logger.debug('Enable spot light type on Player');
         }
     });
-
-    // Awating jpc.core.logger is ready.
-    await JPC.import['core_logger'];
-    // Awating jpc.core.typeconverter is ready.
-    await JPC.import['core_typeconverter'];
-    // Awating jpc.core.xmlparser is ready.
-    await JPC.import['core_xmlparser'];
-    // Awating jpc.core.glsl is ready.
-    await JPC.import['core_glsl'];
-    // Awating jpc.core.miscellany is ready.
-    await JPC.import['core_miscellany'];
 
     class JLightingType {
         static get PointLight() {
@@ -993,7 +985,7 @@
         config.index = this.dispatchUniformIndex();
         const intepreter = new JLightingInterpreter(config);
         for (const param of params) {
-            if (param.code == 108) { // make sure it is a comment
+            if (param.code === 108) {  // make sure it is a comment
                 const assign_statement = param.parameters[0];
                 intepreter.interpret(assign_statement);
             }

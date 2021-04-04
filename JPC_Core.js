@@ -69,29 +69,6 @@ const JPC = (() => {
         });
     });
 
-    ///////////////////////////////////////////////
-    /////               Options               /////
-    ///////////////////////////////////////////////
-
-    Exported.core.options = {};
-    // Whether show the plugin information on the title screen
-    Exported.core.options.outputMsgInTitleScene = false;
-    // Speedup the gameplay (like speedhack)
-    Exported.core.options.speed_multiplier = 1;
-
-    // make message appear in title scene one time only.
-    let _isMsgPrintedInTitleSceneEnd = false;
-
-    ////////////////////////////////////////////////////////
-    /////               Logger Formatter               /////
-    ////////////////////////////////////////////////////////
-
-    function jpc_logger_formatter(messages, context) {
-        const date = new Date();
-        messages.unshift(`[${context.level.name}][${date.toLocaleDateString()} ${date.toLocaleTimeString()}.${
-            date.getMilliseconds()}]`);
-    };
-
     //////////////////////////////////////////////////////
     /////               Public Methods               /////
     //////////////////////////////////////////////////////
@@ -113,6 +90,48 @@ const JPC = (() => {
         const pluginName = Exported.getPluginName(doc);
         return PluginManager.parameters(pluginName);
     };
+
+    ////////////////////////////////////////////////////////
+    /////               Logger Formatter               /////
+    ////////////////////////////////////////////////////////
+
+    function jpc_logger_formatter(messages, context) {
+        const date = new Date();
+        messages.unshift(`[${context.level.name}][${date.toLocaleDateString()} ${date.toLocaleTimeString()}.${
+            date.getMilliseconds()}]`);
+    };
+
+    ///////////////////////////////////////////////////////
+    /////               Plugin Commands               /////
+    ///////////////////////////////////////////////////////
+
+    return Exported;
+})();
+
+JPC.import['core'] = (async (pluginName, pluginParams) => {
+    'use strict';
+
+    // Await loading modules is complete.
+    await JPC.import['core_logger'];
+    await JPC.import['core_vkeys'];
+    await JPC.import['core_notifier'];
+    await JPC.import['core_typeconverter'];
+    await JPC.import['core_xmlparser'];
+    await JPC.import['core_glsl'];
+    await JPC.import['core_miscellany'];
+
+    ///////////////////////////////////////////////
+    /////               Options               /////
+    ///////////////////////////////////////////////
+
+    JPC.core.options = {};
+    // Whether show the plugin information on the title screen
+    JPC.core.options.outputMsgInTitleScene = JPC.core.typeconverter.toBoolean(pluginParams.titleScreenMessageFlag);
+    // Speedup the gameplay (like speedhack)
+    JPC.core.options.speed_multiplier = JPC.core.typeconverter.toNumber(pluginParams.speed_multiplier);
+
+    // make message appear in title scene one time only.
+    let _isMsgPrintedInTitleSceneEnd = false;
 
     ////////////////////////////////////////////
     /////               Hook               /////
@@ -137,8 +156,9 @@ const JPC = (() => {
         }
     };
 
-    return Exported;
-})();
+    // Loading plugin is complete.
+    JPC.core.logger.debug(`${pluginName} is ready.`);
+})(JPC.getPluginName(document), JPC.getPluginParams(document));
 
 /* MIT License
 

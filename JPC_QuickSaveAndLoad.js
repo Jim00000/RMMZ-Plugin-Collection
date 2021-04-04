@@ -6,7 +6,7 @@
  * @base JPC_Core
  * @help
  * QuickSaveAndLoad v1.0.0
- * 
+ *
  * ◼️ Introduction
  *
  * A simple quicksave mechanism similar to The Elder Scrolls V: Skyrim. Use
@@ -17,19 +17,19 @@
  * ◼️ Dependencies
  *
  * - JPC_Core.js
- * 
+ *
  * ◼️ Plugin Commands
- * 
+ *
  * ▷ enableQuickSaveSystem  : enable quick save system
- * 
+ *
  * ▷ disableQuickSaveSystem : disable quick save system
- * 
+ *
  * ▷ enableNotification     : enable quick save notification
- * 
+ *
  * ▷ disableNotification    : disable quick save notification
- * 
+ *
  * ◼️ Change Log
- * 
+ *
  * ✻ v1.0.0
  *   ▷ Initial release
  *
@@ -134,11 +134,14 @@
  *
  */
 
-(async (pluginName, pluginParams) => {
+JPC.import['quicksaveandload'] = (async (pluginName, pluginParams) => {
     'use strict';
 
     JPC.quicksave = {};
-    JPC.quicksave.__version = "1.0.0";
+    JPC.quicksave.__version = '1.0.0';
+
+    // Waiting for JPC core is ready
+    await JPC.import['core'];
 
     ///////////////////////////////////////////////////////
     /////               Plugin Commands               /////
@@ -174,21 +177,14 @@
         return JPC.quicksave.__isEnabledNotification;
     };
 
-    // Waiting for JPC logger is ready
-    await JPC.import['core_logger'];
+    JPC.quicksave.__isEnabled = JPC.core.typeconverter.toBoolean(pluginParams.enable_quicksave_system);
+    JPC.quicksave.__rm_switch_activity = JPC.core.typeconverter.toNumber(pluginParams.rm_switch_activity);
+    JPC.quicksave.__isEnabledNotification = JPC.core.typeconverter.toBoolean(pluginParams.output_notification_msg);
 
-    JPC.import['core_typeconverter'].then(() => {
-        JPC.quicksave.__isEnabled = JPC.core.typeconverter.toBoolean(pluginParams.enable_quicksave_system);
-        JPC.quicksave.__rm_switch_activity = JPC.core.typeconverter.toNumber(pluginParams.rm_switch_activity);
-        JPC.quicksave.__isEnabledNotification = JPC.core.typeconverter.toBoolean(pluginParams.output_notification_msg);
-    });
-
-    JPC.import['core_miscellany'].then(() => {
-        // Register F6 as quicksave hotkey
-        JPC.core.misc.registerKeyBinding(pluginParams.quick_save_key, 'QuickSave');
-        // Register F7 as quickload hotkey
-        JPC.core.misc.registerKeyBinding(pluginParams.quick_load_key, 'QuickLoad');
-    });
+    // Register F6 as quicksave hotkey
+    JPC.core.misc.registerKeyBinding(pluginParams.quick_save_key, 'QuickSave');
+    // Register F7 as quickload hotkey
+    JPC.core.misc.registerKeyBinding(pluginParams.quick_load_key, 'QuickLoad');
 
     class QuickSaveLoad {
         static getQuickSavefileName() {
