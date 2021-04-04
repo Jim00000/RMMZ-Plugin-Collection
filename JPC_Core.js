@@ -75,7 +75,7 @@ const JPC = (() => {
 
     Exported.core.options = {};
     // Whether show the plugin information on the title screen
-    Exported.core.options.outputMsgInTitleScene = true;
+    Exported.core.options.outputMsgInTitleScene = false;
     // Speedup the gameplay (like speedhack)
     Exported.core.options.speed_multiplier = 1;
 
