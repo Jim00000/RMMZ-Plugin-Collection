@@ -1,6 +1,6 @@
 # Jim00000's Plugin Collection - JPC
 
-![rpg maker mz title](https://assets-global.website-files.com/5efc0159f9a97ba05a8b2902/5f1a9382f263c3a6498875ac_rpg-maker-mz-logo-en-p-800.png)
+![rpg maker mz](https://assets-global.website-files.com/5efc0159f9a97ba05a8b2902/5f37b45f88d83d5fb98b45dc_banner-rpg-maker-mz-p-2000.jpeg)
 
 <div>
     <p align="left">
