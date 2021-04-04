@@ -1,15 +1,18 @@
 # Jim00000's Plugin Collection - JPC
 
+![rpg maker mz title](https://assets-global.website-files.com/5efc0159f9a97ba05a8b2902/5f1a9382f263c3a6498875ac_rpg-maker-mz-logo-en-p-800.png)
+
 <div>
     <p align="left">
         <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/issues">
             <img src="https://img.shields.io/github/issues/Jim00000/RMMZ-Plugin-Collection" alt="issues">
         </a>
+        <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/pulls">
+            <img src="https://img.shields.io/github/issues-pr/Jim00000/RMMZ-Plugin-Collection" alt="pull request">
+        </a>
         <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/blob/master/LICENSE">
             <img src="https://img.shields.io/github/license/Jim00000/RMMZ-Plugin-Collection" alt="license">
         </a>
-    </p>
-    <p align="left">
         <a>
             <img src="https://img.shields.io/github/repo-size/Jim00000/RMMZ-Plugin-Collection" alt="repo size">
         </a>
