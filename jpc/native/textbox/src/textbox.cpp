@@ -19,7 +19,7 @@ namespace {
     HRESULT __impl_open(CONST LPCWSTR CLASS_NAME, CONST LPCWSTR WINDOW_TITLE, std::wstring& text, 
         CONST UINT X, CONST UINT Y, CONST UINT WIDTH, CONST UINT HEIGHT)
     {
-        CONST HINSTANCE hInstance = GetModuleHandle(NULL);
+        CONST HINSTANCE hInstance = GetModuleHandleW(NULL);
         CONST UINT nCmdShow = 1;
 
         // Register the window class.
@@ -37,19 +37,19 @@ namespace {
         wcex.lpszClassName = CLASS_NAME;
         wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 
-        if (!RegisterClassEx(&wcex))
+        if (!RegisterClassExW(&wcex))
         {
-            MessageBox(
+            MessageBoxW(
                 NULL,
-                TEXT("Call to RegisterClassEx failed!"),
-                TEXT("Error"),
+                L"Call to RegisterClassEx failed!",
+                L"Error",
                 MB_OK);
 
             return E_FAIL;
         }
 
         // Create the window
-        HWND hWnd = CreateWindowEx(
+        HWND hWnd = CreateWindowExW(
             0,
             CLASS_NAME,                                 // Window class
             WINDOW_TITLE,                               // Window text
@@ -68,7 +68,7 @@ namespace {
         }
 
         // hWnd[0]
-        HWND hEditBox = CreateWindow(
+        HWND hEditBox = CreateWindowW(
             L"EDIT",
             NULL,
             WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE | ES_LEFT | ES_AUTOVSCROLL,
@@ -138,12 +138,12 @@ namespace {
 
         text = std::wstring{ INPUT_BUFFER };
 
-        if (!UnregisterClass(CLASS_NAME, hInstance)) 
+        if (!UnregisterClassW(CLASS_NAME, hInstance)) 
         {
-            MessageBox(
+            MessageBoxW(
                 NULL,
-                TEXT("Call to UnregisterClass failed!"),
-                TEXT("Error"),
+                L"Call to UnregisterClass failed!",
+                L"Error",
                 MB_OK);
 
             return E_FAIL;
@@ -178,7 +178,7 @@ namespace {
             {
                 HWND hEditBox = GetWindow(hWnd, GW_CHILD);
                 GetWindowTextW(hEditBox, INPUT_BUFFER, BUFSIZ);
-                PostMessage(hWnd, WM_CLOSE, 0, 0);
+                PostMessageW(hWnd, WM_CLOSE, 0, 0);
             }
             break;
 
@@ -191,13 +191,13 @@ namespace {
             break;
 
             default:
-                return DefWindowProc(hWnd, uMsg, wParam, lParam);
+                return DefWindowProcW(hWnd, uMsg, wParam, lParam);
             }
         }
         break;
 
         default:
-            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+            return DefWindowProcW(hWnd, uMsg, wParam, lParam);
         }
         return S_NORMAL;
     }
