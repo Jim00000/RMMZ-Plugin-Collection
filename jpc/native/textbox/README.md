@@ -31,6 +31,8 @@ Navigate to the build until build folder is generated.
 
 Open textbox.vcxproj with Visual Studio 2019 and build the native node.
 
+Be sure to change the codepage to unicode.
+
 ## Batch script
 
 For convenience, a script to config and build the addon is provided. Just run the script to build
