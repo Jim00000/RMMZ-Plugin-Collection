@@ -81,4 +81,68 @@ describe('typeconverter.test.js', function() {
                        [true, false, null, null, false, [true, false, [true, [true, false, null], false]]]);
            });
     });
+
+    describe('toNumber()', function() {
+        this.slow(10);      // 10ms
+        this.timeout(100);  // 100ms
+
+        // ---------- trivial test ----------
+
+        it('null → null', function() {
+            expect(converter.toNumber(null)).deep.equal(null);
+        });
+
+        it('153 → 153', function() {
+            expect(converter.toNumber(153)).deep.equal(153);
+        });
+
+        it('246.3 → 246.3', function() {
+            expect(converter.toNumber(246.3)).deep.equal(246.3);
+        });
+
+        // ---------- boolean to number test ----------
+
+        it('true → 1', function() {
+            expect(converter.toNumber(true)).deep.equal(1);
+        });
+
+        it('false → 0', function() {
+            expect(converter.toNumber(false)).deep.equal(0);
+        });
+
+        // ---------- string to number test ----------
+
+        it('"12345" → 12345', function() {
+            expect(converter.toNumber('12345')).deep.equal(12345);
+        });
+
+        it('"123.456" → 123.456', function() {
+            expect(converter.toNumber('123.456')).deep.equal(123.456);
+        });
+
+        it('"4.354e+7" → 43540000', function() {
+            expect(converter.toNumber('4.354e+7')).deep.equal(43540000);
+        });
+
+        it('"not_a_number" → null', function() {
+            console.debug(converter.toNumber('not_a_number'));
+            expect(converter.toNumber('not_a_number')).deep.equal(null);
+        });
+
+        // ---------- string array to number array test ----------
+
+        it('[] → []', function() {
+            expect(converter.toNumber([])).deep.have.ordered.members([]);
+        });
+
+        it('[true, "125.6"] → [1, 125.6]', function() {
+            expect(converter.toNumber([true, '125.6'])).deep.have.ordered.members([1, 125.6]);
+        });
+
+        it('["1", "2", ["3", 4, [5, [6]]]] → [1, 2, [3, 4, [5, [6]]]]', function() {
+            expect(converter.toNumber(['1', '2', ['3', 4, [5, [6]]]])).deep.have.ordered.members([
+                1, 2, [3, 4, [5, [6]]]
+            ]);
+        });
+    });
 });
