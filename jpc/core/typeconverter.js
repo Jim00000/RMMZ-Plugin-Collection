@@ -41,18 +41,50 @@ class InvalidValue extends GenericValue {
     };
 };
 
+/**
+ * Convert to boolean data type.
+ * @param {(boolean|number|string|any[])} objects 
+ * @returns {(boolean|any[])} boolean value
+ * @example 
+ * toBoolean("true") // return true
+ * toBoolean("false") // return false
+ * toBoolean("unknown") // return null
+ * toBoolean(1) // return true
+ * toBoolean(0) // return false
+ * toBoolean(["true", ["false"]]) // return [true, [false]]
+ */
 __typeconverter.toBoolean = function(objects) {
-    if (typeof (objects) === 'boolean') {
-        return objects;
-    } else if (typeof (objects) === 'string') {
-        return JSON.parse(objects.toLowerCase());
-    } else if (typeof (objects) === 'object') {
-        if (Array.isArray(objects)) {
-            for (let i = 0; i < objects.length; i++) {
-                objects[i] = __typeconverter.toBoolean(objects[i]);
-            }
+    const type = typeof objects;
+    switch (type) {
+        case 'boolean':
             return objects;
-        }
+        case 'number':
+            switch (objects) {
+                case 0:
+                    return false;
+                case 1:
+                    return true;
+                default:
+                    return null;
+            }
+        case 'string':
+            const string = objects.toLowerCase();
+            switch (string) {
+                case 'true':
+                    return true;
+                case 'false':
+                    return false;
+                default:
+                    return null;
+            }
+        case 'object':
+            if (Array.isArray(objects)) {
+                const copy = objects.slice(0);  // clone array
+                for (let i = 0; i < copy.length; i++) copy[i] = this.toBoolean(copy[i]);
+                return copy;
+            }
+        default:
+            return null;
     }
 };
 
@@ -64,7 +96,7 @@ __typeconverter.toNumber = function(objects) {
     } else if (typeof (objects) === 'object') {
         if (Array.isArray(objects)) {
             for (let i = 0; i < objects.length; i++) {
-                objects[i] = __typeconverter.toNumber(objects[i]);
+                objects[i] = this.toNumber(objects[i]);
             }
             return objects;
         }
