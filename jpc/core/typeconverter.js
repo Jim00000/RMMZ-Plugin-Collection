@@ -43,9 +43,9 @@ class InvalidValue extends GenericValue {
 
 /**
  * Convert to boolean data type.
- * @param {(boolean|number|string|any[])} objects 
+ * @param {(boolean|number|string|any[])} objects
  * @returns {(boolean|any[])} boolean value
- * @example 
+ * @example
  * toBoolean("true") // return true
  * toBoolean("false") // return false
  * toBoolean("unknown") // return null
@@ -88,18 +88,32 @@ __typeconverter.toBoolean = function(objects) {
     }
 };
 
+/**
+ * Convert to number
+ * @param {(boolean|number|string|any[])} objects
+ * @returns {(number|any[])} number value
+ */
 __typeconverter.toNumber = function(objects) {
-    if (typeof (objects) === 'number') {
-        return objects;
-    } else if (typeof (objects) === 'string') {
-        return Number(objects);
-    } else if (typeof (objects) === 'object') {
-        if (Array.isArray(objects)) {
-            for (let i = 0; i < objects.length; i++) {
-                objects[i] = this.toNumber(objects[i]);
-            }
+    const type = typeof objects;
+    switch (type) {
+        case 'boolean':
+            if (objects === true)
+                return 1;
+            else
+                return 0;
+        case 'number':
             return objects;
-        }
+        case 'string':
+            const num = Number(objects);
+            return Number.isNaN(num) ? null : num;
+        case 'object':
+            if (Array.isArray(objects)) {
+                const copy = objects.slice(0);  // clone array
+                for (let i = 0; i < copy.length; i++) copy[i] = this.toNumber(copy[i]);
+                return copy;
+            }
+        default:
+            return null;
     }
 };
 
