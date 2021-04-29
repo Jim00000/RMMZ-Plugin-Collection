@@ -51,13 +51,13 @@
  *
  * @param enableLog
  * @text Console log
- * @desc Use logger to track plugin's status. Take performance into account, 
+ * @desc Use logger to track plugin's status. Take performance into account,
  * this option should be disabled while the game is released.
  * @type boolean
  * @default false
  * @on Enable
  * @off Disable
- * 
+ *
  * @param speed_multiplier
  * @text Game speed
  * @desc Speedup the game with a factor just like the speedhack in Cheat Engine.
@@ -184,6 +184,15 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
     await JPC.import['core_glsl'];
     await JPC.import['core_miscellany'];
 
+    // Remove loading module's promise. Promise of core is ready implies that submodules of core are complete.
+    delete JPC.import['core_logger'];
+    delete JPC.import['core_vkeys'];
+    delete JPC.import['core_notifier'];
+    delete JPC.import['core_typeconverter'];
+    delete JPC.import['core_xmlparser'];
+    delete JPC.import['core_glsl'];
+    delete JPC.import['core_miscellany'];
+
     ///////////////////////////////////////////////
     /////               Options               /////
     ///////////////////////////////////////////////
@@ -198,7 +207,7 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
     let _isMsgPrintedInTitleSceneEnd = false;
 
     // Handle log level
-    if(JPC.core.typeconverter.toBoolean(pluginParams.enableLog) === false) {
+    if (JPC.core.typeconverter.toBoolean(pluginParams.enableLog) === false) {
         JPC.core.logger.setLevel(JPC.core.logger.OFF);
     }
 
