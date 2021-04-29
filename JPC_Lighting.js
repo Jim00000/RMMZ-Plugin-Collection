@@ -836,12 +836,12 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
         #_lightObjConfigsNameTable
         #_lightObjConfigsIdTable
         #_lightEventCount
-        #_dispatch_index
+        #_index_generator
         #_filter
         #_isInitialized
 
         constructor() {
-            this.#_dispatch_index = 0;
+            this.#_index_generator = this.createIndexGenerator();
             this.#_lightEventCount = 0;
             this.#_mapConfig = new JLightingMapConfig($dataMap.note);
             this.#_playerConfig = JPC.lighting.player;
@@ -853,9 +853,9 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
             this.initializeLightEvent();
         };
 
-        get dispatch_index() {
-            return this.#_dispatch_index;
-        };
+        get indexDispatcher() {
+            return this.#_index_generator;
+        }
 
         get isInitialized() {
             return this.#_isInitialized;
@@ -900,10 +900,14 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
         set lightEventCount(count) {
             this.#_lightEventCount = count;
         };
+    };
 
-        set dispatch_index(idx) {
-            this.#_dispatch_index = idx;
-        };
+    JLightingManager.prototype.createIndexGenerator = function*(initIndex = 0) {
+        let dispatchedIndex = initIndex;
+        while (true) {
+            yield dispatchedIndex;
+            dispatchedIndex++;
+        }
     };
 
     JLightingManager.prototype.createDefaultFilter = function() {
@@ -993,9 +997,7 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
     };
 
     JLightingManager.prototype.dispatchUniformIndex = function() {
-        const dispatched_index = this.dispatch_index;
-        this.dispatch_index += 1;
-        return dispatched_index;
+        return this.indexDispatcher.next().value;
     };
 
     JLightingManager.prototype.refreshUniforms = function(config) {
