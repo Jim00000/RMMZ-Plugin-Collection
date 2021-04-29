@@ -8,14 +8,6 @@ __miscellany.sleep = function(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-__miscellany.select = function(...args) {
-    for (const arg of args) {
-        if (arg !== undefined && arg !== null) {
-            return arg;
-        }
-    }
-    return null;
-};
 
 /* MIT License
 

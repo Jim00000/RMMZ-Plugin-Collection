@@ -571,12 +571,9 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
     class JLightingMapConfig extends JPC.core.xmlparser.XMLDocument {
         constructor(text) {
             super(text);
-            const select = JPC.core.misc.select;
-            JPC.lighting.enable =
-                select(this.query('jpc', 'lighting', 'enable').boolean, JLightingMapDefaultConfig.enable);
-            JPC.lighting.global_illumination = select(
-                this.query('jpc', 'lighting', 'global_illumination').number,
-                JLightingMapDefaultConfig.global_illumination);
+            JPC.lighting.enable = this.query('jpc', 'lighting', 'enable').boolean ?? JLightingMapDefaultConfig.enable;
+            JPC.lighting.global_illumination = this.query('jpc', 'lighting', 'global_illumination').number ??
+                JLightingMapDefaultConfig.global_illumination;
         };
 
         get enable() {
