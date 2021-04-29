@@ -125,7 +125,6 @@ describe('typeconverter.test.js', function() {
         });
 
         it('"not_a_number" → null', function() {
-            console.debug(converter.toNumber('not_a_number'));
             expect(converter.toNumber('not_a_number')).deep.equal(null);
         });
 
