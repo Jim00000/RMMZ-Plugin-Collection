@@ -88,8 +88,16 @@ describe('typeconverter.test.js', function() {
 
         // ---------- trivial test ----------
 
+        it('undefined → assertion', function() {
+            expect(() => converter.toNumber(undefined)).to.throw(TypeError);
+        });
+
         it('null → null', function() {
             expect(converter.toNumber(null)).deep.equal(null);
+        });
+
+        it('{} → throw TypeError', function() {
+            expect(() => converter.toNumber({})).to.throw(TypeError);
         });
 
         it('153 → 153', function() {
