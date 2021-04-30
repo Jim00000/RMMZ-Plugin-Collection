@@ -1,4 +1,7 @@
 export const __typeconverter = {};
+import * as __misc from './miscellany.js';
+
+const misc = __misc.__miscellany;
 
 class GenericValue {
     #_string
@@ -114,6 +117,29 @@ __typeconverter.toNumber = function(objects) {
             }
         default:
             return null;
+    }
+};
+
+__typeconverter.toString = function(objects) {
+    misc.assert(objects !== undefined, `param 'objects' is undefined`);
+    const type = typeof objects;
+    switch (type) {
+        case 'undefined':
+            throw new TypeError(`Argument 'objects' is undefined. Make sure you pass a valid argument.`);
+        case 'boolean':
+        case 'number':
+        case 'string':
+            return objects.toString();
+        case 'object':
+            if (objects === null)
+                return objects;
+            else if (Array.isArray(objects)) {
+                const copy = objects.slice(0);  // clone array
+                for (let i = 0; i < copy.length; i++) copy[i] = this.toString(copy[i]);
+                return copy;
+            }
+        default:
+            throw new TypeError(`Unsupported type detected. Type '${type}' cannot be transformed to String type.`);
     }
 };
 

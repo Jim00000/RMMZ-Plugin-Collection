@@ -144,4 +144,60 @@ describe('typeconverter.test.js', function() {
             ]);
         });
     });
+
+    describe('toString()', function() {
+        this.slow(10);      // 10ms
+        this.timeout(100);  // 100ms
+
+        // ---------- trivial test ----------
+
+        it('undefined → assertion', function() {
+            expect(() => converter.toString(undefined)).to.throw(TypeError);
+        });
+
+        it('null → null', function() {
+            expect(converter.toString(null)).deep.equal(null);
+        });
+
+        it('{} → throw TypeError', function() {
+            expect(() => converter.toString({})).to.throw(TypeError);
+        });
+
+        it('"Hello World" → "Hello World"', function() {
+            expect(converter.toString('Hello World')).deep.equal('Hello World');
+        });
+
+        // ---------- boolean to string ----------
+
+        it('true → "true"', function() {
+            expect(converter.toString(true)).deep.equal('true');
+        });
+
+        it('false → "false"', function() {
+            expect(converter.toString(false)).deep.equal('false');
+        });
+
+        // ---------- number to string ----------
+
+        it('153 → 153', function() {
+            expect(converter.toString(153)).deep.equal('153');
+        });
+
+        it('246.3 → 246.3', function() {
+            expect(converter.toString(246.3)).deep.equal('246.3');
+        });
+
+        // ---------- array to string array test ----------
+
+        it(`[true, 3.14, 'Hello'] → ['true', '3.14', 'Hello']`, function() {
+            expect(converter.toString([true, 3.14, 'Hello'])).deep.have.ordered.members(['true', '3.14', 'Hello']);
+        });
+
+        it(`[[1], [2, [3, 4], [5]], [6, 7, [8, 9]]] → [['1'], ['2', ['3', '4'], ['5']], ['6', '7', ['8', '9']]]`,
+           function() {
+               expect(converter.toString([[1], [2, [3, 4], [5]], [6, 7, [8, 9]]])).deep.have.ordered.members([
+                   ['1'], ['2', ['3', '4'], ['5']], ['6', '7', ['8', '9']]
+               ]);
+           });
+    });
 });
