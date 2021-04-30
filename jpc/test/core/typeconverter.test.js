@@ -9,12 +9,20 @@ describe('typeconverter.test.js', function() {
 
         // ---------- trivial test ----------
 
+        it('undefined → assertion', function() {
+            expect(() => converter.toBoolean(undefined)).to.throw(TypeError);
+        });
+
         it('true → true', function() {
             expect(converter.toBoolean(true)).deep.equal(true);
         });
 
         it('false → false', function() {
             expect(converter.toBoolean(false)).deep.equal(false);
+        });
+
+        it('{} → throw TypeError', function() {
+            expect(() => converter.toBoolean({})).to.throw(TypeError);
         });
 
         // ---------- number to boolean test ----------
