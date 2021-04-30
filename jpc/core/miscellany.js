@@ -1,7 +1,7 @@
 export const __miscellany = {};
 
 __miscellany.isNwjs = function() {
-    let _isNwjs = typeof require === 'function' && typeof process === 'object';
+    let _isNwjs = typeof require === 'function' && typeof process === 'object' && typeof nw !== 'undefined';
     __miscellany.isNwjs = () => {
         return _isNwjs;
     };
