@@ -155,6 +155,12 @@ const JPC = (() => {
         return PluginManager.parameters(pluginName);
     };
 
+    Exported.getPluginInfo = function(doc) {
+        const filename = Exported.getPluginName(doc);
+        const params = Exported.getPluginParams(doc);
+        return [filename, params];
+    };
+
     ////////////////////////////////////////////////////////
     /////               Logger Formatter               /////
     ////////////////////////////////////////////////////////
