@@ -120,6 +120,11 @@ __typeconverter.toNumber = function(objects) {
     }
 };
 
+/**
+ * Convert to String
+ * @param {(boolean|number|string|any[])} objects
+ * @returns {(string|any[])} string
+ */
 __typeconverter.toString = function(objects) {
     misc.assert(objects !== undefined, `param 'objects' is undefined`);
     const type = typeof objects;
