@@ -57,6 +57,7 @@ class InvalidValue extends GenericValue {
  * toBoolean(["true", ["false"]]) // return [true, [false]]
  */
 __typeconverter.toBoolean = function(objects) {
+    misc.assert(objects !== undefined, `param 'objects' is undefined`);
     const type = typeof objects;
     switch (type) {
         case 'boolean':
@@ -81,13 +82,15 @@ __typeconverter.toBoolean = function(objects) {
                     return null;
             }
         case 'object':
-            if (Array.isArray(objects)) {
+            if (objects === null)
+                return objects;
+            else if (Array.isArray(objects)) {
                 const copy = objects.slice(0);  // clone array
                 for (let i = 0; i < copy.length; i++) copy[i] = this.toBoolean(copy[i]);
                 return copy;
             }
         default:
-            return null;
+            throw new TypeError(`Unsupported type detected. Type '${type}' cannot be transformed to Number type.`);
     }
 };
 
