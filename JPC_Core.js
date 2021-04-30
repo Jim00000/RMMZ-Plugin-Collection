@@ -242,7 +242,7 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
 
     // Loading plugin is complete.
     JPC.core.logger.debug(`${pluginName} is ready.`);
-})(JPC.getPluginName(document), JPC.getPluginParams(document));
+})(...JPC.getPluginInfo(document));
 
 /* MIT License
 
