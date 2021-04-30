@@ -1,5 +1,25 @@
 export const __miscellany = {};
 
+__miscellany.isNwjs = function() {
+    let _isNwjs = typeof require === 'function' && typeof process === 'object';
+    __miscellany.isNwjs = () => {
+        return _isNwjs;
+    };
+    return _isNwjs;
+};
+
+__miscellany.isPlayTestMode = function() {
+    let _isPlayTest = false;
+    if (this.isNwjs() && nw.App.argv.length > 0) {
+        _isPlayTest = nw.App.argv[0].split('&').includes('test');
+    }
+    // Reinitialize this function such that we don't need to run the same check process again.
+    __miscellany.isPlayTestMode = () => {
+        return _isPlayTest;
+    };
+    return _isPlayTest;
+};
+
 __miscellany.registerKeyBinding = function(vkey, keyName) {
     Input.keyMapper[vkey] = keyName;
 };
@@ -8,6 +28,15 @@ __miscellany.sleep = function(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
 
+__miscellany.assert = function(...args) {
+    if (this.isNwjs() === true && this.isPlayTestMode()) {
+        __miscellany.assert = globalThis.assert ?? globalThis.console.assert ?? (() => {});
+        __miscellany.assert(...args);
+    } else {
+        // Disable assertion function
+        __miscellany.assert = () => {};
+    }
+};
 
 /* MIT License
 
