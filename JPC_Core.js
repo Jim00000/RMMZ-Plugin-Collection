@@ -88,6 +88,18 @@ SOFTWARE.
  * @max 16.0
  *
  * @ --- Plugin Commands ---
+ *
+ * @command changeGameSpeed
+ * @text Change game speed
+ * @desc Change the game speed in the range of [0.5, 5.0].
+ *
+ * @arg speed
+ * @text game speed
+ * @type number
+ * @default 1.0
+ * @min 0.5
+ * @max 5.0
+ * @decimals 1
  */
 
 const JPC = (() => {
@@ -139,10 +151,6 @@ const JPC = (() => {
         return [filename, params];
     };
 
-    ///////////////////////////////////////////////////////
-    /////               Plugin Commands               /////
-    ///////////////////////////////////////////////////////
-
     return Exported;
 })();
 
@@ -167,6 +175,14 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
     if (JPC.core.type.toBoolean(pluginParams.enableLog) === false) {
         JPC.core.log.setLevel(JPC.core.log.OFF);
     }
+
+    ///////////////////////////////////////////////////////
+    /////               Plugin Commands               /////
+    ///////////////////////////////////////////////////////
+    PluginManager.registerCommand(pluginName, 'changeGameSpeed', (args) => {
+        speed_multiplier = JPC.core.type.toNumber(args.speed);
+        JPC.core.log.debug(`Game speed changes to ${speed_multiplier}`);
+    });
 
     ////////////////////////////////////////////
     /////               Hook               /////
