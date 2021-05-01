@@ -22,6 +22,9 @@ SOFTWARE.
 */
 
 export const __glsl = {};
+import * as __misc from './miscellany.js';
+
+const misc = __misc.__miscellany;
 
 __glsl.createFilter = function(shaderPath, uniforms = {}) {
     // Here we use OpenGL ES 3.0
@@ -36,7 +39,7 @@ function loadGLSLShaderFile(filePath) {
 };
 
 function readFileAsString(filePath) {
-    if (Utils.isNwjs() === true) {
+    if (misc.isNwjs() === true) {
         const path = require('path'), fs = require('fs');
         const shaderFile = fs.readFileSync(path.resolve(filePath));
         return shaderFile.toString();
