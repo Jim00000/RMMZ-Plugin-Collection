@@ -23,32 +23,14 @@ SOFTWARE.
 
 'use strict';
 
-export const __core = {};
+import * as log_module from './third_party/logger.js';  // js-logger
+export const __logger = log_module.__logger;
 
-// Handle logger
-import * as log_module from './logger.js';
-__core.log = log_module.__logger;
+function loggerFormatter(messages, context) {
+    const date = new Date();
+    messages.unshift(
+        `[${context.level.name}][${date.toLocaleDateString()} ${date.toLocaleTimeString()}.${date.getMilliseconds()}]`);
+};
 
-// Handle user input
-import * as input_module from './input.js';
-__core.input = input_module.__input;
-
-// Handle GLSL
-import * as glsl_module from './glsl.js';
-__core.glsl = glsl_module.__glsl;
-
-// Handle misc
-import * as misc_module from './miscellany.js';
-__core.misc = misc_module.__miscellany;
-
-// Handle notifier
-import * as notify_module from './notifier.js';
-__core.notifier = notify_module.__notifier;
-
-// Handle type conversion
-import * as type_module from './typeconverter.js';
-__core.type = type_module.__typeconverter;
-
-// Handle XML parsing
-import * as xml_module from './xmlparser.js';
-__core.xml = xml_module.__xmlparser;
+__logger.useDefaults({formatter: loggerFormatter});
+__logger.setLevel(__logger.DEBUG);

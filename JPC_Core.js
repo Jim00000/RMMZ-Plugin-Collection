@@ -100,8 +100,6 @@ const JPC = (() => {
     // Load all of core submodules
     Exported.import['core_submodules'] = import('./jpc/core/core.js').then(core_module => {
         Exported.core = core_module.__core;
-        Exported.core.log.useDefaults({formatter: jpc_logger_formatter});
-        Exported.core.log.setLevel(Exported.core.log.DEBUG);
         Exported.core.log.debug('Submodules of JPC core are all ready.');
     }).catch(() => {
         throw new Error("Cannot initialize submodules of JPC core");
@@ -134,16 +132,6 @@ const JPC = (() => {
         const filename = Exported.getPluginName(doc);
         const params = Exported.getPluginParams(doc);
         return [filename, params];
-    };
-
-    ////////////////////////////////////////////////////////
-    /////               Logger Formatter               /////
-    ////////////////////////////////////////////////////////
-
-    function jpc_logger_formatter(messages, context) {
-        const date = new Date();
-        messages.unshift(`[${context.level.name}][${date.toLocaleDateString()} ${date.toLocaleTimeString()}.${
-            date.getMilliseconds()}]`);
     };
 
     ///////////////////////////////////////////////////////
