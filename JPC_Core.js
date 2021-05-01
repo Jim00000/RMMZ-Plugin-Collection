@@ -154,12 +154,9 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
 
     JPC.core.options = {};
     // Whether show the plugin information on the title screen
-    JPC.core.options.outputMsgInTitleScene = JPC.core.type.toBoolean(pluginParams.titleScreenMessageFlag);
+    const _outputMsgInTitleScene = JPC.core.type.toBoolean(pluginParams.titleScreenMessageFlag);
     // Speedup the gameplay (like speedhack)
-    JPC.core.options.speed_multiplier = JPC.core.type.toNumber(pluginParams.speed_multiplier);
-
-    // make message appear in title scene one time only.
-    let _isMsgPrintedInTitleSceneEnd = false;
+    let speed_multiplier = JPC.core.type.toNumber(pluginParams.speed_multiplier);
 
     // Handle log level
     if (JPC.core.type.toBoolean(pluginParams.enableLog) === false) {
@@ -173,21 +170,26 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
     const _Scene_Base__update = Scene_Base.prototype.update;
     Scene_Base.prototype.update = function() {
         _Scene_Base__update.apply(this, arguments);
-        Graphics.app.ticker.speed = JPC.core.options.speed_multiplier;
+        Graphics.app.ticker.speed = speed_multiplier;
     };
 
-    const _Scene_Title__start = Scene_Title.prototype.start;
-    Scene_Title.prototype.start = function() {
-        _Scene_Title__start.apply(this, arguments);
-        if (JPC.core.options.outputMsgInTitleScene && _isMsgPrintedInTitleSceneEnd === false) {
-            JPC.core.notifier.notify('Welcome to use Jim00000\'s Plugin Collection (JPC)', 3500);
-            JPC.core.notifier.notify('Enabled plugins : ', 7000);
-            $plugins.forEach((plugin, index) => {
-                if (plugin.status === true) JPC.core.notifier.notify(`${plugin.name}`, 7000);
-            });
-            _isMsgPrintedInTitleSceneEnd = true;
-        }
-    };
+    if (_outputMsgInTitleScene === true) {
+        // make message appear in title scene one time only.
+        let _isMsgPrintedInTitleSceneEnd = false;
+
+        const _Scene_Title__start = Scene_Title.prototype.start;
+        Scene_Title.prototype.start = function() {
+            _Scene_Title__start.apply(this, arguments);
+            if (_isMsgPrintedInTitleSceneEnd === false) {
+                JPC.core.notifier.notify('Welcome to use Jim00000\'s Plugin Collection (JPC)', 3500);
+                JPC.core.notifier.notify('Enabled plugins : ', 7000);
+                $plugins.forEach((plugin, index) => {
+                    if (plugin.status === true) JPC.core.notifier.notify(`${plugin.name}`, 7000);
+                });
+                _isMsgPrintedInTitleSceneEnd = true;
+            }
+        };
+    }
 
     // Loading plugin is complete.
     JPC.core.log.debug(`${pluginName} is ready.`);
