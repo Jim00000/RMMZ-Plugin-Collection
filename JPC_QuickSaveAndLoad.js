@@ -1,3 +1,26 @@
+/* MIT License
+
+Copyright (c) 2021 Jim00000
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 /*:
  * @target MZ
  * @plugindesc A simple, skyrim style like quick save and quick load system.
@@ -143,6 +166,19 @@ JPC.import['quicksaveandload'] = (async (pluginName, pluginParams) => {
     // Waiting for JPC core is ready
     await JPC.import['core'];
 
+    let qsl_module = {};
+
+    // Load quicksaveload module
+    // clang-format off
+    const qsl_promise = import('./jpc/quicksaveload/quicksaveload.js').then(_qsl_module => {
+        qsl_module = _qsl_module.__quicksaveload;
+    }).catch(() => {
+        throw new Error("Cannot initialize quicksaveload module");
+    });
+    // clang-format on
+    // Waiting for quicksaveload module is ready.
+    await qsl_promise;
+
     ///////////////////////////////////////////////////////
     /////               Plugin Commands               /////
     ///////////////////////////////////////////////////////
@@ -177,150 +213,24 @@ JPC.import['quicksaveandload'] = (async (pluginName, pluginParams) => {
         return JPC.quicksave.__isEnabledNotification;
     };
 
-    JPC.quicksave.__isEnabled = JPC.core.typeconverter.toBoolean(pluginParams.enable_quicksave_system);
-    JPC.quicksave.__rm_switch_activity = JPC.core.typeconverter.toNumber(pluginParams.rm_switch_activity);
-    JPC.quicksave.__isEnabledNotification = JPC.core.typeconverter.toBoolean(pluginParams.output_notification_msg);
+    JPC.quicksave.__isEnabled = JPC.core.type.toBoolean(pluginParams.enable_quicksave_system);
+    JPC.quicksave.__rm_switch_activity = JPC.core.type.toNumber(pluginParams.rm_switch_activity);
+    JPC.quicksave.__isEnabledNotification = JPC.core.type.toBoolean(pluginParams.output_notification_msg);
 
-    // Register F6 as quicksave hotkey
-    JPC.core.misc.registerKeyBinding(pluginParams.quick_save_key, 'QuickSave');
-    // Register F7 as quickload hotkey
-    JPC.core.misc.registerKeyBinding(pluginParams.quick_load_key, 'QuickLoad');
+    const quickSaveName = pluginParams.quick_save_name ?? 'quicksave';
 
-    class QuickSaveLoad {
-        static getQuickSavefileName() {
-            return pluginParams.quick_save_name;
-        }
-
-        static getQuickSavefileId() {
-            return DataManager.maxSavefiles() + 1;
-        }
-
-        static save() {
-            const quickSavefileId = QuickSaveLoad.getQuickSavefileId();
-            const saveName = QuickSaveLoad.getQuickSavefileName();
-            $gameSystem._versionId = $dataSystem.versionId;
-            $gameSystem._framesOnSave = Graphics.frameCount;
-            $gameSystem._bgmOnSave = AudioManager.saveBgm();
-            $gameSystem._bgsOnSave = AudioManager.saveBgs();
-            const contents = DataManager.makeSaveContents();
-            StorageManager.saveObject(saveName, contents)
-                .then(() => {
-                    DataManager._globalInfo[quickSavefileId] = DataManager.makeSavefileInfo();
-                    DataManager.saveGlobalInfo();
-                })
-                .then(() => SoundManager.playSave())
-                .catch(() => SoundManager.playBuzzer())
-                .then(() => {
-                    if (JPC.quicksave.isNotificationEnabled()) {
-                        JPC.notifier.notify(pluginParams.quick_save_notification_msg, 1000);
-                    }
-                });
-        }
-
-        static load() {
-            const saveName = QuickSaveLoad.getQuickSavefileName();
-            StorageManager.loadObject(saveName)
-                .then(contents => {
-                    DataManager.createGameObjects();
-                    DataManager.extractSaveContents(contents);
-                    DataManager.correctDataErrors();
-                })
-                .then(() => {
-                    SoundManager.playLoad();
-                    QuickSaveLoad.fadeInOut();
-                    SceneManager.goto(Scene_Map);
-                    Scene_Load.prototype.reloadMapIfUpdated();
-                })
-                .catch(() => {
-                    SoundManager.playBuzzer();
-                })
-                .then(() => {
-                    if (JPC.quicksave.isNotificationEnabled()) {
-                        JPC.notifier.notify(pluginParams.quick_load_notification_msg, 1000);
-                    }
-                });
-        }
-
-        static fadeInOut() {
-            const time = Scene_Load.prototype.slowFadeSpeed() / 60;
-            AudioManager.fadeOutBgm(time);
-            AudioManager.fadeOutBgs(time);
-            AudioManager.fadeOutMe(time);
-            $gameScreen.startFadeOut(Scene_Load.prototype.slowFadeSpeed());
-            $gameScreen.startFadeIn(Scene_Load.prototype.slowFadeSpeed());
-        }
-
-        static updateCallQuickSave() {
-            if (QuickSaveLoad.isQuickSaveCalled()) {
-                QuickSaveLoad.save();
-            }
-        };
-
-        static updateCallQuickLoad() {
-            if (QuickSaveLoad.isQuickLoadCalled()) {
-                QuickSaveLoad.load();
-            }
-        };
-
-        static isQuickSaveCalled() {
-            return Input.isTriggered('QuickSave');
-        };
-
-        static isQuickLoadCalled() {
-            return Input.isTriggered('QuickLoad');
-        };
-    };
-
-    ////////////////////////////////////////////
-    /////               Hook               /////
-    ////////////////////////////////////////////
-
-    const _Scene_Map__updateScene = Scene_Map.prototype.updateScene;
-    Scene_Map.prototype.updateScene = function() {
-        _Scene_Map__updateScene.apply(this, arguments);
-        if (JPC.quicksave.isEnabled() === true) {
-            if (!SceneManager.isSceneChanging()) {
-                QuickSaveLoad.updateCallQuickSave();
-            }
-            if (!SceneManager.isSceneChanging()) {
-                QuickSaveLoad.updateCallQuickLoad();
-            }
-        }
-    };
-
-    const _Scene_Title__update = Scene_Title.prototype.update;
-    Scene_Title.prototype.update = function() {
-        _Scene_Title__update.apply(this, arguments);
-        if (JPC.quicksave.__isEnabled === true) {
-            if (!SceneManager.isSceneChanging()) {
-                QuickSaveLoad.updateCallQuickLoad();
-            }
-        }
-    };
+    // Register quicksave hotkey in map.
+    JPC.core.input.mapInput.register(
+        pluginParams.quick_save_key, 'QuickSave', qsl_module.onQuickSave,
+        {saveName: quickSaveName, notification: pluginParams.quick_save_notification_msg});
+    // Register quickload hotkey in both title and map.
+    JPC.core.input.mapInput.register(
+        pluginParams.quick_load_key, 'QuickLoad', qsl_module.onQuickLoad,
+        {saveName: quickSaveName, notification: pluginParams.quick_load_notification_msg});
+    JPC.core.input.titleInput.register(
+        pluginParams.quick_load_key, 'QuickLoad', qsl_module.onQuickLoad,
+        {saveName: quickSaveName, notification: pluginParams.quick_load_notification_msg});
 
     // Loading plugin is complete.
-    JPC.core.logger.debug(`${pluginName} is ready.`);
-})(JPC.getPluginName(document), JPC.getPluginParams(document));
-
-/* MIT License
-
-Copyright (c) Jim00000
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+    JPC.core.log.debug(`${pluginName} is ready.`);
+})(...JPC.getPluginInfo(document));
