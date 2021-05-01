@@ -31,22 +31,27 @@ SOFTWARE.
  *
  * ◼️ Introduction
  *
- * The plugin contains essential functions and modules to support other JPC's
- * plugins. This plugin should be put before other JPC plugins. Some features
- * are provided by this plugin :
+ * The plugin contains essential functions and modules to support other JPC
+ * plugin's functionality. This plugin should be put before other JPC plugins.
+ * Some features are provided by this plugin :
  *
- * ▷ Logger (js-logger v1.6.1)
- * ▷ Virtual Key
- * ▷ A simple notifier
- * ▷ XML parsing
- * ▷ GLSL support and helper
- * ▷ Miscellaneous
+ * - Logger (js-logger v1.6.1)
+ * - Input mapping and key event binding
+ * - A simple notifier
+ * - XML parsing
+ * - GLSL support and helper
+ * - Miscellaneous
  *
  * ◼️ Dependencies
  *
  * No
  *
- * ◼️ Plugin Commands
+ * ◼️ Platform compatibility
+ *
+ * ☑ Windows
+ * ☐ macOS (never tested)
+ * ☑ Web browsers
+ * ☐ Mobile Devices (Android / iOS) (never tested)
  *
  * ◼️ License
  *
