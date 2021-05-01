@@ -21,7 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+'use strict';
+
 export const __xmlparser = {};
+import * as __type from './typeconverter.js';
 
 __xmlparser.parse = function(text) {
     const jpcxml = __xmlparser.filter(text);
@@ -48,10 +51,8 @@ class XMLDocument {
     };
 };
 
-__xmlparser.XMLDocument = XMLDocument;
-
 XMLDocument.prototype.query = function(...tags) {
-    const stringToGeneric = JPC.core.typeconverter.stringToGeneric;
+    const stringToGeneric = __type.__typeconverter.stringToGeneric;
     if (this.doc !== undefined && this.doc !== null) {
         let node = this.doc;
         for (const tag of tags) {
@@ -63,3 +64,5 @@ XMLDocument.prototype.query = function(...tags) {
         return stringToGeneric(null);
     }
 };
+
+__xmlparser.XMLDocument = XMLDocument;
