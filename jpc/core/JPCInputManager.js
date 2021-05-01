@@ -45,9 +45,9 @@ JPCInputManager.prototype.getKeyName = function(vkey) {
     return this.keyMapper[vkey];
 };
 
-JPCInputManager.prototype.register = function(vkey, keyName, handler) {
+JPCInputManager.prototype.register = function(vkey, keyName, handler, args = {}) {
     this.keyMapper[vkey] = keyName;
-    this.keyEvents[keyName] = handler;
+    this.keyEvents[keyName] = [handler, args];
     Input.keyMapper[vkey] = keyName;
 };
 
@@ -80,8 +80,8 @@ JPCInputManager.prototype.isTriggered = function(keyName) {
 };
 
 JPCInputManager.prototype.onHandleKeyEvent = function(keyName) {
-    const handler = this.keyEvents[keyName];
+    const [handler, args] = this.keyEvents[keyName];
     if (handler instanceof Function) {
-        handler();
+        handler(args);
     }
 };
