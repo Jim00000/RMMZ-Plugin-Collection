@@ -1,6 +1,25 @@
-//=============================================================================
-// RPG Maker MZ - Lighting
-//=============================================================================
+/* MIT License
+
+Copyright (c) 2021 Jim00000
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 /*:
  * @target MZ
@@ -317,182 +336,181 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
     ///////////////////////////////////////////////////////
 
     PluginManager.registerCommand(pluginName, 'enableLightingSystem', () => {
-        JPC.core.logger.debug(`Call ${pluginName}:enableLightingSystem command.`);
+        JPC.core.log.debug(`Call ${pluginName}:enableLightingSystem command.`);
         JPC.lighting.enable = true;
-        JPC.core.logger.debug(`JPC lighting system activates.`);
+        JPC.core.log.debug(`JPC lighting system activates.`);
     });
 
     PluginManager.registerCommand(pluginName, 'disableLightingSystem', () => {
-        JPC.core.logger.debug(`Call ${pluginName}:disableLightingSystem command.`);
+        JPC.core.log.debug(`Call ${pluginName}:disableLightingSystem command.`);
         JPC.lighting.enable = false;
-        JPC.core.logger.debug(`JPC lighting system deactivates.`);
+        JPC.core.log.debug(`JPC lighting system deactivates.`);
     });
 
     PluginManager.registerCommand(pluginName, 'setGlobalIllumination', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setGlobalIllumination command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setGlobalIllumination command.`);
         JPC.lighting.global_illumination = args.global_illumination;
-        JPC.core.logger.debug(`Global illumination is set to ${JPC.lighting.global_illumination}`);
+        JPC.core.log.debug(`Global illumination is set to ${JPC.lighting.global_illumination}`);
     });
 
     PluginManager.registerCommand(pluginName, 'toggleLight', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:toggleLight command.`);
+        JPC.core.log.debug(`Call ${pluginName}:toggleLight command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
-            event.is_light_source = JPC.core.typeconverter.toBoolean(args.enabled);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
+            event.is_light_source = JPC.core.type.toBoolean(args.enabled);
             if (event.is_light_source === true)
-                JPC.core.logger.debug(`Light event ${args.event_name} is enabled.`);
+                JPC.core.log.debug(`Light event ${args.event_name} is enabled.`);
             else
-                JPC.core.logger.debug(`Light event ${args.event_name} is disabled.`);
+                JPC.core.log.debug(`Light event ${args.event_name} is disabled.`);
         } else {
-            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+            JPC.core.log.warn(`Target event ${args.event_name} cannot be found.`);
         }
     });
 
     PluginManager.registerCommand(pluginName, 'setRChannel', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setRChannel command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setRChannel command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
             event.r = args.r;
-            JPC.core.logger.debug(`Event ${args.event_name} R channel is changed to ${event.r}.`);
+            JPC.core.log.debug(`Event ${args.event_name} R channel is changed to ${event.r}.`);
         } else {
-            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+            JPC.core.log.warn(`Target event ${args.event_name} cannot be found.`);
         }
     });
 
     PluginManager.registerCommand(pluginName, 'setGChannel', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setGChannel command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setGChannel command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
             event.g = args.g;
-            JPC.core.logger.debug(`Event ${args.event_name} G channel is changed to ${event.g}.`);
+            JPC.core.log.debug(`Event ${args.event_name} G channel is changed to ${event.g}.`);
         } else {
-            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+            JPC.core.log.warn(`Target event ${args.event_name} cannot be found.`);
         }
     });
 
     PluginManager.registerCommand(pluginName, 'setBChannel', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setBChannel command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setBChannel command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
             event.b = args.b;
-            JPC.core.logger.debug(`Event ${args.event_name} B channel is changed to ${event.b}.`);
+            JPC.core.log.debug(`Event ${args.event_name} B channel is changed to ${event.b}.`);
         } else {
-            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+            JPC.core.log.warn(`Target event ${args.event_name} cannot be found.`);
         }
     });
 
     PluginManager.registerCommand(pluginName, 'setPointLightRadius', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPointLightRadius command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setPointLightRadius command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
             event.pointlight_radius = args.radius;
-            JPC.core.logger.debug(`Event ${args.event_name} point light radius is changed to ${args.radius}.`);
+            JPC.core.log.debug(`Event ${args.event_name} point light radius is changed to ${args.radius}.`);
         } else {
-            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+            JPC.core.log.warn(`Target event ${args.event_name} cannot be found.`);
         }
     });
 
     PluginManager.registerCommand(pluginName, 'setSpotLightRadius', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setSpotLightRadius command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setSpotLightRadius command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
             event.spotlight_radius = args.radius;
-            JPC.core.logger.debug(`Event ${args.event_name} spot light radius is changed to ${args.radius}.`);
+            JPC.core.log.debug(`Event ${args.event_name} spot light radius is changed to ${args.radius}.`);
         } else {
-            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+            JPC.core.log.warn(`Target event ${args.event_name} cannot be found.`);
         }
     });
 
     PluginManager.registerCommand(pluginName, 'setLightDirection', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setLightDirection command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setLightDirection command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
             event.direction = args.direction;
-            JPC.core.logger.debug(`Event ${args.event_name} direction is changed to ${
+            JPC.core.log.debug(`Event ${args.event_name} direction is changed to ${
                 JLightingDirection.prototype.toString(args.direction)}.`);
         } else {
-            JPC.core.logger.warn(
-                `Target event ${JLightingDirection.prototype.toString(args.direction)} cannot be found.`);
+            JPC.core.log.warn(`Target event ${JLightingDirection.prototype.toString(args.direction)} cannot be found.`);
         }
     });
 
     PluginManager.registerCommand(pluginName, 'setFOV', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setFOV command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setFOV command.`);
         const event = JPC.lighting.manager.objConfigsNameTable[args.event_name];
         if (event !== undefined && event !== null) {
-            JPC.core.logger.debug(`Target event ${args.event_name} is found.`);
-            event.fov = JPC.core.typeconverter.toNumber(args.fov);
-            JPC.core.logger.debug(`Event ${args.event_name} fov is changed to ${args.fov}.`);
+            JPC.core.log.debug(`Target event ${args.event_name} is found.`);
+            event.fov = JPC.core.type.toNumber(args.fov);
+            JPC.core.log.debug(`Event ${args.event_name} fov is changed to ${args.fov}.`);
         } else {
-            JPC.core.logger.warn(`Target event ${args.event_name} cannot be found.`);
+            JPC.core.log.warn(`Target event ${args.event_name} cannot be found.`);
         }
     });
 
     // plugin commands for player
     PluginManager.registerCommand(pluginName, 'togglePlayerLight', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:togglePlayerLight command.`);
-        JPC.lighting.player.is_light_source = JPC.core.typeconverter.toBoolean(args.enabled);
+        JPC.core.log.debug(`Call ${pluginName}:togglePlayerLight command.`);
+        JPC.lighting.player.is_light_source = JPC.core.type.toBoolean(args.enabled);
         if (JPC.lighting.player.is_light_source === true)
-            JPC.core.logger.debug(`Light source of player is enabled.`);
+            JPC.core.log.debug(`Light source of player is enabled.`);
         else
-            JPC.core.logger.debug(`Light source of player is disabled.`);
+            JPC.core.log.debug(`Light source of player is disabled.`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerRChannel', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPlayerRChannel command.`);
-        JPC.lighting.player.r = JPC.core.typeconverter.toNumber(args.r);
-        JPC.core.logger.debug(`Set R channel to ${JPC.lighting.player.r} on Player`);
+        JPC.core.log.debug(`Call ${pluginName}:setPlayerRChannel command.`);
+        JPC.lighting.player.r = JPC.core.type.toNumber(args.r);
+        JPC.core.log.debug(`Set R channel to ${JPC.lighting.player.r} on Player`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerGChannel', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPlayerGChannel command.`);
-        JPC.lighting.player.g = JPC.core.typeconverter.toNumber(args.g);
-        JPC.core.logger.debug(`Set G channel to ${JPC.lighting.player.g} on Player`);
+        JPC.core.log.debug(`Call ${pluginName}:setPlayerGChannel command.`);
+        JPC.lighting.player.g = JPC.core.type.toNumber(args.g);
+        JPC.core.log.debug(`Set G channel to ${JPC.lighting.player.g} on Player`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerBChannel', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPlayerBChannel command.`);
-        JPC.lighting.player.b = JPC.core.typeconverter.toNumber(args.b);
-        JPC.core.logger.debug(`Set B channel to ${JPC.lighting.player.b} on Player`);
+        JPC.core.log.debug(`Call ${pluginName}:setPlayerBChannel command.`);
+        JPC.lighting.player.b = JPC.core.type.toNumber(args.b);
+        JPC.core.log.debug(`Set B channel to ${JPC.lighting.player.b} on Player`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerPointLightRadius', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPlayerPointLightRadius command.`);
-        JPC.lighting.player.pointlight_radius = JPC.core.typeconverter.toNumber(args.radius);
-        JPC.core.logger.debug(`Set point light radius to ${JPC.lighting.player.pointlight_radius} on Player`);
+        JPC.core.log.debug(`Call ${pluginName}:setPlayerPointLightRadius command.`);
+        JPC.lighting.player.pointlight_radius = JPC.core.type.toNumber(args.radius);
+        JPC.core.log.debug(`Set point light radius to ${JPC.lighting.player.pointlight_radius} on Player`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerSpotLightRadius', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPlayerSpotLightRadius command.`);
-        JPC.lighting.player.spotlight_radius = JPC.core.typeconverter.toNumber(args.radius);
-        JPC.core.logger.debug(`Set spot light radius to ${JPC.lighting.player.spotlight_radius} on Player`);
+        JPC.core.log.debug(`Call ${pluginName}:setPlayerSpotLightRadius command.`);
+        JPC.lighting.player.spotlight_radius = JPC.core.type.toNumber(args.radius);
+        JPC.core.log.debug(`Set spot light radius to ${JPC.lighting.player.spotlight_radius} on Player`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerFOV', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPlayerFOV command.`);
-        JPC.lighting.player.fov = JPC.core.typeconverter.toNumber(args.fov);
-        JPC.core.logger.debug(`Set FOV to ${JPC.lighting.player.fov} on Player`);
+        JPC.core.log.debug(`Call ${pluginName}:setPlayerFOV command.`);
+        JPC.lighting.player.fov = JPC.core.type.toNumber(args.fov);
+        JPC.core.log.debug(`Set FOV to ${JPC.lighting.player.fov} on Player`);
     });
 
     PluginManager.registerCommand(pluginName, 'setPlayerLightType', args => {
-        JPC.core.logger.debug(`Call ${pluginName}:setPlayerLightType command.`);
+        JPC.core.log.debug(`Call ${pluginName}:setPlayerLightType command.`);
         JPC.lighting.player.lighttype = 0;
 
-        if (JPC.core.typeconverter.toBoolean(args.lighttype_point) === true) {
+        if (JPC.core.type.toBoolean(args.lighttype_point) === true) {
             JPC.lighting.player.lighttype |= JLightingType.PointLight;
-            JPC.core.logger.debug('Enable point light type on Player');
+            JPC.core.log.debug('Enable point light type on Player');
         }
 
-        if (JPC.core.typeconverter.toBoolean(args.lighttype_spot) === true) {
+        if (JPC.core.type.toBoolean(args.lighttype_spot) === true) {
             JPC.lighting.player.lighttype |= JLightingType.SpotLight;
-            JPC.core.logger.debug('Enable spot light type on Player');
+            JPC.core.log.debug('Enable spot light type on Player');
         }
     });
 
@@ -568,7 +586,7 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
     };
 
     // This class contains metadata of the game map related to lighting.
-    class JLightingMapConfig extends JPC.core.xmlparser.XMLDocument {
+    class JLightingMapConfig extends JPC.core.xml.XMLDocument {
         constructor(text) {
             super(text);
             JPC.lighting.enable = this.query('jpc', 'lighting', 'enable').boolean ?? JLightingMapDefaultConfig.enable;
@@ -797,25 +815,25 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
     JLightingInterpreter.prototype.onAssignment = function(lvalue, rvalue) {
         switch (lvalue) {
             case 'r':
-                this.config.r = JPC.core.typeconverter.toNumber(rvalue);
+                this.config.r = JPC.core.type.toNumber(rvalue);
                 break;
             case 'g':
-                this.config.g = JPC.core.typeconverter.toNumber(rvalue);
+                this.config.g = JPC.core.type.toNumber(rvalue);
                 break;
             case 'b':
-                this.config.b = JPC.core.typeconverter.toNumber(rvalue);
+                this.config.b = JPC.core.type.toNumber(rvalue);
                 break;
             case 'is_light_source':
-                this.config.is_light_source = JPC.core.typeconverter.toBoolean(rvalue);
+                this.config.is_light_source = JPC.core.type.toBoolean(rvalue);
                 break;
             case 'pointlight_radius':
-                this.config.pointlight_radius = JPC.core.typeconverter.toNumber(rvalue);
+                this.config.pointlight_radius = JPC.core.type.toNumber(rvalue);
                 break;
             case 'spotlight_radius':
-                this.config.spotlight_radius = JPC.core.typeconverter.toNumber(rvalue);
+                this.config.spotlight_radius = JPC.core.type.toNumber(rvalue);
                 break;
             case 'fov':
-                this.config.fov = JPC.core.typeconverter.toNumber(rvalue);
+                this.config.fov = JPC.core.type.toNumber(rvalue);
                 break;
             case 'lighttype':
                 this.config.lighttype = JLightingType.prototype.parse(rvalue);
@@ -824,7 +842,7 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
                 this.config.direction = JLightingDirection.prototype.parse(rvalue);
                 break;
             default:
-                JPC.core.logger.warn(`Unhandled case occurs. lvalue : ${lvalue}, rvalue : ${rvalue}`);
+                JPC.core.log.warn(`Unhandled case occurs. lvalue : ${lvalue}, rvalue : ${rvalue}`);
                 break;
         };
     };
@@ -1050,7 +1068,7 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
             // Update player's uTime
             this.filter.uniforms.times[0] += config.delta;
         } else {
-            JPC.core.logger.warn('Unidentified configuration.');
+            JPC.core.log.warn('Unidentified configuration.');
         }
     };
 
@@ -1116,28 +1134,5 @@ JPC.import['lighting'] = (async (pluginName, pluginParams) => {
     };
 
     // Loading plugin is complete.
-    JPC.core.logger.debug(`${pluginName} is ready.`);
-})(JPC.getPluginName(document), JPC.getPluginParams(document));
-
-/* MIT License
-
-Copyright (c) Jim00000
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+    JPC.core.log.debug(`${pluginName} is ready.`);
+})(...JPC.getPluginInfo(document));
