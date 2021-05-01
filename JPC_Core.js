@@ -140,15 +140,14 @@ const JPC = (() => {
         return pluginName;
     };
 
-    Exported.getPluginParams = function(doc) {
-        const pluginName = Exported.getPluginName(doc);
+    Exported.getPluginParams = function(pluginName) {
         return PluginManager.parameters(pluginName);
     };
 
     Exported.getPluginInfo = function(doc) {
-        const filename = Exported.getPluginName(doc);
-        const params = Exported.getPluginParams(doc);
-        return [filename, params];
+        const pluginName = Exported.getPluginName(doc);
+        const parameters = Exported.getPluginParams(pluginName);
+        return [pluginName, parameters];
     };
 
     return Exported;
