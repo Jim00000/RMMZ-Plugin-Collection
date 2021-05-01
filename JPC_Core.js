@@ -163,7 +163,7 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
 
     // Handle log level
     if (JPC.core.type.toBoolean(pluginParams.enableLog) === false) {
-        JPC.core.log.setLevel(JPC.core.logger.OFF);
+        JPC.core.log.setLevel(JPC.core.log.OFF);
     }
 
     ////////////////////////////////////////////
