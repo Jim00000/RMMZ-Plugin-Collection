@@ -96,55 +96,17 @@ const JPC = (() => {
     Exported.import = {};  // import will place objects/functions from other modules
     Exported.core = {};
 
-    // js-logger v1.6.1
-    Exported.import['core_logger'] = import('./jpc/core/third_party/logger.js').then(mod => {
-        Exported.core.logger = mod.__logger;
-        Exported.core.logger.useDefaults({formatter: jpc_logger_formatter});
-        Exported.core.logger.setLevel(Exported.core.logger.DEBUG);
-        Exported.core.logger.debug('JPC.core.logger is ready.');
+    // clang-format off
+    // Load all of core submodules
+    Exported.import['core_submodules'] = import('./jpc/core/core.js').then(core_module => {
+        Exported.core = core_module.__core;
+        Exported.core.log.useDefaults({formatter: jpc_logger_formatter});
+        Exported.core.log.setLevel(Exported.core.log.DEBUG);
+        Exported.core.log.debug('Submodules of JPC core are all ready.');
+    }).catch(() => {
+        throw new Error("Cannot initialize submodules of JPC core");
     });
-
-    Exported.import['core_input'] = import('./jpc/core/input.js').then(mod => {
-        Exported.core.input = mod.__input;
-        Exported.import['core_logger'].then(() => {
-            Exported.core.logger.debug('JPC.core.input is ready.');
-        });
-    });
-
-    Exported.import['core_notifier'] = import('./jpc/core/notifier.js').then(mod => {
-        Exported.notifier = mod.__notifier;
-        Exported.import['core_logger'].then(() => {
-            Exported.core.logger.debug('JPC.notifier is ready.');
-        });
-    });
-
-    Exported.import['core_typeconverter'] = import('./jpc/core/typeconverter.js').then(mod => {
-        Exported.core.typeconverter = mod.__typeconverter;
-        Exported.import['core_logger'].then(() => {
-            Exported.core.logger.debug('JPC.core.typeconverter is ready.');
-        });
-    });
-
-    Exported.import['core_xmlparser'] = import('./jpc/core/xmlparser.js').then(mod => {
-        Exported.core.xmlparser = mod.__xmlparser;
-        Exported.import['core_logger'].then(() => {
-            Exported.core.logger.debug('JPC.core.xmlparser is ready.');
-        });
-    });
-
-    Exported.import['core_glsl'] = import('./jpc/core/glsl.js').then(mod => {
-        Exported.core.glsl = mod.__glsl;
-        Exported.import['core_logger'].then(() => {
-            Exported.core.logger.debug('JPC.core.glsl is ready.');
-        });
-    });
-
-    Exported.import['core_miscellany'] = import('./jpc/core/miscellany.js').then(mod => {
-        Exported.core.misc = mod.__miscellany;
-        Exported.import['core_logger'].then(() => {
-            Exported.core.logger.debug('JPC.core.misc is ready.');
-        });
-    });
+    // clang-format on
 
     //////////////////////////////////////////////////////
     /////               Public Methods               /////
@@ -194,23 +156,9 @@ const JPC = (() => {
 JPC.import['core'] = (async (pluginName, pluginParams) => {
     'use strict';
 
-    // Await loading modules is complete.
-    await JPC.import['core_logger'];
-    await JPC.import['core_input'];
-    await JPC.import['core_notifier'];
-    await JPC.import['core_typeconverter'];
-    await JPC.import['core_xmlparser'];
-    await JPC.import['core_glsl'];
-    await JPC.import['core_miscellany'];
-
-    // Remove loading module's promise. Promise of core is ready implies that submodules of core are complete.
-    delete JPC.import['core_logger'];
-    delete JPC.import['core_input'];
-    delete JPC.import['core_notifier'];
-    delete JPC.import['core_typeconverter'];
-    delete JPC.import['core_xmlparser'];
-    delete JPC.import['core_glsl'];
-    delete JPC.import['core_miscellany'];
+    // Await core submodules is complete.
+    await JPC.import['core_submodules'];
+    delete JPC.import['core_submodules'];
 
     ///////////////////////////////////////////////
     /////               Options               /////
@@ -218,16 +166,16 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
 
     JPC.core.options = {};
     // Whether show the plugin information on the title screen
-    JPC.core.options.outputMsgInTitleScene = JPC.core.typeconverter.toBoolean(pluginParams.titleScreenMessageFlag);
+    JPC.core.options.outputMsgInTitleScene = JPC.core.type.toBoolean(pluginParams.titleScreenMessageFlag);
     // Speedup the gameplay (like speedhack)
-    JPC.core.options.speed_multiplier = JPC.core.typeconverter.toNumber(pluginParams.speed_multiplier);
+    JPC.core.options.speed_multiplier = JPC.core.type.toNumber(pluginParams.speed_multiplier);
 
     // make message appear in title scene one time only.
     let _isMsgPrintedInTitleSceneEnd = false;
 
     // Handle log level
-    if (JPC.core.typeconverter.toBoolean(pluginParams.enableLog) === false) {
-        JPC.core.logger.setLevel(JPC.core.logger.OFF);
+    if (JPC.core.type.toBoolean(pluginParams.enableLog) === false) {
+        JPC.core.log.setLevel(JPC.core.logger.OFF);
     }
 
     ////////////////////////////////////////////
@@ -244,15 +192,15 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
     Scene_Title.prototype.start = function() {
         _Scene_Title__start.apply(this, arguments);
         if (JPC.core.options.outputMsgInTitleScene && _isMsgPrintedInTitleSceneEnd === false) {
-            JPC.notifier.notify('Welcome to use Jim00000\'s Plugin Collection (JPC)', 3500);
-            JPC.notifier.notify('Enabled plugins : ', 7000);
+            JPC.core.notifier.notify('Welcome to use Jim00000\'s Plugin Collection (JPC)', 3500);
+            JPC.core.notifier.notify('Enabled plugins : ', 7000);
             $plugins.forEach((plugin, index) => {
-                if (plugin.status === true) JPC.notifier.notify(`${plugin.name}`, 7000);
+                if (plugin.status === true) JPC.core.notifier.notify(`${plugin.name}`, 7000);
             });
             _isMsgPrintedInTitleSceneEnd = true;
         }
     };
 
     // Loading plugin is complete.
-    JPC.core.logger.debug(`${pluginName} is ready.`);
+    JPC.core.log.debug(`${pluginName} is ready.`);
 })(...JPC.getPluginInfo(document));
