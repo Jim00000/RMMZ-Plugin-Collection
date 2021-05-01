@@ -43,10 +43,6 @@ __miscellany.isPlayTestMode = function() {
     return _isPlayTest;
 };
 
-__miscellany.registerKeyBinding = function(vkey, keyName) {
-    Input.keyMapper[vkey] = keyName;
-};
-
 __miscellany.sleep = function(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
