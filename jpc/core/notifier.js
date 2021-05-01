@@ -36,18 +36,18 @@ __notifier.createCustomizedStyle = null;
 function createDefaultStyle() {
     // https://pixijs.io/pixi-text-style/
     return new PIXI.TextStyle({
-        fill: "white",
-        fontFamily: "Tahoma",
+        fill: 'white',
+        fontFamily: 'Tahoma',
         fontSize: 20,
         letterSpacing: 2,
-        lineJoin: "bevel",
+        lineJoin: 'bevel',
         miterLimit: 5,
         strokeThickness: 4
     });
 }
 
 function createStyle() {
-    if(__notifier.createCustomizedStyle === undefined || __notifier.createCustomizedStyle === null) {
+    if (__notifier.createCustomizedStyle === undefined || __notifier.createCustomizedStyle === null) {
         return createDefaultStyle();
     } else {
         return __notifier.createCustomizedStyle();
