@@ -91,10 +91,10 @@ const JPC = (() => {
         Exported.core.logger.debug('JPC.core.logger is ready.');
     });
 
-    Exported.import['core_vkeys'] = import('./jpc/core/vkeys.js').then(mod => {
-        Exported.core.vkeys = mod.__vkeys;
+    Exported.import['core_input'] = import('./jpc/core/input.js').then(mod => {
+        Exported.core.input = mod.__input;
         Exported.import['core_logger'].then(() => {
-            Exported.core.logger.debug('JPC.core.vkeys is ready.');
+            Exported.core.logger.debug('JPC.core.input is ready.');
         });
     });
 
@@ -183,7 +183,7 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
 
     // Await loading modules is complete.
     await JPC.import['core_logger'];
-    await JPC.import['core_vkeys'];
+    await JPC.import['core_input'];
     await JPC.import['core_notifier'];
     await JPC.import['core_typeconverter'];
     await JPC.import['core_xmlparser'];
@@ -192,7 +192,7 @@ JPC.import['core'] = (async (pluginName, pluginParams) => {
 
     // Remove loading module's promise. Promise of core is ready implies that submodules of core are complete.
     delete JPC.import['core_logger'];
-    delete JPC.import['core_vkeys'];
+    delete JPC.import['core_input'];
     delete JPC.import['core_notifier'];
     delete JPC.import['core_typeconverter'];
     delete JPC.import['core_xmlparser'];
