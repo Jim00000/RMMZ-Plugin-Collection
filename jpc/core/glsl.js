@@ -55,6 +55,6 @@ function loadBySyncXHR(path) {
     if (request.status === 200) {
         return request.responseText;
     } else {
-        return null;
+        throw new Error(`Error occurs. Status code is ${request.status}`);
     }
 };
