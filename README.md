@@ -19,6 +19,9 @@
         <a>
             <img src="https://img.shields.io/tokei/lines/github/Jim00000/RMMZ-Plugin-Collection" alt="total lines">
         </a>
+        <a>
+            <img src="https://img.shields.io/github/downloads/Jim00000/RMMZ-Plugin-Collection/total" alt="total release download">
+        </a>
     </p>
 </div>
 
