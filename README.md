@@ -52,4 +52,4 @@ Make it as a hobby. I will slowly update this project.
 
 ## License
 
-This software is under MIT license.
+JPC project is FOSS (**F**ree/Libre and **O**pen **S**ource **S**oftware) and is under MIT license. See [LICENSE](LICENSE) for more information.
