@@ -31,15 +31,15 @@ Make it as a hobby. I will slowly update this project.
 
 ## Plugin List
 
-| Plugin | File name | Dependency | Status | Sample |
-|:---|:---|:---:|:---:|:---:|
-| Essential Core | JPC_Core.js | - | WIP | - |
-| Quick Save/Load | JPC_QuickSaveAndLoad.js | JPC_Core.js | v1.0.0 | - |
-| TextBox Input | JPC_TextBox.js | JPC_Core.js | v1.0.0 | <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/releases/download/sample/JPC_TextBox_Sample-20210405-36d09a3.7z">36d09a3</a> |
-| God Ray Effect | JPC_GodRayFilter.js | JPC_Core.js | WIP (not working right now) | - |
-| Lighting Effect | JPC_Lighting.js | JPC_Core.js | WIP |  <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/releases/download/sample/JPC_Lighting_Sample-8d5ad32082ffb7080136947437ff47b91d175cdb.7z">8d5ad32</a> |
-| Fog Effect | JPC_Fog.js | JPC_Core.js | WIP (not working right now) | - |
-| Snow Weather Effect | JPC_Snow.js | JPC_Core.js | WIP (not working right now) | - |
+| Plugin | File name | Status | Sample |
+|:---|:---|:---:|:---:|
+| Essential Core | JPC_Core.js | WIP | - |
+| Quick Save/Load | JPC_QuickSaveAndLoad.js | v1.0.0 | - |
+| TextBox Input | JPC_TextBox.js | v1.0.0 | <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/releases/download/sample/JPC_TextBox_Sample-20210405-36d09a3.7z">36d09a3</a> |
+| God Ray Effect | JPC_GodRayFilter.js | WIP (not working right now) | - |
+| Lighting Effect | JPC_Lighting.js |WIP |  <a href="https://github.com/Jim00000/RMMZ-Plugin-Collection/releases/download/sample/JPC_Lighting_Sample-8d5ad32082ffb7080136947437ff47b91d175cdb.7z">8d5ad32</a> |
+| Fog Effect | JPC_Fog.js | WIP (not working right now) | - |
+| Snow Weather Effect | JPC_Snow.js | WIP (not working right now) | - |
 
 ## Installation
 
